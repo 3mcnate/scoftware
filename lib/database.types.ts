@@ -81,6 +81,51 @@ export type Database = {
           },
         ]
       }
+      ticket_reservations: {
+        Row: {
+          confirmed: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          stripe_checkout_session_id: string
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          confirmed?: boolean
+          created_at?: string
+          expires_at?: string
+          id?: string
+          stripe_checkout_session_id: string
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          confirmed?: boolean
+          created_at?: string
+          expires_at?: string
+          id?: string
+          stripe_checkout_session_id?: string
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_reservations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_reservations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_guides: {
         Row: {
           role: Database["public"]["Enums"]["trip_guide_role"]
@@ -117,29 +162,41 @@ export type Database = {
       trips: {
         Row: {
           created_at: string
-          description: string
-          difficulty: number
+          description: string | null
+          difficulty: number | null
+          driver_tickets_sold: number
           id: string
-          name: string
-          picture: string
+          name: string | null
+          participant_tickets_sold: number | null
+          picture: string | null
+          total_driver_tickets: number
+          total_participant_tickets: number | null
           updated_at: string
         }
         Insert: {
           created_at?: string
-          description: string
-          difficulty: number
+          description?: string | null
+          difficulty?: number | null
+          driver_tickets_sold?: number
           id?: string
-          name: string
-          picture: string
+          name?: string | null
+          participant_tickets_sold?: number | null
+          picture?: string | null
+          total_driver_tickets?: number
+          total_participant_tickets?: number | null
           updated_at?: string
         }
         Update: {
           created_at?: string
-          description?: string
-          difficulty?: number
+          description?: string | null
+          difficulty?: number | null
+          driver_tickets_sold?: number
           id?: string
-          name?: string
-          picture?: string
+          name?: string | null
+          participant_tickets_sold?: number | null
+          picture?: string | null
+          total_driver_tickets?: number
+          total_participant_tickets?: number | null
           updated_at?: string
         }
         Relationships: []
