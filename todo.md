@@ -1,0 +1,3 @@
+- reservations table
+- auth function and trigger for new signup
+- roles jwt auth hook

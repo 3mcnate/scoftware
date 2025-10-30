@@ -6,7 +6,7 @@ AI Coding Best Practices
 
 Always prefer type safety over defensive programming. Let type systems and schema validation ensure correctness.
 
-Avoid any. Use only as a last resort when no better option exists.
+Avoid the any type. Use only as a last resort when no better option exists.
 
 Don’t guess object shapes. Import or derive types from existing definitions.
 
