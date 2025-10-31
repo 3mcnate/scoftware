@@ -3,3 +3,4 @@
 - roles jwt auth hook - done
 - mcp servers
 - claude code + codex
+- supabase clients
