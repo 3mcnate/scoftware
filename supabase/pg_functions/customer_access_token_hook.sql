@@ -20,7 +20,7 @@ as $$
     -- Return the modified or original event
     return event;
   end;
-$$;
+$$ set search_path = '';
 
 grant usage on schema public to supabase_auth_admin;
 
