@@ -16,7 +16,17 @@ begin
 		new.raw_user_meta_data->>'phone_number'
 	);
 
+	insert into public.roles ("user_id", "role")
+	values (
+		new.id,
+		'participant'
+	);
+
 	return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql
+set search_path = '';
 
+revoke execute on function handle_new_user from public;
+revoke execute on function handle_new_user from authenticated;
+revoke execute on function handle_new_user from anon;

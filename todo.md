@@ -1,3 +1,5 @@
-- reservations table
-- auth function and trigger for new signup
-- roles jwt auth hook
+- reservations table - done
+- auth function and trigger for new signup - done
+- roles jwt auth hook - done
+- mcp servers
+- claude code + codex
