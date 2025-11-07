@@ -206,7 +206,7 @@ export const trip_cycles = pgTable("trip_cycles", {
 	range: timestamp({ withTimezone: true, mode: "string" }).array().generatedAlwaysAs(sql`tstzrange(starts_at, ends_at, '[)'::text)`).notNull(),
 	trip_feedback_form: text(),
 	guide_post_trip_form: text(),
-}, (table) => [
+}, () => [
 	check("end_after_start", sql`starts_at < ends_at`),
 ]);
 
@@ -324,7 +324,7 @@ export const trips = pgTable("trips", {
 	participant_spots: integer().default(8).notNull(),
 	starts_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	ends_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-}, (table) => [
+}, () => [
 	check("ends_after_start", sql`starts_at < ends_at`),
 	check("trips_driver_spots_check", sql`driver_spots >= 0`),
 	check("trips_participant_spots_check", sql`participant_spots >= 0`),
