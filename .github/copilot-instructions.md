@@ -1,43 +1,39 @@
----
-type: "always_apply"
----
-
-AI Coding Best Practices
+# AI Coding Best Practices
 
 Always prefer type safety over defensive programming. Let type systems and schema validation ensure correctness.
 
-Avoid the any type. Use only as a last resort when no better option exists.
+Avoid the "any" type. Use only as a last resort when no better option exists.
 
 Don’t guess object shapes. Import or derive types from existing definitions.
 
-Minimize comments. Only add them for non-obvious, high-level logic.
+Minimize comments. Only add them for non-obvious logic.
 
 No emojis.
 
 No excessive logging.
 
-Frontend (Web App)
+## Frontend (Web App)
 
-Types:
+Use shadcn/ui components. Use the #shadcn MCP tool to look up documentation and which component is best for each use case. Make simple yet beautiful and performant designs.  
 
 Every input, variable, and return value must have explicit types.
 
-For DB interactions, derive types from Tables in database.types.ts (e.g. Table<'scripts'>).
+For DB interactions, import/derive types from Tables, Enums, and Views in database.types.ts (e.g. Table<'scripts'>). This keeps in sync with our supabase database. Also, use the supabase MCP server to inspect the schema of the database.
+
+Use the supabase js client when possible for crud operations. 
 
 Libraries:
 
 Use Zod
  for validation.
 
-Use React Query
- for data fetching.
+Use React Query for all data fetching on the frontend. Always wrap it with the @supabase-cache-helpers/postgrest-react-query library.
 
-Use react-hook-form
- for form management.
+Use react-hook-form and the shadcn/ui <Form> component for form management.
 
-Patterns:
+## Patterns:
 
-Keep files small and scoped. Break large components into helpers or sub-components.
+Keep files small and scoped and code clean and modular. Break large components into helpers, sub-components, and separate files.
 
 Use Promise.all() for parallel requests where interdependencies don’t exist.
 
