@@ -5,7 +5,7 @@ export default defineConfig({
   dbCredentials: {
     url: "postgresql://postgres:postgres@127.0.0.1:54322/postgres",
   },
-  schemaFilter: ["public", "auth"],
+  schemaFilter: ["public"],
   tablesFilter: ["*"],
   introspect: {
 	  casing: "preserve"

@@ -1,6 +1,6 @@
-import { pgTable, uuid, timestamp, jsonb, foreignKey, check, numeric, real, integer, text, boolean, index, unique, varchar, uniqueIndex, smallint, json, bigserial, inet, date, pgPolicy, primaryKey, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, uuid, timestamp, jsonb, foreignKey, check, numeric, real, integer, text, boolean, unique, date, pgPolicy, primaryKey, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
-import { usersInAuth } from "@/drizzle/auth-schema"
+import { users } from "@/drizzle/auth-schema"
 
 export const checkout_session_status = pgEnum("checkout_session_status", ['open', 'complete', 'expired'])
 export const guide_position = pgEnum("guide_position", ['new_guide', 'guide', 'longboard', 'alum'])
@@ -192,7 +192,6 @@ export const waitlist_signups = pgTable("waitlist_signups", {
 	unique("waitlist_signups_user_trip_unique").on(table.user_id, table.trip_id),
 ]);
 
-
 export const trip_cycles = pgTable("trip_cycles", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -204,7 +203,7 @@ export const trip_cycles = pgTable("trip_cycles", {
 	member_signups_start_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	nonmember_signups_start_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	// TODO: failed to parse database type 'tstzrange'
-	// range: unknown("range").generatedAlwaysAs(sql`tstzrange(starts_at, ends_at, '[)'::text)`),
+	range: timestamp({ withTimezone: true, mode: "string" }).array().generatedAlwaysAs(sql`tstzrange(starts_at, ends_at, '[)'::text)`).notNull(),
 	trip_feedback_form: text(),
 	guide_post_trip_form: text(),
 }, (table) => [
@@ -342,7 +341,7 @@ export const profiles = pgTable("profiles", {
 }, (table) => [
 	foreignKey({
 			columns: [table.id],
-			foreignColumns: [usersInAuth.id],
+			foreignColumns: [users.id],
 			name: "profiles_id_fkey"
 		}).onUpdate("cascade").onDelete("cascade"),
 ]);

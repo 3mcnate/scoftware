@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { trips, trip_budgets, forms, form_responses, profiles, waiver_uploads, tickets, bucketsInStorage, trip_ticket_info, oauth_clientsInAuth, oauth_authorizationsInAuth, usersInAuth, oauth_consentsInAuth, participant_info, trip_prices, waitlist_signups, sso_providersInAuth, saml_relay_statesInAuth, flow_stateInAuth, sessionsInAuth, refresh_tokensInAuth, sso_domainsInAuth, mfa_amr_claimsInAuth, saml_providersInAuth, identitiesInAuth, one_time_tokensInAuth, mfa_factorsInAuth, mfa_challengesInAuth, driver_info, roles, hard_trip_participants, waiver_signatures, guide_info, checkout_sessions, trip_guides } from "./schema";
+import { trips, trip_budgets, forms, form_responses, profiles, waiver_uploads, tickets, bucketsInStorage, trip_ticket_info, participant_info, trip_prices, waitlist_signups, driver_info, roles, hard_trip_participants, waiver_signatures, guide_info, usersInAuth, checkout_sessions, trip_guides } from "./schema";
 
 export const trip_budgetsRelations = relations(trip_budgets, ({one}) => ({
 	trip: one(trips, {
@@ -95,44 +95,6 @@ export const trip_ticket_infoRelations = relations(trip_ticket_info, ({one}) => 
 	}),
 }));
 
-export const oauth_authorizationsInAuthRelations = relations(oauth_authorizationsInAuth, ({one}) => ({
-	oauth_clientsInAuth: one(oauth_clientsInAuth, {
-		fields: [oauth_authorizationsInAuth.client_id],
-		references: [oauth_clientsInAuth.id]
-	}),
-	usersInAuth: one(usersInAuth, {
-		fields: [oauth_authorizationsInAuth.user_id],
-		references: [usersInAuth.id]
-	}),
-}));
-
-export const oauth_clientsInAuthRelations = relations(oauth_clientsInAuth, ({many}) => ({
-	oauth_authorizationsInAuths: many(oauth_authorizationsInAuth),
-	oauth_consentsInAuths: many(oauth_consentsInAuth),
-	sessionsInAuths: many(sessionsInAuth),
-}));
-
-export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
-	oauth_authorizationsInAuths: many(oauth_authorizationsInAuth),
-	oauth_consentsInAuths: many(oauth_consentsInAuth),
-	identitiesInAuths: many(identitiesInAuth),
-	sessionsInAuths: many(sessionsInAuth),
-	one_time_tokensInAuths: many(one_time_tokensInAuth),
-	mfa_factorsInAuths: many(mfa_factorsInAuth),
-	profiles: many(profiles),
-}));
-
-export const oauth_consentsInAuthRelations = relations(oauth_consentsInAuth, ({one}) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [oauth_consentsInAuth.user_id],
-		references: [usersInAuth.id]
-	}),
-	oauth_clientsInAuth: one(oauth_clientsInAuth, {
-		fields: [oauth_consentsInAuth.client_id],
-		references: [oauth_clientsInAuth.id]
-	}),
-}));
-
 export const participant_infoRelations = relations(participant_info, ({one}) => ({
 	profile: one(profiles, {
 		fields: [participant_info.user_id],
@@ -155,97 +117,6 @@ export const waitlist_signupsRelations = relations(waitlist_signups, ({one}) => 
 	trip: one(trips, {
 		fields: [waitlist_signups.trip_id],
 		references: [trips.id]
-	}),
-}));
-
-export const saml_relay_statesInAuthRelations = relations(saml_relay_statesInAuth, ({one}) => ({
-	sso_providersInAuth: one(sso_providersInAuth, {
-		fields: [saml_relay_statesInAuth.sso_provider_id],
-		references: [sso_providersInAuth.id]
-	}),
-	flow_stateInAuth: one(flow_stateInAuth, {
-		fields: [saml_relay_statesInAuth.flow_state_id],
-		references: [flow_stateInAuth.id]
-	}),
-}));
-
-export const sso_providersInAuthRelations = relations(sso_providersInAuth, ({many}) => ({
-	saml_relay_statesInAuths: many(saml_relay_statesInAuth),
-	sso_domainsInAuths: many(sso_domainsInAuth),
-	saml_providersInAuths: many(saml_providersInAuth),
-}));
-
-export const flow_stateInAuthRelations = relations(flow_stateInAuth, ({many}) => ({
-	saml_relay_statesInAuths: many(saml_relay_statesInAuth),
-}));
-
-export const refresh_tokensInAuthRelations = relations(refresh_tokensInAuth, ({one}) => ({
-	sessionsInAuth: one(sessionsInAuth, {
-		fields: [refresh_tokensInAuth.session_id],
-		references: [sessionsInAuth.id]
-	}),
-}));
-
-export const sessionsInAuthRelations = relations(sessionsInAuth, ({one, many}) => ({
-	refresh_tokensInAuths: many(refresh_tokensInAuth),
-	mfa_amr_claimsInAuths: many(mfa_amr_claimsInAuth),
-	usersInAuth: one(usersInAuth, {
-		fields: [sessionsInAuth.user_id],
-		references: [usersInAuth.id]
-	}),
-	oauth_clientsInAuth: one(oauth_clientsInAuth, {
-		fields: [sessionsInAuth.oauth_client_id],
-		references: [oauth_clientsInAuth.id]
-	}),
-}));
-
-export const sso_domainsInAuthRelations = relations(sso_domainsInAuth, ({one}) => ({
-	sso_providersInAuth: one(sso_providersInAuth, {
-		fields: [sso_domainsInAuth.sso_provider_id],
-		references: [sso_providersInAuth.id]
-	}),
-}));
-
-export const mfa_amr_claimsInAuthRelations = relations(mfa_amr_claimsInAuth, ({one}) => ({
-	sessionsInAuth: one(sessionsInAuth, {
-		fields: [mfa_amr_claimsInAuth.session_id],
-		references: [sessionsInAuth.id]
-	}),
-}));
-
-export const saml_providersInAuthRelations = relations(saml_providersInAuth, ({one}) => ({
-	sso_providersInAuth: one(sso_providersInAuth, {
-		fields: [saml_providersInAuth.sso_provider_id],
-		references: [sso_providersInAuth.id]
-	}),
-}));
-
-export const identitiesInAuthRelations = relations(identitiesInAuth, ({one}) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [identitiesInAuth.user_id],
-		references: [usersInAuth.id]
-	}),
-}));
-
-export const one_time_tokensInAuthRelations = relations(one_time_tokensInAuth, ({one}) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [one_time_tokensInAuth.user_id],
-		references: [usersInAuth.id]
-	}),
-}));
-
-export const mfa_factorsInAuthRelations = relations(mfa_factorsInAuth, ({one, many}) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [mfa_factorsInAuth.user_id],
-		references: [usersInAuth.id]
-	}),
-	mfa_challengesInAuths: many(mfa_challengesInAuth),
-}));
-
-export const mfa_challengesInAuthRelations = relations(mfa_challengesInAuth, ({one}) => ({
-	mfa_factorsInAuth: one(mfa_factorsInAuth, {
-		fields: [mfa_challengesInAuth.factor_id],
-		references: [mfa_factorsInAuth.id]
 	}),
 }));
 
@@ -288,6 +159,10 @@ export const guide_infoRelations = relations(guide_info, ({one}) => ({
 		fields: [guide_info.user_id],
 		references: [profiles.id]
 	}),
+}));
+
+export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
+	profiles: many(profiles),
 }));
 
 export const checkout_sessionsRelations = relations(checkout_sessions, ({one}) => ({

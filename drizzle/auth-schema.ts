@@ -15,7 +15,7 @@ import { sql } from "drizzle-orm"
 
 export const auth = pgSchema("auth");
 
-export const usersInAuth = auth.table("users", {
+export const users = auth.table("users", {
 	instance_id: uuid(),
 	id: uuid().notNull(),
 	aud: varchar({ length: 255 }),
