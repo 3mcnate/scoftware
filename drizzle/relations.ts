@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm/relations";
-import { trips, trip_budgets, forms, form_responses, profiles, waiver_uploads, tickets, bucketsInStorage, trip_ticket_info, participant_info, trip_prices, waitlist_signups, driver_info, roles, hard_trip_participants, waiver_signatures, guide_info, usersInAuth, checkout_sessions, trip_guides } from "./schema";
+import { trips, trip_budgets, forms, form_responses, profiles, waiver_uploads, tickets, trip_ticket_info, participant_info, trip_prices, waitlist_signups, driver_info, roles, hard_trip_participants, waiver_signatures, guide_info, checkout_sessions, trip_guides } from "./schema";
+import { users } from "@/drizzle/auth-schema"
 
 export const trip_budgetsRelations = relations(trip_budgets, ({one}) => ({
 	trip: one(trips, {
@@ -48,9 +49,9 @@ export const profilesRelations = relations(profiles, ({one, many}) => ({
 	}),
 	waiver_signatures: many(waiver_signatures),
 	guide_infos: many(guide_info),
-	usersInAuth: one(usersInAuth, {
+	usersInAuth: one(users, {
 		fields: [profiles.id],
-		references: [usersInAuth.id]
+		references: [users.id]
 	}),
 	checkout_sessions: many(checkout_sessions),
 	tickets: many(tickets),
@@ -66,10 +67,6 @@ export const waiver_uploadsRelations = relations(waiver_uploads, ({one}) => ({
 		fields: [waiver_uploads.ticket_id],
 		references: [tickets.id]
 	}),
-	bucketsInStorage: one(bucketsInStorage, {
-		fields: [waiver_uploads.bucket],
-		references: [bucketsInStorage.name]
-	}),
 }));
 
 export const ticketsRelations = relations(tickets, ({one, many}) => ({
@@ -82,10 +79,6 @@ export const ticketsRelations = relations(tickets, ({one, many}) => ({
 		fields: [tickets.user_id],
 		references: [profiles.id]
 	}),
-}));
-
-export const bucketsInStorageRelations = relations(bucketsInStorage, ({many}) => ({
-	waiver_uploads: many(waiver_uploads),
 }));
 
 export const trip_ticket_infoRelations = relations(trip_ticket_info, ({one}) => ({
@@ -161,7 +154,7 @@ export const guide_infoRelations = relations(guide_info, ({one}) => ({
 	}),
 }));
 
-export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
+export const usersInAuthRelations = relations(users, ({many}) => ({
 	profiles: many(profiles),
 }));
 
