@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          operationName?: string
-          variables?: Json
           extensions?: Json
+          operationName?: string
           query?: string
+          variables?: Json
         }
         Returns: Json
       }
@@ -36,42 +36,42 @@ export type Database = {
     Tables: {
       checkout_sessions: {
         Row: {
-          confirmed: boolean
           created_at: string
           expires_at: string
           id: string
+          status: Database["public"]["Enums"]["checkout_session_status"]
           stripe_checkout_session_id: string | null
           trip_id: string
           user_id: string
         }
         Insert: {
-          confirmed?: boolean
           created_at?: string
           expires_at?: string
           id?: string
+          status?: Database["public"]["Enums"]["checkout_session_status"]
           stripe_checkout_session_id?: string | null
           trip_id: string
           user_id: string
         }
         Update: {
-          confirmed?: boolean
           created_at?: string
           expires_at?: string
           id?: string
+          status?: Database["public"]["Enums"]["checkout_session_status"]
           stripe_checkout_session_id?: string | null
           trip_id?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "ticket_reservations_trip_id_fkey"
+            foreignKeyName: "checkout_sessions_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "ticket_reservations_user_id_fkey"
+            foreignKeyName: "checkout_sessions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -81,11 +81,15 @@ export type Database = {
       }
       driver_info: {
         Row: {
+          affirm_good_condition: boolean
           auto_insurance_company: string
           auto_insurance_policy_number: string
           created_at: string
+          drivers_license_expiration: string
           drivers_license_number: string
-          good_condition: boolean
+          drivers_license_state: string
+          is_4wd: boolean
+          license_plate_number: string
           num_seats: number
           slack_interested: boolean
           updated_at: string
@@ -96,11 +100,15 @@ export type Database = {
           vehicle_year: number
         }
         Insert: {
+          affirm_good_condition: boolean
           auto_insurance_company: string
           auto_insurance_policy_number: string
           created_at?: string
+          drivers_license_expiration: string
           drivers_license_number: string
-          good_condition: boolean
+          drivers_license_state: string
+          is_4wd: boolean
+          license_plate_number: string
           num_seats: number
           slack_interested: boolean
           updated_at?: string
@@ -111,11 +119,15 @@ export type Database = {
           vehicle_year: number
         }
         Update: {
+          affirm_good_condition?: boolean
           auto_insurance_company?: string
           auto_insurance_policy_number?: string
           created_at?: string
+          drivers_license_expiration?: string
           drivers_license_number?: string
-          good_condition?: boolean
+          drivers_license_state?: string
+          is_4wd?: boolean
+          license_plate_number?: string
           num_seats?: number
           slack_interested?: boolean
           updated_at?: string
@@ -250,18 +262,21 @@ export type Database = {
           approved_by: string
           created_at: string
           notes: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
           approved_by: string
           created_at?: string
           notes?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
           approved_by?: string
           created_at?: string
           notes?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -425,46 +440,46 @@ export type Database = {
       }
       tickets: {
         Row: {
+          amount_paid: number
           cancelled: boolean
           cancelled_at: string | null
           created_at: string
           id: string
           refunded: boolean
           stripe_payment_id: string
+          stripe_refund_id: string | null
           trip_id: string
           type: Database["public"]["Enums"]["ticket_type"]
           updated_at: string
           user_id: string
-          waiver_confirmed: boolean
-          waiver_id: string | null
         }
         Insert: {
+          amount_paid: number
           cancelled?: boolean
           cancelled_at?: string | null
           created_at?: string
           id?: string
           refunded?: boolean
           stripe_payment_id: string
+          stripe_refund_id?: string | null
           trip_id: string
           type: Database["public"]["Enums"]["ticket_type"]
           updated_at?: string
           user_id: string
-          waiver_confirmed?: boolean
-          waiver_id?: string | null
         }
         Update: {
+          amount_paid?: number
           cancelled?: boolean
           cancelled_at?: string | null
           created_at?: string
           id?: string
           refunded?: boolean
           stripe_payment_id?: string
+          stripe_refund_id?: string | null
           trip_id?: string
           type?: Database["public"]["Enums"]["ticket_type"]
           updated_at?: string
           user_id?: string
-          waiver_confirmed?: boolean
-          waiver_id?: string | null
         }
         Relationships: [
           {
@@ -479,13 +494,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tickets_waiver_id_fkey"
-            columns: ["waiver_id"]
-            isOneToOne: false
-            referencedRelation: "waiver_uploads"
             referencedColumns: ["id"]
           },
         ]
@@ -550,6 +558,7 @@ export type Database = {
         Row: {
           created_at: string
           ends_at: string
+          guide_post_trip_form: string | null
           id: string
           member_signups_start_at: string
           name: string
@@ -563,6 +572,7 @@ export type Database = {
         Insert: {
           created_at?: string
           ends_at: string
+          guide_post_trip_form?: string | null
           id?: string
           member_signups_start_at: string
           name: string
@@ -576,6 +586,7 @@ export type Database = {
         Update: {
           created_at?: string
           ends_at?: string
+          guide_post_trip_form?: string | null
           id?: string
           member_signups_start_at?: string
           name?: string
@@ -670,29 +681,29 @@ export type Database = {
       }
       trip_ticket_info: {
         Row: {
-          cancelled_driver_tickets: number
-          cancelled_participant_tickets: number
           created_at: string
           driver_tickets_sold: number
+          driver_waitlist_only: boolean
           participant_tickets_sold: number
+          participant_waitlist_only: boolean
           trip_id: string
           updated_at: string
         }
         Insert: {
-          cancelled_driver_tickets?: number
-          cancelled_participant_tickets?: number
           created_at?: string
           driver_tickets_sold?: number
+          driver_waitlist_only?: boolean
           participant_tickets_sold?: number
+          participant_waitlist_only?: boolean
           trip_id: string
           updated_at?: string
         }
         Update: {
-          cancelled_driver_tickets?: number
-          cancelled_participant_tickets?: number
           created_at?: string
           driver_tickets_sold?: number
+          driver_waitlist_only?: boolean
           participant_tickets_sold?: number
+          participant_waitlist_only?: boolean
           trip_id?: string
           updated_at?: string
         }
@@ -789,6 +800,65 @@ export type Database = {
           },
           {
             foreignKeyName: "waitlist_signups_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      waiver_signatures: {
+        Row: {
+          confirmation_email_sent_at: string
+          consent_text: string
+          created_at: string
+          document_hash: string
+          document_id: string
+          drawn_signature: string
+          email: string
+          id: string
+          ip_address: string
+          signature_hash: string
+          signed_at: string
+          typed_date: string
+          typed_name: string
+          user_id: string
+        }
+        Insert: {
+          confirmation_email_sent_at: string
+          consent_text: string
+          created_at?: string
+          document_hash: string
+          document_id: string
+          drawn_signature: string
+          email: string
+          id?: string
+          ip_address: string
+          signature_hash: string
+          signed_at: string
+          typed_date: string
+          typed_name: string
+          user_id: string
+        }
+        Update: {
+          confirmation_email_sent_at?: string
+          consent_text?: string
+          created_at?: string
+          document_hash?: string
+          document_id?: string
+          drawn_signature?: string
+          email?: string
+          id?: string
+          ip_address?: string
+          signature_hash?: string
+          signed_at?: string
+          typed_date?: string
+          typed_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waiver_signatures_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -1085,6 +1155,7 @@ export type Database = {
       }
     }
     Enums: {
+      checkout_session_status: "open" | "complete" | "expired"
       guide_position: "new_guide" | "guide" | "longboard" | "alum"
       membership_length: "semester" | "year"
       ticket_type: "member" | "nonmember" | "driver"
@@ -1220,6 +1291,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      checkout_session_status: ["open", "complete", "expired"],
       guide_position: ["new_guide", "guide", "longboard", "alum"],
       membership_length: ["semester", "year"],
       ticket_type: ["member", "nonmember", "driver"],
