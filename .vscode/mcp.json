@@ -1,17 +1,31 @@
 {
-	"servers": {
-		"local-supabase": {
-			"url": "http://localhost:54321/mcp?read_only=true",
-			"type": "http"
-		},
-		"next-devtools": {
-			"command": "npx",
-			"args": ["-y", "next-devtools-mcp@latest"]
-		},
-		"zod": {
-			"command": "npx",
-			"args": ["-y", "mcp-remote", "https://mcp.inkeep.com/zod/mcp"]
-		}
-	},
-	"inputs": []
+  "servers": {
+    "local-supabase": {
+      "url": "http://localhost:54321/mcp?read_only=true",
+      "type": "http"
+    },
+    "next-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "next-devtools-mcp@latest"
+      ]
+    },
+    "zod": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.inkeep.com/zod/mcp"
+      ]
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
+    }
+  },
+  "inputs": []
 }
