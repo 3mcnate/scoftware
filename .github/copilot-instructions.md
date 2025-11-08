@@ -1,22 +1,25 @@
 # AI Coding Best Practices
 
-Always prefer type safety over defensive programming. Let type systems and schema validation ensure correctness.
-
-Avoid the "any" type. Use only as a last resort when no better option exists.
-
-Don’t guess object shapes. Import or derive types from existing definitions.
-
-Minimize comments. Only add them for non-obvious logic.
-
-No emojis.
-
-No excessive logging.
-
 ## Architecture
 
 This project uses Next.js and Supabase, including Supabase Auth. The first choice for data fetching should be on the browser, using Tanstack Query wrapped by the @supabase-cache-helpers/postgrest-react-query library. 
 
-## Project Directory Structure
+### Tech Stack
+
+- TypeScript 
+- Next.js 16 deployed on Vercel's serverless platform
+	- pages in the (public) route group should use Incremental Static Regeneration (ISR)
+	- pages in the (protected) route group are dashboard pages and should generally fetch data using Client Side Rendering (CSR)
+	- pages in the (auth) route group can be statically generated
+- Shadcn/ui components styled with TailwindCSS
+- Tanstack Query (React Query) for data fetching on the frontend
+- Drizzle ORM for privileged DB operations server-side
+- Supabase with RLS policies for direct browser to DB CRUD operations. Not all tables have RLS rules - some will only be accessed via authenticated server routes and Drizzle. Examples of such tables include those relating to checkout, stripe webhooks, and anywhere it would be too complicated to enforce security with RLS policies
+- React-hook-form for frontend forms
+- Zod for server route validation and forms (import { z } 'zod/v4')
+- Stripe integration for payments
+
+### Project Directory Structure
 
 src/
 ├── app/                            # Next.js routes (App Router)
@@ -116,57 +119,37 @@ src/
     └── database.types.ts  			# contains all TypeScript types generated from the Supabase database
 
 
+### Frontend Instructions
 
+- Use shadcn/ui components. Use the #shadcn MCP tool to look up documentation and which component is best for each use case. Make simple yet beautiful and performant designs.  
+- Every input, variable, and return value must have explicit types.
+- Use the supabase-js client when possible for crud operations. Always wrap calls with the @supabase-cache-helpers/postgrest-react-query library.
+- Use react-hook-form and the shadcn/ui <Form> component with zod for form management.
 
-## Frontend (Web App)
+### Backend (Next.js API)
 
-Use shadcn/ui components. Use the #shadcn MCP tool to look up documentation and which component is best for each use case. Make simple yet beautiful and performant designs.  
+- Don’t wrap every route in try/catch. Let Next.js handle 500 responses.
+- Only catch errors you intend to handle (e.g. user-facing validation).
 
-Every input, variable, and return value must have explicit types.
+## Other Patterns and Instructions:
 
-For DB interactions, import/derive types from Tables, Enums, and Views in database.types.ts (e.g. Table<'scripts'>). This keeps in sync with our supabase database. Also, use the supabase MCP server to inspect the schema of the database.
+### Type Safety
 
-Use the supabase-js client when possible for crud operations. Always wrap calls with the @supabase-cache-helpers/postgrest-react-query library.
+- Always prefer type safety over defensive programming. Let type systems and schema validation ensure correctness. Don't use the "any" type unless absolutely necessary
+- For DB interactions, import/derive types from Tables, Enums, and Views in types/database.types.ts (e.g. Table<'trips'>). This keeps in sync with our supabase database. Also, you can use the Supabase MCP server to inspect the schema of the database.
+- Don’t guess object shapes. Import or derive types from existing definitions.
 
-Use react-hook-form and the shadcn/ui <Form> component with zod for form management.
+### General Code Quality
 
-
-## Patterns:
-
-Keep files small and scoped and code clean and modular. Break large components into helpers, sub-components, and separate files.
-
-Use Promise.all() for parallel requests where interdependencies don’t exist.
-
-Keep UI clean: avoid bloated logic in components. Factor out hooks and utils.
-
-Structure:
-
-Follow standardized file/folder conventions. Do not invent ad-hoc structures.
-
-Reuse shared logic instead of duplicating.
-
-Backend (Next.js API)
-
-Don’t wrap every route in try/catch. Let Next.js handle 500 responses.
-
-Only catch errors you intend to handle (e.g. user-facing validation).
-
-Keep API files lean. Move logic into helpers/services instead of bloating handlers.
-
-Prefer standard libraries or vetted 3rd-party ones over writing custom utility classes.
-
-Return clear, typed responses.
-
-Structure code to maximize readability and reuse.
-
-Never guess. If you are unclear where something exists in the codebase (files, functions, types, endpoints), ask or search. Do not assume or invent. Always locate the source of truth before proceeding.
-
-Style
-
-Prioritize concise, clean, readable patterns.
-
-Keep logic lean: no unnecessary abstractions, no spaghetti.
-
-Design for extensibility, but don’t over-engineer.
-
-If you are confused on what has been asked of you ask clarifying questions, dont assume
+- Keep files small and scoped and code clean and modular. Break large components into helpers, sub-components, and separate files. avoid bloated logic in components. Factor out hooks and shared utils.
+- Prioritize concise, clean, readable, and reusable patterns, without unnecessary abstractions or code spaghetti.
+- Reuse shared logic instead of duplicating.
+- Minimize comments. Only add them for non-obvious logic.
+- No emojis.
+- No excessive logging.
+- Use Promise.all() for parallel requests where interdependencies don’t exist.
+- Follow the Project Directory Structure defined above. Do not invent ad-hoc structures.
+- If there is a high-quality third-party package that could achieve what you're trying to do easier, suggest it.
+- Never guess. If you are unclear where something exists in the codebase (files, functions, types, endpoints), ask or search. Do not assume or invent. Always locate the source of truth before proceeding.
+- Design for extensibility, but don’t over-engineer.
+- If you are confused on what has been asked of you then ask clarifying questions. Don't assume if you're unsure.
