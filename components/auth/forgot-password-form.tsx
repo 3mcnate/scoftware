@@ -10,60 +10,64 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { createClient } from "@/utils/supabase/browser"
 
-export function LoginForm({
+export function ForgotPasswordForm({
 	className,
 	...props
 }: React.ComponentProps<"form">) {
-	const router = useRouter()
 	const supabase = createClient()
 	
 	const [email, setEmail] = useState<string>("")
-	const [password, setPassword] = useState<string>("")
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState<string>("")
+	const [successMessage, setSuccessMessage] = useState<string>("")
 
-	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		setError("")
+		setSuccessMessage("")
 		setIsLoading(true)
 
 		try {
-			const { error: authError } = await supabase.auth.signInWithPassword({
-				email,
-				password,
+			const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+				redirectTo: `${window.location.origin}/reset-password`,
 			})
 
-			if (authError) {
-				setError(authError.message)
+			if (resetError) {
+				setError(resetError.message)
 				setIsLoading(false)
 				return
 			}
 
-			router.push("/")
-			router.refresh()
+			setSuccessMessage(`If an account exists with email ${email}, a password reset email will be sent`)
+			setEmail("")
 		} catch (err) {
 			if (err instanceof Error) {
 				setError(err.message)
 			}
+		} finally {
 			setIsLoading(false)
 		}
 	}
 
 	return (
-		<form className={cn("flex flex-col gap-6", className)} onSubmit={handleLogin} {...props}>
+		<form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit} {...props}>
 			<FieldGroup>
 				<div className="flex flex-col items-center gap-1 text-center">
-					<h1 className="text-2xl font-bold">Login to your account</h1>
+					<h1 className="text-2xl font-bold">Reset your password</h1>
 					<p className="text-muted-foreground text-sm text-balance">
-						Enter your USC email
+						Enter your USC email to receive a password reset link
 					</p>
 				</div>
 				{error && (
 					<div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
 						{error}
+					</div>
+				)}
+				{successMessage && (
+					<div className="rounded-md bg-green-50 p-3 text-sm text-green-800">
+						{successMessage}
 					</div>
 				)}
 				<Field>
@@ -80,32 +84,13 @@ export function LoginForm({
 					/>
 				</Field>
 				<Field>
-					<div className="flex items-center">
-						<FieldLabel htmlFor="password">Password</FieldLabel>
-						<a
-							href="/forgot-password"
-							className="ml-auto text-sm underline-offset-4 hover:underline"
-						>
-							Forgot your password?
-						</a>
-					</div>
-					<Input 
-						id="password" 
-						type="password" 
-						required 
-						value={password}
-						onChange={e => setPassword(e.target.value)}
-						disabled={isLoading}
-					/>
-				</Field>
-				<Field>
 					<Button type="submit" disabled={isLoading}>
-						{isLoading ? "Logging in..." : "Login"}
+						{isLoading ? "Sending..." : "Send reset link"}
 					</Button>
 					<FieldDescription className="text-center">
-						Don&apos;t have an account?{" "}
-						<a href="/signup" className="underline underline-offset-4">
-							Sign up
+						Remember your password?{" "}
+						<a href="/login" className="underline underline-offset-4">
+							Login
 						</a>
 					</FieldDescription>
 				</Field>
