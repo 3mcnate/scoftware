@@ -18,6 +18,7 @@ This project uses Next.js and Supabase, including Supabase Auth. The first choic
 - React-hook-form for frontend forms
 - Zod for server route validation and forms (import { z } 'zod/v4')
 - Stripe integration for payments
+- Resend for emails
 
 ### Project Directory Structure
 
