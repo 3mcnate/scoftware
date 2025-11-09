@@ -37,7 +37,7 @@ export const updateSession = async (request: NextRequest) => {
 
 
     // https://supabase.com/docs/guides/auth/server-side/nextjs
-    await supabase.auth.getClaims();
+    await supabase.auth.getUser();
 
     return response;
   } catch (e) {
