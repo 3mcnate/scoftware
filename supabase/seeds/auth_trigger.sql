@@ -1,4 +1,4 @@
-create trigger handle_new_user_trg
+create or replace trigger handle_new_user_trg
 after insert on auth.users
 for each row
 execute function public.handle_new_user();

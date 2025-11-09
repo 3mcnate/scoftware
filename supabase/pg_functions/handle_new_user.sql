@@ -13,16 +13,24 @@ begin
 	select "value" into env
 	from public.env where "key" = 'env';
 
+	if new.email is null then
+		raise exception 'email is null';
+	end if;
+
 	if env != 'development' and new.email !~* '@usc.edu$' then
 		raise exception 'must signup with @usc.edu email address';
 	end if;
 
 	if new.raw_user_meta_data->>'first_name' is null then
 		fname := new.email;
+	else
+		select new.raw_user_meta_data->>'first_name' into fname;
 	end if;
 
 	if new.raw_user_meta_data->>'last_name' is null then
 		lname := new.email;
+	else
+		select new.raw_user_meta_data->>'last_name' into lname;
 	end if;
 
 	insert into public.profiles (id, first_name, last_name)
