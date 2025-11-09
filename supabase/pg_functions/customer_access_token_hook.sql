@@ -6,13 +6,13 @@ stable
 as $$
   declare
     claims jsonb;
-    urole public.user_role;
+    app_role public.user_role;
   begin
     -- Fetch the user role in the user_roles table
-    select "role" into urole from public.roles where user_id = (event->>'user_id')::uuid;
+    select "role" into app_role from public.roles where user_id = (event->>'user_id')::uuid;
 
     claims := event->'claims';
-	claims := jsonb_set(claims, '{user_role}', to_jsonb(user_role));
+	  claims := jsonb_set(claims, '{app_role}', to_jsonb(app_role));
 
     -- Update the 'claims' object in the original event
     event := jsonb_set(event, '{claims}', claims);

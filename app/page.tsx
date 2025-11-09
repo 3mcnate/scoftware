@@ -1,6 +1,15 @@
+import RawAuthInfo from "@/components/auth/raw-auth-info";
+import { Button } from "@/components/ui/button";
+import { createServerClient } from "@/utils/supabase/server";
+
 import Image from "next/image";
 
-export default function Home() {
+export default async function Home() {
+
+  const supabase = await createServerClient()
+  const claimsData = await supabase.auth.getClaims();
+  console.log(claimsData);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
@@ -33,6 +42,10 @@ export default function Home() {
             </a>{" "}
             center.
           </p>
+          <RawAuthInfo />
+          <Button>
+            Sign out
+          </Button>
         </div>
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
           <a

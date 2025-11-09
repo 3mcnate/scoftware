@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/utils/supabase/browser"
+import RawAuthInfo from "@/components/auth/raw-auth-info"
 
 const ENV = process.env.NEXT_PUBLIC_ENV!;
 
@@ -56,6 +57,7 @@ export function LoginForm({
 
 	return (
 		<form className={cn("flex flex-col gap-6", className)} onSubmit={handleLogin} {...props}>
+			<RawAuthInfo />
 			<FieldGroup>
 				<div className="flex flex-col items-center gap-1 text-center">
 					<h1 className="text-2xl font-bold">Login to your account</h1>
