@@ -1,0 +1,1 @@
+insert into public.env ("key", "value") values ('env', 'development');

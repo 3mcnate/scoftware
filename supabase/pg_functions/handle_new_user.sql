@@ -6,9 +6,14 @@ declare
 
 fname text;
 lname text;
+env text;
 
 begin
-	if new.email !~* '@usc.edu$' then
+
+	select "value" into env
+	from public.env where "key" = 'env';
+
+	if env != 'development' and new.email !~* '@usc.edu$' then
 		raise exception 'must signup with @usc.edu email address';
 	end if;
 
