@@ -1,5 +1,5 @@
 import RawAuthInfo from "@/components/auth/raw-auth-info";
-import { Button } from "@/components/ui/button";
+import { SignoutButton } from "@/components/auth/signout-button";
 import { createServerClient } from "@/utils/supabase/server";
 
 import Image from "next/image";
@@ -43,9 +43,7 @@ export default async function Home() {
             center.
           </p>
           <RawAuthInfo />
-          <Button>
-            Sign out
-          </Button>
+          <SignoutButton />
         </div>
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
           <a
