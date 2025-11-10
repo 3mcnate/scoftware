@@ -11,5 +11,5 @@
 - "confirmation email sent" - done 
 - "email confirmed" page - done
 - auth error page - done
-- route protection in middleware
+- route protection in middleware - done
 - default dashboard pages for participant/guide
