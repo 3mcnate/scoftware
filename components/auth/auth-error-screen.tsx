@@ -40,9 +40,6 @@ export function AuthErrorScreen({
         <div className="flex flex-col items-center gap-2 text-center">
           <Image src="/logo.png" alt="Logo" width={100} height={100} />
           <h1 className="text-2xl font-bold mt-2">Authentication Error</h1>
-          <p className="text-muted-foreground text-sm text-balance">
-            We encountered an issue with your authentication.
-          </p>
         </div>
         <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
           {errorMessage}

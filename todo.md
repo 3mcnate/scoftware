@@ -10,6 +10,6 @@
 - reset password page - done
 - "confirmation email sent" - done 
 - "email confirmed" page - done
-- auth error page -
+- auth error page - done
 - route protection in middleware
 - default dashboard pages for participant/guide

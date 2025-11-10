@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import Image from "next/image";
@@ -59,7 +58,6 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const router = useRouter();
   const supabase = createClient();
   const [serverError, setServerError] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
