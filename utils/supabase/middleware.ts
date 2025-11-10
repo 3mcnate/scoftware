@@ -40,7 +40,7 @@ export const updateSession = async (request: NextRequest) => {
     await supabase.auth.getUser();
 
     return response;
-  } catch (e) {
+  } catch {
     // If you are here, a Supabase client could not be created!
     // This is likely because you have not set up environment variables.
     return NextResponse.next({
