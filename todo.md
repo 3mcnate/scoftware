@@ -6,6 +6,7 @@
 - supabase clients - done
 
 11/9/25
+- replace auth image - done
 - reset password page
 - "confirmation email sent"
 - "email confirmed" page
