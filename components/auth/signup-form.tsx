@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import Image from "next/image";
 import { Mail } from "lucide-react";
 import { z } from "zod/v4";
 import { cn } from "@/utils/cn";
@@ -61,6 +62,8 @@ export function SignupForm({
   const router = useRouter();
   const supabase = createClient();
   const [serverError, setServerError] = useState<string>("");
+  const [success, setSuccess] = useState<boolean>(false);
+  const [userEmail, setUserEmail] = useState<string>("");
 
   const {
     control,
@@ -99,8 +102,8 @@ export function SignupForm({
         return;
       }
 
-      router.push("/");
-      router.refresh();
+      setUserEmail(data.email);
+      setSuccess(true);
     } catch (err) {
       if (err instanceof Error) {
         setServerError(err.message);
@@ -109,6 +112,30 @@ export function SignupForm({
       }
     }
   };
+
+  if (success) {
+    return (
+      <div className={cn("flex flex-col gap-6", className)}>
+        <FieldGroup>
+          <div className="flex flex-col items-center gap-2 text-center">
+            <Image src="/logo.png" alt="Logo" width={100} height={100} />
+            <h1 className="text-2xl font-bold mt-2">Success!</h1>
+            <p className="text-muted-foreground text-sm text-balance">
+              Confirmation was sent to <strong>{userEmail}</strong>
+            </p>
+          </div>
+          <div className="rounded-md bg-green-50 p-3 text-sm text-green-800">
+            Please check your email to verify your account before signing in.
+          </div>
+          <Field>
+            <Button asChild>
+              <a href="/login">Go to Sign In</a>
+            </Button>
+          </Field>
+        </FieldGroup>
+      </div>
+    );
+  }
 
   return (
     <form

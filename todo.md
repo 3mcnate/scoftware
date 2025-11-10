@@ -7,8 +7,9 @@
 
 11/9/25
 - replace auth image - done
-- reset password page
-- "confirmation email sent"
-- "email confirmed" page
+- reset password page - done
+- "confirmation email sent" - done 
+- "email confirmed" page - done
+- auth error page -
 - route protection in middleware
 - default dashboard pages for participant/guide
