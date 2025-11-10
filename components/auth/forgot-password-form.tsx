@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/browser";
 
+const ENV = process.env.NEXT_PUBLIC_ENV!;
+
 export function ForgotPasswordForm({
   className,
   ...props
@@ -86,7 +88,7 @@ export function ForgotPasswordForm({
             type="email"
             placeholder="user@usc.edu"
             required
-            pattern="^.+@usc.edu$"
+            pattern={ENV !== "development" ? "^.+@usc.edu$" : undefined}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}

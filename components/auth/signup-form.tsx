@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import Image from "next/image";
@@ -62,6 +62,8 @@ export function SignupForm({
   const [serverError, setServerError] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [countdown, setCountdown] = useState<number>(60);
+  const [isResending, setIsResending] = useState<boolean>(false);
 
   const {
     control,
@@ -111,6 +113,50 @@ export function SignupForm({
     }
   };
 
+  const handleResendEmail = async () => {
+    if (countdown > 0 || isResending) return;
+
+    setIsResending(true);
+    setServerError("");
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: userEmail,
+      });
+
+      if (error) {
+        setServerError(error.message);
+      } else {
+        setCountdown(60);
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setServerError(err.message);
+      } else {
+        setServerError("Failed to resend email");
+      }
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!success || countdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [success, countdown]);
+
   if (success) {
     return (
       <div className={cn("flex flex-col gap-6", className)}>
@@ -122,9 +168,28 @@ export function SignupForm({
               Confirmation was sent to <strong>{userEmail}</strong>
             </p>
           </div>
+          {serverError && (
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+              {serverError}
+            </div>
+          )}
           <div className="rounded-md bg-green-50 p-3 text-sm text-green-800">
-            Please check your email to verify your account before signing in.
+            Please check your email to verify your account before signing in. <strong>Make sure you check your spam folder.</strong>
           </div>
+          <Field>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleResendEmail}
+              disabled={countdown > 0 || isResending}
+            >
+              {isResending
+                ? "Resending..."
+                : countdown > 0
+                  ? `Resend email (${countdown}s)`
+                  : "Resend confirmation email"}
+            </Button>
+          </Field>
           <Field>
             <Button asChild>
               <a href="/login">Go to Sign In</a>
