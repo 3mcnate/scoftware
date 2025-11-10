@@ -6,9 +6,9 @@ import Image from "next/image";
 
 export default async function Home() {
 
-  const supabase = await createServerClient()
-  const claimsData = await supabase.auth.getClaims();
-  console.log(claimsData);
+  // const supabase = await createServerClient()
+  // const claimsData = await supabase.auth.getClaims();
+  // console.log(claimsData);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
