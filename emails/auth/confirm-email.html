@@ -34,10 +34,10 @@
 <body>
   <div class="container">
     <img src="{{ .SiteURL }}/logo.png" alt="Logo" class="logo">
-    <p>Confirm your email address:</p>
+    <h3>Confirm your email address:</h3>
     <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email</a></p>
     <p>This link will expire in 24 hours.</p>
   </div>
 </body>
-</html>
+</html>	
 

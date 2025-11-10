@@ -1,6 +1,5 @@
 import RawAuthInfo from "@/components/auth/raw-auth-info";
 import { SignoutButton } from "@/components/auth/signout-button";
-import { createServerClient } from "@/utils/supabase/server";
 
 import Image from "next/image";
 
