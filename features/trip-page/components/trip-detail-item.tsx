@@ -28,7 +28,7 @@ export function TripDetailItem({
   return (
     <Item variant="outline" className="items-start">
       <ItemMedia>
-        <Icon className="h-5 w-5 text-primary" />
+        <Icon className="h-5 w-5" />
       </ItemMedia>
       <ItemContent>
         <div className="flex items-center justify-between w-full">

@@ -1,38 +1,43 @@
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 // @ts-expect-error - allow side-effect global CSS import in Next.js root layout
-import "./globals.css"
-import { AuthProvider } from "@/components/providers/auth-provider"
+import "./globals.css";
+import { AuthProvider } from "@/components/providers/auth-provider";
 
 const geistSans = Geist({
-	variable: "--font-geist-sans",
-	subsets: ["latin"],
-})
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
 
 const geistMono = Geist_Mono({
-	variable: "--font-geist-mono",
-	subsets: ["latin"],
-})
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-	title: "SC Outfitters",
-	description: "SC Outfitters Trips Platform",
-}
+  title: "SC Outfitters",
+  description: "SC Outfitters Trips Platform",
+};
 
 export default function RootLayout({
-	children,
+  children,
 }: Readonly<{
-	children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-	return (
-		<html lang="en">
-			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
-			>
-				<AuthProvider>
-					{children}
-				</AuthProvider>
-			</body>
-		</html>
-	)
+  return (
+    <html lang="en">
+      <head>
+        <script
+          async
+          crossOrigin="anonymous"
+          src="https://tweakcn.com/live-preview.min.js"
+        />
+      </head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
+      >
+        <AuthProvider>{children}</AuthProvider>
+      </body>
+    </html>
+  );
 }

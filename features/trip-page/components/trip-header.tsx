@@ -5,6 +5,7 @@ import { Mountain } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { SignupButtons } from "@/features/trip-page/components/signup-buttons"
 import Image from "next/image"
+import Link from "next/link"
 
 interface TripHeaderProps {
   participantSpotsRemaining: number
@@ -23,9 +24,9 @@ export function TripHeader({
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/80">
       <div className="container flex h-auto mx-auto flex-col gap-3 px-4 py-3 md:h-16 md:flex-row md:items-center md:justify-between md:py-0 md:px-6">
         <div className="flex items-center justify-between md:justify-start gap-3">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <Image src="/logo.png" height={100} width={100} alt="logo" />
-          </div>
+          </Link >
 
           <div className="flex gap-2 md:hidden">
             <Badge variant="secondary" className="font-bold text-xs">

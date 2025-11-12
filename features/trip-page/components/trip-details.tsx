@@ -129,17 +129,17 @@ export function TripDetails({
               <ItemGroup className="gap-3 lg:gap-2">
                 <div className="flex items-baseline justify-between gap-4">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Member</span>
-                  <span className="text-xl font-medium text-primary">${memberPrice}</span>
+                  <span className="text-xl font-medium ">${memberPrice}</span>
                 </div>
                 <ItemSeparator className="block lg:hidden" />
                 <div className="flex items-baseline justify-between gap-4">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Non-Member</span>
-                  <span className="text-xl font-medium text-primary">${nonMemberPrice}</span>
+                  <span className="text-xl font-medium ">${nonMemberPrice}</span>
                 </div>
                 <ItemSeparator className="block lg:hidden" />
                 <div className="flex items-baseline justify-between gap-4">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Driver</span>
-                  <span className="text-xl font-medium text-primary">${driverPrice}</span>
+                  <span className="text-xl font-medium ">${driverPrice}</span>
                 </div>
               </ItemGroup>
             </ItemContent>
@@ -269,24 +269,22 @@ export function TripDetails({
                 key={index}
                 className="flex items-center gap-4 p-4 rounded-lg bg-muted/50"
               >
-                <Avatar className="h-14 w-14 border-2 border-primary">
+                <Avatar className="h-14 w-14">
                   <AvatarImage
                     src={guide.image || "/placeholder.svg"}
                     alt={guide.name}
                   />
-                  <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+                  <AvatarFallback className="bg-foreground text-primary-foreground font-bold">
                     {guide.initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <p className="font-bold text-foreground">{guide.name}</p>
-                  <a
-                    href={`mailto:${guide.email}`}
-                    className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
+                  <p className="text-xs flex items-center gap-1 mt-1"
                   >
                     <Mail className="h-3 w-3" />
                     {guide.email}
-                  </a>
+                  </p>
                 </div>
               </div>
             ))}
@@ -313,8 +311,8 @@ export function TripDetails({
                 to be re-filled.
               </p>
               <a
-                href="#"
-                className="text-primary hover:underline font-semibold inline-flex items-center gap-1"
+                href="https://www.scoutfitters.org/cancellation-policy"
+                className="hover:underline hover:text-primary font-semibold inline-flex items-center gap-1"
               >
                 Read complete cancellation/refund policy →
               </a>
