@@ -1,4 +1,9 @@
-import { Item, ItemContent, ItemTitle, ItemDescription, ItemMedia, ItemGroup } from "@/components/ui/item";
+import {
+  Item,
+  ItemContent,
+  ItemTitle,
+  ItemGroup,
+} from "@/components/ui/item";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Calendar,
@@ -9,6 +14,7 @@ import {
   Mail,
 } from "lucide-react";
 import { DifficultyModal } from "@/features/trip-page/components/difficulty-modal";
+import { TripDetailItem } from "@/features/trip-page/components/trip-detail-item";
 import Image from "next/image";
 
 interface Guide {
@@ -106,71 +112,32 @@ export function TripDetails({
       </div>
 
       <ItemGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Item variant="outline" className="p-4">
-          <ItemMedia variant="icon">
-            <Calendar className="h-5 w-5 text-primary" />
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Date & Time
-            </ItemTitle>
-            <ItemDescription className="text-base font-semibold text-foreground mt-2 line-clamp-none">
-              {meetDate}
-            </ItemDescription>
-            <p className="text-xs text-muted-foreground mt-1">
-              Meet: {meetTime}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Return: {returnTime}
-            </p>
-          </ItemContent>
-        </Item>
+        <TripDetailItem
+          icon={Calendar}
+          label="Date & Time"
+          value={meetDate}
+          details={[`Meet: ${meetTime}`, `Return: ${returnTime}`]}
+        />
 
-        <Item variant="outline" className="p-4">
-          <ItemMedia variant="icon">
-            <MapPin className="h-5 w-5 text-primary" />
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Trip Location
-            </ItemTitle>
-            <ItemDescription className="text-base font-semibold text-foreground mt-2 line-clamp-none">
-              {location}
-            </ItemDescription>
-          </ItemContent>
-        </Item>
+        <TripDetailItem
+          icon={MapPin}
+          label="Trip Location"
+          value={location}
+        />
 
-        <Item variant="outline" className="p-4">
-          <ItemMedia variant="icon">
-            <Compass className="h-5 w-5 text-primary" />
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Activity
-            </ItemTitle>
-            <ItemDescription className="text-base font-semibold text-foreground mt-2 line-clamp-none">
-              {activity}
-            </ItemDescription>
-          </ItemContent>
-        </Item>
+        <TripDetailItem
+          icon={Compass}
+          label="Activity"
+          value={activity}
+        />
 
-        <Item variant="outline" className="p-4">
-          <ItemMedia variant="icon">
-            <TrendingUp className="h-5 w-5 text-primary" />
-          </ItemMedia>
-          <ItemContent>
-            <div className="flex items-center gap-2 mb-2">
-              <ItemTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Difficulty
-              </ItemTitle>
-              <DifficultyModal />
-            </div>
-            <ItemDescription className="text-base font-semibold text-foreground line-clamp-none">
-              {difficulty}
-            </ItemDescription>
-            <p className="text-xs text-muted-foreground mt-1">{distance}</p>
-          </ItemContent>
-        </Item>
+        <TripDetailItem
+          icon={TrendingUp}
+          label="Difficulty"
+          value={difficulty}
+          details={distance}
+          footer={<DifficultyModal />}
+        />
       </ItemGroup>
 
       <Item variant="outline" className="bg-accent/10">
@@ -241,13 +208,15 @@ export function TripDetails({
       <div className="grid gap-6 md:grid-cols-2">
         <Item variant="outline" className="p-6 items-start">
           <ItemContent>
-            <h3 className="text-xl font-bold text-foreground mb-4">What to Bring</h3>
+            <h3 className="text-xl font-bold text-foreground mb-4">
+              What to Bring
+            </h3>
             <p className="text-sm text-muted-foreground mb-4">
               *REMINDER (overnights only) : if you do not have a sleeping bag,
               sleeping pad, backpacking pack, or other technical gear
-              (non-clothing), do not panic, SC Outfitters has these items for you!
-              Your guides will send out a gear-request form the week of your trip
-              where you&apos;ll let them know what gear you need!
+              (non-clothing), do not panic, SC Outfitters has these items for
+              you! Your guides will send out a gear-request form the week of
+              your trip where you&apos;ll let them know what gear you need!
             </p>
             <ul className="space-y-2">
               {whatToBring.map((item, index) => (
@@ -332,10 +301,10 @@ export function TripDetails({
               <p className="text-muted-foreground mb-2">
                 All SC Outfitters trips have a no-refund policy unless a
                 substitute participant can be found. In the event your trip
-                requires added reporting measures of participants (plane tickets,
-                external providers, rental services, etc.) dropping the trip close
-                to the date of the trip will not allow for the spot to be
-                re-filled.
+                requires added reporting measures of participants (plane
+                tickets, external providers, rental services, etc.) dropping the
+                trip close to the date of the trip will not allow for the spot
+                to be re-filled.
               </p>
               <a
                 href="#"
@@ -350,9 +319,9 @@ export function TripDetails({
                 Questions or Concerns?
               </h3>
               <p className="text-muted-foreground">
-                If you have any questions or concerns about the physical activity,
-                recommended prior experience, or gear needed on any kind of trip
-                please contact the guides as soon as possible!
+                If you have any questions or concerns about the physical
+                activity, recommended prior experience, or gear needed on any
+                kind of trip please contact the guides as soon as possible!
               </p>
             </div>
 
@@ -363,9 +332,9 @@ export function TripDetails({
               <p className="text-muted-foreground">
                 This program is open to all eligible individuals. SC Outfitters
                 operates all of its programs and activities consistent with the
-                University&apos;s Notice of Non-Discrimination. Eligibility is not
-                determined based on race, sex, ethnicity, sexual orientation, or
-                any other prohibited factor.
+                University&apos;s Notice of Non-Discrimination. Eligibility is
+                not determined based on race, sex, ethnicity, sexual
+                orientation, or any other prohibited factor.
               </p>
             </div>
 
@@ -377,10 +346,10 @@ export function TripDetails({
                 Individuals with disabilities who need accommodations to attend
                 this event may contact the guides listed above. We request that
                 individuals requiring accommodations or auxiliary aids such as
-                sign language interpreters and alternative format materials notify
-                us at least 7 days prior to the event. Every reasonable effort
-                will be made to provide reasonable accommodations in an effective
-                and timely manner.
+                sign language interpreters and alternative format materials
+                notify us at least 7 days prior to the event. Every reasonable
+                effort will be made to provide reasonable accommodations in an
+                effective and timely manner.
               </p>
             </div>
           </div>

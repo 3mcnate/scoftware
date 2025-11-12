@@ -52,8 +52,7 @@ export function DifficultyModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="link" size="icon" className="h-auto ml-1">
-          {/* <Info className="h-4 w-4 text-primary" /> */}
+        <Button variant="link" size="icon">
           Rating system
         </Button>
       </DialogTrigger>
