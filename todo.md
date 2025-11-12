@@ -12,11 +12,22 @@
 - "email confirmed" page - done
 - auth error page - done
 - route protection in middleware - done
-- default dashboard pages for participant/guide
 
 11/11/25
 - trip page - done 
 	- fix detail icons - done
-- trips list page
-- react query provider
-- participant dashboard page + participant info form
+
+
+Next up
+- make trip page have live info
+- upcoming trips page ('/')
+- participant dashboard (view signed up trips) 
+- participant info form
+- participant waiver
+- participant profile
+- checkout
+- driver info form
+- driver waiver
+- memberships
+- waitlists
+- past trips page
