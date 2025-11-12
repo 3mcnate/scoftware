@@ -7,6 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { ArrowUpRight, Info } from "lucide-react"
 
 export function DifficultyModal() {
   const difficultyLevels = [
@@ -51,10 +52,9 @@ export function DifficultyModal() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="link" size="icon">
-          Rating system
-        </Button>
+      <DialogTrigger className="hover:underline text-xs gap-1 flex">
+        Rating System
+        <Info className="size-4" strokeWidth={1.5} />
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>

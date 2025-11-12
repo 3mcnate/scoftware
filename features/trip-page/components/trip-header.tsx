@@ -1,9 +1,9 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Mountain } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { SignupButtons } from "@/features/trip-page/components/signup-buttons"
 
 interface TripHeaderProps {
   participantSpotsRemaining: number
@@ -41,7 +41,7 @@ export function TripHeader({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
+        <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
           {/* Desktop spot counters */}
           <div className="hidden md:flex items-center gap-3">
             <div className="text-right">
@@ -59,15 +59,7 @@ export function TripHeader({
             </div>
           </div>
 
-          <Button
-            size="lg"
-            className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-sm flex-1 md:flex-none"
-          >
-            SIGN ME UP BIG TIME!
-          </Button>
-          <Button variant="outline" size="lg" className="font-semibold bg-transparent flex-1 md:flex-none">
-            Driver Signup
-          </Button>
+          <SignupButtons />
           <Avatar className="h-10 w-10 border-2 border-border hidden md:flex">
             <AvatarImage src="/diverse-student-profiles.png" alt="User" />
             <AvatarFallback>JD</AvatarFallback>

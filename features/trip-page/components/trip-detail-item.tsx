@@ -4,7 +4,6 @@ import {
   ItemContent,
   ItemDescription,
   ItemTitle,
-  ItemFooter,
 } from "@/components/ui/item";
 import { LucideIcon } from "lucide-react";
 import { ReactNode } from "react";
@@ -13,7 +12,7 @@ interface TripDetailItemProps {
   icon: LucideIcon;
   label: string;
   value: string;
-  footer?: ReactNode;
+  titleAction?: ReactNode;
   details?: string | string[];
 }
 
@@ -21,20 +20,23 @@ export function TripDetailItem({
   icon: Icon,
   label,
   value,
-  footer,
+  titleAction,
   details,
 }: TripDetailItemProps) {
   const detailsArray = Array.isArray(details) ? details : details ? [details] : [];
 
   return (
-    <Item variant="outline" className="p-4 items-start">
+    <Item variant="outline" className="items-start">
       <ItemMedia>
         <Icon className="h-5 w-5 text-primary" />
       </ItemMedia>
       <ItemContent>
-        <ItemTitle>
-          {label}
-        </ItemTitle>
+        <div className="flex items-center justify-between w-full">
+          <ItemTitle>
+            {label}
+          </ItemTitle>
+          {titleAction}
+        </div>
         <ItemDescription>
           {value}
         </ItemDescription>
@@ -47,7 +49,6 @@ export function TripDetailItem({
             ))}
           </div>
         )}
-        {footer}
       </ItemContent>
     </Item>
   );

@@ -136,7 +136,7 @@ export function TripDetails({
           label="Difficulty"
           value={difficulty}
           details={distance}
-          footer={<DifficultyModal />}
+          titleAction={<DifficultyModal />}
         />
       </ItemGroup>
 
