@@ -32,12 +32,12 @@ export function TripDetailItem({
       </ItemMedia>
       <ItemContent>
         <div className="flex items-center justify-between w-full">
-          <ItemTitle>
+          <ItemTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             {label}
           </ItemTitle>
           {titleAction}
         </div>
-        <ItemDescription>
+        <ItemDescription className="font-medium text-foreground">
           {value}
         </ItemDescription>
         {detailsArray.length > 0 && (

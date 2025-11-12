@@ -52,7 +52,7 @@ export function DifficultyModal() {
 
   return (
     <Dialog>
-      <DialogTrigger className="hover:underline text-xs gap-1 flex">
+      <DialogTrigger className="hover:underline text-xs gap-1 flex text-muted-foreground">
         Rating System
         <Info className="size-4" strokeWidth={1.5} />
       </DialogTrigger>

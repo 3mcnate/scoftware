@@ -33,7 +33,7 @@ export function TripHeader({
 
           <div className="flex gap-2 md:hidden">
             <Badge variant="secondary" className="font-bold text-xs">
-              {participantSpotsRemaining}/{participantSpotsTotal} spots
+              {participantSpotsRemaining}/{participantSpotsTotal} spots left
             </Badge>
             <Badge variant="outline" className="font-bold text-xs">
               {driverSpotsRemaining}/{driverSpotsTotal} drivers
@@ -59,7 +59,9 @@ export function TripHeader({
             </div>
           </div>
 
-          <SignupButtons />
+          
+          <SignupButtons className="hidden md:flex"/>
+          <SignupButtons className="flex flex-row md:hidden"/>
           <Avatar className="h-10 w-10 border-2 border-border hidden md:flex">
             <AvatarImage src="/diverse-student-profiles.png" alt="User" />
             <AvatarFallback>JD</AvatarFallback>

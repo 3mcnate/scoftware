@@ -46,7 +46,7 @@ export function TripNavigation({ previousTrip, nextTrip }: TripNavigationProps) 
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </ItemMedia>
             <ItemContent className="text-right">
-              <ItemTitle className="justify-end">
+              <ItemTitle className="block w-full text-right">
                 <span className="text-xs font-semibold text-muted-foreground">Next Trip</span>
               </ItemTitle>
               <ItemDescription className="font-bold text-base text-foreground group-hover:text-primary transition-colors line-clamp-1">

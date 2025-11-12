@@ -3,6 +3,7 @@ import {
   ItemContent,
   ItemTitle,
   ItemGroup,
+  ItemSeparator,
 } from "@/components/ui/item";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -119,17 +120,9 @@ export function TripDetails({
           details={[`Meet: ${meetTime}`, `Return: ${returnTime}`]}
         />
 
-        <TripDetailItem
-          icon={MapPin}
-          label="Trip Location"
-          value={location}
-        />
+        <TripDetailItem icon={MapPin} label="Trip Location" value={location} />
 
-        <TripDetailItem
-          icon={Compass}
-          label="Activity"
-          value={activity}
-        />
+        <TripDetailItem icon={Compass} label="Activity" value={activity} />
 
         <TripDetailItem
           icon={TrendingUp}
@@ -140,39 +133,43 @@ export function TripDetails({
         />
       </ItemGroup>
 
-      <Item variant="outline" className="bg-accent/10">
-        <ItemContent className="w-full">
-          <div className="flex items-center gap-2 mb-3">
-            <DollarSign className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-bold text-foreground">Trip Pricing</h2>
-          </div>
-          <ItemGroup className="grid gap-3 sm:grid-cols-3">
-            <Item variant="outline" size="sm">
+      <Item variant="outline" className="bg-accent/10 ">
+        <ItemContent className="">
+
+
+          <ItemTitle className="text-xl ml-2">
+            Pricing
+          </ItemTitle>
+
+          <ItemGroup className="">
+            <Item variant="default" size="sm" className="items-start">
               <ItemContent>
                 <ItemTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Member
                 </ItemTitle>
-                <p className="text-2xl font-bold text-primary mt-0.5">
+                <p className="text-xl mt-0.5">
                   ${memberPrice}
                 </p>
               </ItemContent>
             </Item>
-            <Item variant="outline" size="sm">
+            <ItemSeparator />
+            <Item variant="default" size="sm" className="items-start">
               <ItemContent>
                 <ItemTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Non-Member
                 </ItemTitle>
-                <p className="text-2xl font-bold text-primary mt-0.5">
+                <p className="text-xl mt-0.5">
                   ${nonMemberPrice}
                 </p>
               </ItemContent>
             </Item>
-            <Item variant="outline" size="sm">
+            <ItemSeparator />
+            <Item variant="default" size="sm" className="items-start">
               <ItemContent>
                 <ItemTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Participant Driver
                 </ItemTitle>
-                <p className="text-2xl font-bold text-primary mt-0.5">
+                <p className="text-xl mt-0.5">
                   ${driverPrice}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -181,13 +178,14 @@ export function TripDetails({
               </ItemContent>
             </Item>
           </ItemGroup>
+
         </ItemContent>
       </Item>
 
       <Item variant="outline" className="p-6 md:p-8">
         <ItemContent>
           <h2 className="text-2xl font-bold mb-4 text-foreground">
-            Trip Overview
+            Overview
           </h2>
           <div className="space-y-4">
             {priorExperience && (
