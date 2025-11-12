@@ -15,7 +15,8 @@
 - default dashboard pages for participant/guide
 
 11/11/25
+- trip page - done 
+	- fix detail icons - done
 - trips page list
-- trip page
 - react query provider
 - participant dashboard page + participant info form

@@ -13,6 +13,10 @@ import {
   Compass,
   DollarSign,
   Mail,
+  Mountain,
+  Footprints,
+  Clock,
+  TentTree,
 } from "lucide-react";
 import { DifficultyModal } from "@/features/trip-page/components/difficulty-modal";
 import { TripDetailItem } from "@/features/trip-page/components/trip-detail-item";
@@ -145,22 +149,52 @@ export function TripDetails({
 
       <ItemGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <TripDetailItem
-          icon={Calendar}
-          label="Date & Time"
-          value={meetDate}
-          details={[`Meet: ${meetTime}`, `Return: ${returnTime}`]}
+          icon={Clock}
+          label="Meet"
+          value="Friday, 11/14, 7 A.M. @ Trader Joe's Elevators"
         />
 
-        <TripDetailItem icon={MapPin} label="Trip Location" value={location} />
+        <TripDetailItem 
+          icon={Calendar} 
+          label="Return" 
+          value="Sunday, 11/16 around 6 P.M." 
+        />
 
-        <TripDetailItem icon={Compass} label="Activity" value={activity} />
+        <TripDetailItem 
+          icon={TentTree} 
+          label="Activity" 
+          value="hiking, sightseeing, camping" 
+        />
 
         <TripDetailItem
           icon={TrendingUp}
           label="Difficulty"
-          value={difficulty}
-          details={distance}
+          value="(4/10) Easy-Medium"
           titleAction={<DifficultyModal />}
+        />
+
+        <TripDetailItem 
+          icon={Footprints} 
+          label="Trail" 
+          value="Distance: ~6/7 miles, ~500 ft elevation" 
+        />
+
+        <TripDetailItem 
+          icon={Compass} 
+          label="Recommended Prior Experience" 
+          value="none!" 
+        />
+
+        <TripDetailItem 
+          icon={MapPin} 
+          label="Location of Trip" 
+          value="Pfeiffer Big Sur State Park, Point Lobos State Natural Reserve" 
+        />
+
+        <TripDetailItem 
+          icon={Mountain} 
+          label="Native Land" 
+          value="Salinan, Esselen" 
         />
       </ItemGroup>
 
@@ -170,14 +204,6 @@ export function TripDetails({
             Overview
           </h2>
           <div className="space-y-4">
-            {priorExperience && (
-              <div className="p-4 rounded-lg bg-accent/10 border-l-4 border-primary">
-                <p className="text-sm font-semibold text-foreground mb-1">
-                  Recommended Prior Experience:
-                </p>
-                <p className="text-sm text-foreground">{priorExperience}</p>
-              </div>
-            )}
             <p className="text-base leading-relaxed text-foreground">
               {description}
             </p>
