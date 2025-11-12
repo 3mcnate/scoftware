@@ -31,6 +31,7 @@ interface TripDetailsProps {
   image: string;
   meetDate: string;
   meetTime: string;
+  returnDate: string;
   returnTime: string;
   location: string;
   nativeLand: string;
@@ -53,6 +54,7 @@ export function TripDetails({
   image,
   meetDate,
   meetTime,
+  returnDate,
   returnTime,
   location,
   nativeLand,
@@ -104,11 +106,40 @@ export function TripDetails({
           fill
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-balance leading-tight">
+      </div>
+
+      {/* Title and Pricing Section */}
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+        <div className="flex-1">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground text-balance leading-tight mb-3 lg:mb-4">
             {title}
           </h1>
+          <p className="text-base sm:text-lg">
+            {meetDate} @ {meetTime} - {returnDate} @ {returnTime}
+          </p>
+        </div>
+
+        <div className="lg:shrink-0">
+          <Item variant="default" className="bg-accent/10 lg:pl-0 lg:pt-0 w-full">
+            <ItemContent className="flex-col">
+              <ItemGroup className="gap-3 lg:gap-2">
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Member</span>
+                  <span className="text-xl font-medium text-primary">${memberPrice}</span>
+                </div>
+                <ItemSeparator className="block lg:hidden" />
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Non-Member</span>
+                  <span className="text-xl font-medium text-primary">${nonMemberPrice}</span>
+                </div>
+                <ItemSeparator className="block lg:hidden" />
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Driver</span>
+                  <span className="text-xl font-medium text-primary">${driverPrice}</span>
+                </div>
+              </ItemGroup>
+            </ItemContent>
+          </Item>
         </div>
       </div>
 
@@ -132,55 +163,6 @@ export function TripDetails({
           titleAction={<DifficultyModal />}
         />
       </ItemGroup>
-
-      <Item variant="outline" className="bg-accent/10 ">
-        <ItemContent className="">
-
-
-          <ItemTitle className="text-xl ml-2">
-            Pricing
-          </ItemTitle>
-
-          <ItemGroup className="">
-            <Item variant="default" size="sm" className="items-start">
-              <ItemContent>
-                <ItemTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Member
-                </ItemTitle>
-                <p className="text-xl mt-0.5">
-                  ${memberPrice}
-                </p>
-              </ItemContent>
-            </Item>
-            <ItemSeparator />
-            <Item variant="default" size="sm" className="items-start">
-              <ItemContent>
-                <ItemTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Non-Member
-                </ItemTitle>
-                <p className="text-xl mt-0.5">
-                  ${nonMemberPrice}
-                </p>
-              </ItemContent>
-            </Item>
-            <ItemSeparator />
-            <Item variant="default" size="sm" className="items-start">
-              <ItemContent>
-                <ItemTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Participant Driver
-                </ItemTitle>
-                <p className="text-xl mt-0.5">
-                  ${driverPrice}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  + gas reimbursed
-                </p>
-              </ItemContent>
-            </Item>
-          </ItemGroup>
-
-        </ItemContent>
-      </Item>
 
       <Item variant="outline" className="p-6 md:p-8">
         <ItemContent>

@@ -40,15 +40,6 @@ export function TripDetailItem({
         <ItemDescription className="font-medium text-foreground">
           {value}
         </ItemDescription>
-        {detailsArray.length > 0 && (
-          <div className="mt-1 space-y-0.5">
-            {detailsArray.map((detail, index) => (
-              <p key={index} className="text-xs text-muted-foreground">
-                {detail}
-              </p>
-            ))}
-          </div>
-        )}
       </ItemContent>
     </Item>
   );

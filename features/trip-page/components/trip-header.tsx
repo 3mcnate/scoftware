@@ -35,8 +35,8 @@ export function TripHeader({
             <Badge variant="secondary" className="font-bold text-xs">
               {participantSpotsRemaining}/{participantSpotsTotal} spots left
             </Badge>
-            <Badge variant="outline" className="font-bold text-xs">
-              {driverSpotsRemaining}/{driverSpotsTotal} drivers
+            <Badge variant="secondary" className="font-bold text-xs">
+              {driverSpotsRemaining}/{driverSpotsTotal} drivers spots left
             </Badge>
           </div>
         </div>
@@ -47,26 +47,26 @@ export function TripHeader({
             <div className="text-right">
               <p className="text-xs text-muted-foreground font-medium">Participant Spots</p>
               <p className="text-lg font-bold text-foreground">
-                {participantSpotsRemaining}/{participantSpotsTotal} left
+                {participantSpotsRemaining}/{participantSpotsTotal} <span className="hidden lg:inline-block">left</span>
               </p>
             </div>
             <div className="h-10 w-px bg-border" />
             <div className="text-right">
               <p className="text-xs text-muted-foreground font-medium">Driver Spots</p>
               <p className="text-lg font-bold text-foreground">
-                {driverSpotsRemaining}/{driverSpotsTotal} left
+                {driverSpotsRemaining}/{driverSpotsTotal} <span className="hidden lg:inline-block">left</span>
               </p>
             </div>
           </div>
 
           
           <SignupButtons className="hidden md:flex"/>
-          <SignupButtons className="flex flex-row md:hidden"/>
           <Avatar className="h-10 w-10 border-2 border-border hidden md:flex">
             <AvatarImage src="/diverse-student-profiles.png" alt="User" />
             <AvatarFallback>JD</AvatarFallback>
           </Avatar>
         </div>
+        <SignupButtons className="flex flex-row justify-between md:hidden" header/>
       </div>
     </header>
   )

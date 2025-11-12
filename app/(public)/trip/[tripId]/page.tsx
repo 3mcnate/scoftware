@@ -9,6 +9,7 @@ export default function TripPage() {
     image: "/trip-pic-1.webp",
     meetDate: "Saturday, February 15, 2025",
     meetTime: "5:00 AM",
+    returnDate: "Sunday, February 16, 2025",
     returnTime: "8:00 PM",
     location: "Pfeiffer Big Sur State Park, Point Lobos State Natural Reserve",
     nativeLand: "Abenaki and Wabanaki Territory",
@@ -82,6 +83,7 @@ Saturday will be packed with sur-prisingly stunning hikes and gorgeous coastal v
           image={tripData.image}
           meetDate={tripData.meetDate}
           meetTime={tripData.meetTime}
+          returnDate={tripData.returnDate}
           returnTime={tripData.returnTime}
           location={tripData.location}
           nativeLand={tripData.nativeLand}
