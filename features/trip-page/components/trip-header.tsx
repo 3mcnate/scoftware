@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Mountain } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { SignupButtons } from "@/features/trip-page/components/signup-buttons"
+import Image from "next/image"
 
 interface TripHeaderProps {
   participantSpotsRemaining: number
@@ -23,12 +24,7 @@ export function TripHeader({
       <div className="container flex h-auto mx-auto flex-col gap-3 px-4 py-3 md:h-16 md:flex-row md:items-center md:justify-between md:py-0 md:px-6">
         <div className="flex items-center justify-between md:justify-start gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <Mountain className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-foreground">Outdoors Club</h2>
-            </div>
+            <Image src="/logo.png" height={100} width={100} alt="logo" />
           </div>
 
           <div className="flex gap-2 md:hidden">
