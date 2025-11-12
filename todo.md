@@ -13,3 +13,9 @@
 - auth error page - done
 - route protection in middleware - done
 - default dashboard pages for participant/guide
+
+11/11/25
+- trips page list
+- trip page
+- react query provider
+- participant dashboard page + participant info form
