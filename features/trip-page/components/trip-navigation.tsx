@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Card } from "@/components/ui/card"
+import { Item, ItemContent, ItemTitle, ItemDescription, ItemMedia } from "@/components/ui/item"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface TripNavigationProps {
@@ -19,35 +19,43 @@ export function TripNavigation({ previousTrip, nextTrip }: TripNavigationProps) 
   return (
     <div className="grid gap-4 sm:grid-cols-2 mt-8 pt-8 border-t-2 border-border">
       {previousTrip ? (
-        <Link href={`/trips/${previousTrip.id}`} className="group">
-          <Card className="p-4 border-2 hover:border-primary transition-colors h-full">
-            <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-              <ChevronLeft className="h-4 w-4" />
-              <span className="font-semibold">Previous Trip</span>
-            </div>
-            <h3 className="font-bold text-base text-foreground group-hover:text-primary transition-colors text-balance">
-              {previousTrip.title}
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{previousTrip.date}</p>
-          </Card>
-        </Link>
+        <Item variant="outline" size="default" asChild>
+          <Link href={`/trips/${previousTrip.id}`} className="group hover:border-primary h-full">
+            <ItemMedia>
+              <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>
+                <span className="text-xs font-semibold text-muted-foreground">Previous Trip</span>
+              </ItemTitle>
+              <ItemDescription className="font-bold text-base text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                {previousTrip.title}
+              </ItemDescription>
+              <p className="text-xs text-muted-foreground">{previousTrip.date}</p>
+            </ItemContent>
+          </Link>
+        </Item>
       ) : (
         <div />
       )}
 
       {nextTrip ? (
-        <Link href={`/trips/${nextTrip.id}`} className="group">
-          <Card className="p-4 border-2 hover:border-primary transition-colors h-full text-right">
-            <div className="flex items-center justify-end gap-2 text-muted-foreground text-xs mb-1">
-              <span className="font-semibold">Next Trip</span>
-              <ChevronRight className="h-4 w-4" />
-            </div>
-            <h3 className="font-bold text-base text-foreground group-hover:text-primary transition-colors text-balance">
-              {nextTrip.title}
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{nextTrip.date}</p>
-          </Card>
-        </Link>
+        <Item variant="outline" size="default" asChild>
+          <Link href={`/trips/${nextTrip.id}`} className="group hover:border-primary h-full flex-row-reverse">
+            <ItemMedia>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </ItemMedia>
+            <ItemContent className="text-right">
+              <ItemTitle className="justify-end">
+                <span className="text-xs font-semibold text-muted-foreground">Next Trip</span>
+              </ItemTitle>
+              <ItemDescription className="font-bold text-base text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                {nextTrip.title}
+              </ItemDescription>
+              <p className="text-xs text-muted-foreground">{nextTrip.date}</p>
+            </ItemContent>
+          </Link>
+        </Item>
       ) : (
         <div />
       )}
