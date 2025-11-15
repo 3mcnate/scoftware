@@ -1,7 +1,5 @@
 import { TripsListHeader } from "@/features/trips-list/trips-list-header";
 import { TripsList } from "@/features/trips-list/trips-list";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 
 export default function TripsPage() {
   const currentTrips = [
