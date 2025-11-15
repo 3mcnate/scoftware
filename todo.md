@@ -19,8 +19,9 @@
 
 
 Next up
-- make trip page have live info
-- upcoming trips page ('/')
+- upcoming trips page ('/') - done
+- header auth component
+- make trip page + trip list page have live info
 - participant dashboard (view signed up trips) 
 - participant info form
 - participant waiver
