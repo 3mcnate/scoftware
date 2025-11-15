@@ -6,8 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { ArrowUpRight, Info } from "lucide-react"
+import { Info } from "lucide-react"
 
 export function DifficultyModal() {
   const difficultyLevels = [

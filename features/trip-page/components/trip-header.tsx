@@ -1,7 +1,6 @@
 "use client"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Mountain } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { SignupButtons } from "@/features/trip-page/components/signup-buttons"
 import Image from "next/image"

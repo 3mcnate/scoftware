@@ -1,7 +1,6 @@
 import {
   Item,
   ItemContent,
-  ItemTitle,
   ItemGroup,
   ItemSeparator,
 } from "@/components/ui/item";
@@ -11,7 +10,6 @@ import {
   MapPin,
   TrendingUp,
   Compass,
-  DollarSign,
   Mail,
   Mountain,
   Footprints,
@@ -124,21 +122,32 @@ export function TripDetails({
         </div>
 
         <div className="lg:shrink-0">
-          <Item variant="default" className="bg-accent/10 lg:pl-0 lg:pt-0 w-full">
+          <Item
+            variant="default"
+            className="bg-accent/10 lg:pl-0 lg:pt-0 w-full"
+          >
             <ItemContent className="flex-col">
               <ItemGroup className="gap-3 lg:gap-2">
-                <div className="flex items-baseline justify-between gap-4">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Member</span>
+                <div className="flex items-baseline justify-between gap-8">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    Member
+                  </span>
                   <span className="text-xl font-medium ">${memberPrice}</span>
                 </div>
                 <ItemSeparator className="block lg:hidden" />
-                <div className="flex items-baseline justify-between gap-4">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Non-Member</span>
-                  <span className="text-xl font-medium ">${nonMemberPrice}</span>
+                <div className="flex items-baseline justify-between gap-8">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    Non-Member
+                  </span>
+                  <span className="text-xl font-medium ">
+                    ${nonMemberPrice}
+                  </span>
                 </div>
                 <ItemSeparator className="block lg:hidden" />
-                <div className="flex items-baseline justify-between gap-4">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Driver</span>
+                <div className="flex items-baseline justify-between gap-8">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    Driver
+                  </span>
                   <span className="text-xl font-medium ">${driverPrice}</span>
                 </div>
               </ItemGroup>
@@ -154,16 +163,16 @@ export function TripDetails({
           value="Friday, 11/14, 7 A.M. @ Trader Joe's Elevators"
         />
 
-        <TripDetailItem 
-          icon={Calendar} 
-          label="Return" 
-          value="Sunday, 11/16 around 6 P.M." 
+        <TripDetailItem
+          icon={Calendar}
+          label="Return"
+          value="Sunday, 11/16 around 6 P.M."
         />
 
-        <TripDetailItem 
-          icon={TentTree} 
-          label="Activity" 
-          value="hiking, sightseeing, camping" 
+        <TripDetailItem
+          icon={TentTree}
+          label="Activity"
+          value="hiking, sightseeing, camping"
         />
 
         <TripDetailItem
@@ -173,36 +182,34 @@ export function TripDetails({
           titleAction={<DifficultyModal />}
         />
 
-        <TripDetailItem 
-          icon={Footprints} 
-          label="Trail" 
-          value="Distance: ~6/7 miles, ~500 ft elevation" 
+        <TripDetailItem
+          icon={Footprints}
+          label="Trail"
+          value="Distance: ~6/7 miles, ~500 ft elevation"
         />
 
-        <TripDetailItem 
-          icon={Compass} 
-          label="Recommended Prior Experience" 
-          value="none!" 
+        <TripDetailItem
+          icon={Compass}
+          label="Recommended Prior Experience"
+          value="none!"
         />
 
-        <TripDetailItem 
-          icon={MapPin} 
-          label="Location of Trip" 
-          value="Pfeiffer Big Sur State Park, Point Lobos State Natural Reserve" 
+        <TripDetailItem
+          icon={MapPin}
+          label="Location of Trip"
+          value="Pfeiffer Big Sur State Park, Point Lobos State Natural Reserve"
         />
 
-        <TripDetailItem 
-          icon={Mountain} 
-          label="Native Land" 
-          value="Salinan, Esselen" 
+        <TripDetailItem
+          icon={Mountain}
+          label="Native Land"
+          value="Salinan, Esselen"
         />
       </ItemGroup>
 
       <Item variant="outline" className="p-6 md:p-8">
         <ItemContent>
-          <h2 className="text-2xl font-bold mb-4 text-foreground">
-            Overview
-          </h2>
+          <h2 className="text-2xl font-bold mb-4 text-foreground">Overview</h2>
           <div className="space-y-4">
             <p className="text-base leading-relaxed text-foreground">
               {description}
@@ -280,8 +287,7 @@ export function TripDetails({
                 </Avatar>
                 <div className="flex-1">
                   <p className="font-bold text-foreground">{guide.name}</p>
-                  <p className="text-xs flex items-center gap-1 mt-1"
-                  >
+                  <p className="text-xs flex items-center gap-1 mt-1">
                     <Mail className="h-3 w-3" />
                     {guide.email}
                   </p>
