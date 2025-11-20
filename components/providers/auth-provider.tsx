@@ -34,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           status: "error",
           error: sessionError,
         });
+        return;
       }
 
       const session = sessionData?.session ?? null;
@@ -47,7 +48,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: claimsData, error: claimsError } =
         await supabase.auth.getClaims();
       if (claimsError) {
-        throw claimsError;
+        console.log('claimsError,',claimsError)
+        setState({
+          status: "error",
+          error: claimsError,
+        });
+        return;
       }
 
       const claims = (claimsData?.claims ?? {}) as AuthClaims;
