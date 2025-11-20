@@ -17,10 +17,11 @@
 - trip page - done 
 	- fix detail icons - done
 
-
-Next up
+11/19/25
 - upcoming trips page ('/') - done
 - header auth component - done
+
+Next up
 - make trip page + trip list page have live info
 - participant dashboard (view signed up trips) 
 - participant info form
