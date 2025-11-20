@@ -20,13 +20,13 @@
 
 Next up
 - upcoming trips page ('/') - done
-- header auth component 
+- header auth component - done
 - make trip page + trip list page have live info
 - participant dashboard (view signed up trips) 
 - participant info form
 - participant waiver
 - participant profile
-- checkout
+- checkout (lets go)
 - driver info form
 - driver waiver
 - memberships
