@@ -33,3 +33,4 @@ Next up
 - memberships
 - waitlists
 - past trips page
+- add "you must sign in or create an account to sign up for a trip alert"
