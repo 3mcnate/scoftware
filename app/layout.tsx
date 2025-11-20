@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 // @ts-expect-error - allow side-effect global CSS import in Next.js root layout
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import TanstackQueryProvider from "@/components/providers/tanstack-query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +37,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <TanstackQueryProvider>{children}</TanstackQueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

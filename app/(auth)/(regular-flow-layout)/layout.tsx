@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function AuthLayout({
   children,
@@ -9,9 +10,9 @@ export default function AuthLayout({
 		<div className="grid min-h-screen overflow-hidden lg:grid-cols-2">
 		  <div className="flex flex-col gap-4 p-6 md:p-10">
 			<div className="flex justify-center gap-2 md:justify-start">
-			  <a href="#" className="flex items-center gap-2 font-medium">
+			  <Link href="/" className="flex items-center gap-2 font-medium">
 				<Image alt="sc outfitters logo" height={100} width={100} src="/logo.png"/>
-			  </a>
+			  </Link>
 			</div>
 			<div className="flex flex-1 items-center justify-center">
 			  <div className="w-full max-w-sm">

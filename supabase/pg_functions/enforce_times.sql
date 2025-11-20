@@ -1,4 +1,4 @@
-create or replace function enforce_times()
+create or replace function public.enforce_times()
 returns trigger
 security definer
 language plpgsql
@@ -50,6 +50,7 @@ $$ set search_path = '';
 
 CREATE OR REPLACE FUNCTION public.add_auto_timestamps_triggers()
 RETURNS void
+security definer
 LANGUAGE plpgsql AS $$
 DECLARE
   tbl record;
@@ -70,23 +71,28 @@ BEGIN
     ) INTO has_timestamp_cols;
 
     IF has_timestamp_cols THEN
-	begin
-		EXECUTE format('
-          DROP TRIGGER %I_enforce_times_trg ON public.%I;
-        ', tbl.table_name, tbl.table_name);
-        EXECUTE format('
-          CREATE TRIGGER %I_enforce_times_trg
-          BEFORE INSERT OR UPDATE ON public.%I
-          FOR EACH ROW
-          EXECUTE FUNCTION public.enforce_times();
-        ', tbl.table_name, tbl.table_name);
-	exception
-		when others then
-			raise notice 'something went wrong adding trigger to %', tbl.table_name;
-	end;
+    begin
+      EXECUTE format('
+            DROP TRIGGER %I_enforce_times_trg ON public.%I;
+          ', tbl.table_name, tbl.table_name);
+      EXECUTE format('
+        CREATE or replace TRIGGER %I_enforce_times_trg
+        BEFORE INSERT OR UPDATE ON public.%I
+        FOR EACH ROW
+        EXECUTE FUNCTION public.enforce_times();
+      ', tbl.table_name, tbl.table_name);
+    exception
+      when others then
+        raise notice 'something went wrong adding trigger to %', tbl.table_name;
+      end;
     END IF;
   END LOOP;
 END;
 $$ set search_path = '';
 
 SELECT public.add_auto_timestamps_triggers();
+
+CREATE TRIGGER profile_organization_enforce_times_trg
+BEFORE INSERT OR UPDATE ON public.profile_organization
+FOR EACH ROW
+EXECUTE FUNCTION public.enforce_times();

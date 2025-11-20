@@ -1,5 +1,6 @@
 "use client";
 
+import HeaderAuth from "@/components/auth/header-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Undo2 } from "lucide-react";
@@ -22,10 +23,7 @@ export function TripsListHeader() {
           </Button>
         </div>
 
-        <Avatar className="h-10 w-10 border-2 border-border">
-          <AvatarImage src="/diverse-student-profiles.png" alt="User" />
-          <AvatarFallback>JD</AvatarFallback>
-        </Avatar>
+        <HeaderAuth />
       </div>
     </header>
   );
