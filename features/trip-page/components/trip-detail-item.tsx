@@ -21,12 +21,10 @@ export function TripDetailItem({
   label,
   value,
   titleAction,
-  details,
 }: TripDetailItemProps) {
-  const detailsArray = Array.isArray(details) ? details : details ? [details] : [];
 
   return (
-    <Item variant="outline" className="items-start">
+    <Item variant="outline" className="items-start bg-muted/30">
       <ItemMedia>
         <Icon className="h-5 w-5" />
       </ItemMedia>
