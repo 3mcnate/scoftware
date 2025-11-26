@@ -20,7 +20,7 @@ export function TripNavigation({ previousTrip, nextTrip }: TripNavigationProps) 
     <div className="grid gap-4 sm:grid-cols-2 mt-8 pt-8 border-t-2 border-border">
       {previousTrip ? (
         <Item variant="outline" size="default" asChild>
-          <Link href={`/trips/${previousTrip.id}`} className="group hover:border-primary h-full">
+          <Link href={`/trip/${previousTrip.id}`} className="group hover:border-primary h-full">
             <ItemMedia>
               <ChevronLeft className="h-5 w-5 text-muted-foreground" />
             </ItemMedia>
@@ -41,7 +41,7 @@ export function TripNavigation({ previousTrip, nextTrip }: TripNavigationProps) 
 
       {nextTrip ? (
         <Item variant="outline" size="default" asChild>
-          <Link href={`/trips/${nextTrip.id}`} className="group hover:border-primary h-full flex-row-reverse">
+          <Link href={`/trip/${nextTrip.id}`} className="group hover:border-primary h-full flex-row-reverse">
             <ItemMedia>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </ItemMedia>

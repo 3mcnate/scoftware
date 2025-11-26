@@ -22,12 +22,15 @@
 - header auth component - done
 
 Next up
-- make trip page + trip list page have live info
+- make trip page have live info - done
+- make trip list page have live info - done
+- make past trips age
 - participant dashboard (view signed up trips) 
 - participant info form
 - participant waiver
 - participant profile
 - checkout (lets go)
+- live spot info checks
 - driver info form
 - driver waiver
 - memberships

@@ -12,7 +12,7 @@ import Image from "next/image";
 
 interface Trip {
   id: string;
-  image: string;
+  picture: string;
   title: string;
   startDate: string;
   startTime: string;
@@ -40,7 +40,7 @@ export function TripListItem({ trip }: TripListItemProps) {
       >
         <ItemMedia variant="image" className="aspect-12/9 relative h-60 w-full md:w-auto">
           <Image
-            src={"/trip-pic-2.webp"}
+            src={trip.picture}
             alt={trip.title}
             className="size-full object-cover"
             fill

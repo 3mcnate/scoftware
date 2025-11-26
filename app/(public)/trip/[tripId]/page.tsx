@@ -5,7 +5,9 @@ import { TripDetails } from "@/features/trip-page/components/trip-details";
 import { SignupButtons } from "@/features/trip-page/components/signup-buttons";
 import { TripNavigation } from "@/features/trip-page/components/trip-navigation";
 import { getPublishedTrip } from "@/data/trips/get-published-trip";
+import { getAdjacentPublishedTrips } from "@/data/trips/get-adjacent-published-trips";
 import { notFound } from "next/navigation";
+import { formatDate } from "@/utils/date-time";
 
 export default async function TripPage({
   params,
@@ -26,6 +28,11 @@ export default async function TripPage({
     notFound();
   }
 
+  const { previous, next } = await getAdjacentPublishedTrips(
+    trip.id,
+    trip.start_date
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <TripHeader />
@@ -36,16 +43,24 @@ export default async function TripPage({
         <SignupButtons className="my-8" />
 
         <TripNavigation
-          previousTrip={{
-            id: "lake-placid-snowshoeing",
-            title: "Lake Placid Snowshoeing Adventure",
-            date: "February 8, 2025",
-          }}
-          nextTrip={{
-            id: "white-mountains-skiing",
-            title: "White Mountains Backcountry Skiing",
-            date: "February 22, 2025",
-          }}
+          previousTrip={
+            previous
+              ? {
+                  id: previous.id,
+                  title: previous.name,
+                  date: formatDate(previous.start_date),
+                }
+              : undefined
+          }
+          nextTrip={
+            next
+              ? {
+                  id: next.id,
+                  title: next.name,
+                  date: formatDate(next.start_date),
+                }
+              : undefined
+          }
         />
       </main>
     </div>

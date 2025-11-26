@@ -5,7 +5,7 @@ import { TripListItem } from "./trip-list-item";
 
 interface Trip {
   id: string;
-  image: string;
+  picture: string;
   title: string;
   startDate: string;
   startTime: string;

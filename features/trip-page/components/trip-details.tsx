@@ -15,11 +15,11 @@ import { DifficultyModal } from "@/features/trip-page/components/difficulty-moda
 import { TripDetailItem } from "@/features/trip-page/components/trip-detail-item";
 import Image from "next/image";
 import { formatDate, formatTime } from "@/utils/date-time";
-import { type InferModel } from "drizzle-orm";
+import { type InferSelectModel } from "drizzle-orm";
 import { published_trips } from "@/drizzle/schema";
-import { getInitials, getInitialsFullname } from "@/utils/names";
+import { getInitialsFullname } from "@/utils/names";
 
-type PublishedTrip = InferModel<typeof published_trips>;
+type PublishedTrip = InferSelectModel<typeof published_trips>;
 
 interface TripDetailsProps {
   trip: PublishedTrip;
