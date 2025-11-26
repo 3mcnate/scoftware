@@ -29,7 +29,7 @@ export function SignupButtons({ className, header }: SignupButtonsProps) {
           SIGN ME UP BIG TIME
         </Button>
         <Button
-          variant="secondary"
+          variant="outline"
           size="lg"
           className={cn("bg-transparent", { "flex-1": header })}
         >
@@ -58,7 +58,7 @@ export function SignupButtons({ className, header }: SignupButtonsProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant="secondary"
+            variant="outline"
             size="lg"
             className={cn("bg-transparent", { "flex-1": header })}
             

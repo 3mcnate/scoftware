@@ -37,6 +37,7 @@ export const trips = pgTable("trips", {
 	signup_status: trip_signup_status().default('open').notNull(),
 	what_to_bring: text(),
 	access_code: text(),
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 }, (table) => [
 	check("ends_after_start", sql`starts_at < ends_at`),
 	check("trips_driver_spots_check", sql`driver_spots >= 0`),

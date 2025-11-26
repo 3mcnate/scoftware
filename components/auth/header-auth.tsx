@@ -13,6 +13,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfileById } from "@/data/profiles/get-profile-by-id";
 import { useAuth } from "@/hooks/use-auth";
+import { getInitials } from "@/utils/names";
 import { createClient } from "@/utils/supabase/browser";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
@@ -99,6 +100,3 @@ function HeaderAuthProfile({ userId }: { userId: string }) {
   );
 }
 
-const getInitials = (firstName: string, lastName: string) => {
-  return (firstName[0] + lastName[0]).toUpperCase();
-};

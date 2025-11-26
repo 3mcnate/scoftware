@@ -17,6 +17,7 @@ import Image from "next/image";
 import { formatDate, formatTime } from "@/utils/date-time";
 import { type InferModel } from "drizzle-orm";
 import { published_trips } from "@/drizzle/schema";
+import { getInitials, getInitialsFullname } from "@/utils/names";
 
 type PublishedTrip = InferModel<typeof published_trips>;
 
@@ -221,7 +222,7 @@ export function TripDetails({ trip }: TripDetailsProps) {
                     alt={guide.name}
                   />
                   <AvatarFallback className="bg-foreground text-primary-foreground font-bold">
-                    {guide.initials}
+										{getInitialsFullname(guide.name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
