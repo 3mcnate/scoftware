@@ -34,6 +34,52 @@ export type Database = {
   }
   public: {
     Tables: {
+      allowed_trip_participants: {
+        Row: {
+          approved_by: string
+          created_at: string
+          trip_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_by?: string
+          created_at?: string
+          trip_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          approved_by?: string
+          created_at?: string
+          trip_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allowed_trip_participants_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allowed_trip_participants_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: true
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allowed_trip_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checkout_sessions: {
         Row: {
           created_at: string
@@ -147,63 +193,18 @@ export type Database = {
           },
         ]
       }
-      form_responses: {
+      env: {
         Row: {
-          created_at: string
-          form_id: string
-          id: string
-          response: Json
-          user_id: string
+          key: string
+          value: string
         }
         Insert: {
-          created_at?: string
-          form_id?: string
-          id?: string
-          response: Json
-          user_id: string
+          key: string
+          value: string
         }
         Update: {
-          created_at?: string
-          form_id?: string
-          id?: string
-          response?: Json
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "form_responses_form_id_fkey"
-            columns: ["form_id"]
-            isOneToOne: false
-            referencedRelation: "forms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "form_responses_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      forms: {
-        Row: {
-          created_at: string
-          form_schema: Json
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          form_schema: Json
-          id?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          form_schema?: Json
-          id?: string
-          updated_at?: string
+          key?: string
+          value?: string
         }
         Relationships: []
       }
@@ -216,10 +217,12 @@ export type Database = {
           emergency_contact_relationship: string
           guide_class: number
           has_car: boolean
+          is_wfr: boolean
           medical_history: string | null
           position: Database["public"]["Enums"]["guide_position"]
           updated_at: string
           user_id: string
+          wfr_expiration_date: string | null
         }
         Insert: {
           active?: boolean
@@ -229,10 +232,12 @@ export type Database = {
           emergency_contact_relationship: string
           guide_class: number
           has_car: boolean
+          is_wfr?: boolean
           medical_history?: string | null
           position?: Database["public"]["Enums"]["guide_position"]
           updated_at?: string
           user_id: string
+          wfr_expiration_date?: string | null
         }
         Update: {
           active?: boolean
@@ -242,10 +247,12 @@ export type Database = {
           emergency_contact_relationship?: string
           guide_class?: number
           has_car?: boolean
+          is_wfr?: boolean
           medical_history?: string | null
           position?: Database["public"]["Enums"]["guide_position"]
           updated_at?: string
           user_id?: string
+          wfr_expiration_date?: string | null
         }
         Relationships: [
           {
@@ -323,6 +330,38 @@ export type Database = {
         }
         Relationships: []
       }
+      participant_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participant_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       participant_info: {
         Row: {
           allergies: string
@@ -388,29 +427,132 @@ export type Database = {
       profiles: {
         Row: {
           avatar: string | null
-          email: string
           first_name: string
           id: string
           last_name: string
-          phone_number: string
         }
         Insert: {
           avatar?: string | null
-          email: string
           first_name: string
           id?: string
           last_name: string
-          phone_number: string
         }
         Update: {
           avatar?: string | null
-          email?: string
           first_name?: string
           id?: string
           last_name?: string
-          phone_number?: string
         }
         Relationships: []
+      }
+      public_trip_spot_info: {
+        Row: {
+          created_at: string
+          driver_spots: number
+          driver_spots_available: number
+          id: string
+          participant_spots: number
+          participant_spots_available: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          driver_spots: number
+          driver_spots_available: number
+          id: string
+          participant_spots: number
+          participant_spots_available: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          driver_spots?: number
+          driver_spots_available?: number
+          id?: string
+          participant_spots?: number
+          participant_spots_available?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_trip_spot_info_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      published_trips: {
+        Row: {
+          activity: string
+          created_at: string
+          description: string
+          difficulty: string
+          end_date: string
+          guides: Json
+          id: string
+          location: string
+          meet: string
+          name: string
+          native_land: string
+          picture: string
+          recommended_prior_experience: string
+          return: string
+          start_date: string
+          trail: string
+          updated_at: string
+          what_to_bring: string[]
+        }
+        Insert: {
+          activity: string
+          created_at?: string
+          description: string
+          difficulty: string
+          end_date: string
+          guides: Json
+          id: string
+          location: string
+          meet: string
+          name: string
+          native_land: string
+          picture: string
+          recommended_prior_experience: string
+          return: string
+          start_date: string
+          trail: string
+          updated_at?: string
+          what_to_bring: string[]
+        }
+        Update: {
+          activity?: string
+          created_at?: string
+          description?: string
+          difficulty?: string
+          end_date?: string
+          guides?: Json
+          id?: string
+          location?: string
+          meet?: string
+          name?: string
+          native_land?: string
+          picture?: string
+          recommended_prior_experience?: string
+          return?: string
+          start_date?: string
+          trail?: string
+          updated_at?: string
+          what_to_bring?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "published_trips_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       roles: {
         Row: {
@@ -599,6 +741,56 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_details: {
+        Row: {
+          activity: string
+          created_at: string
+          difficulty: string
+          location: string
+          meet: string
+          native_land: string
+          prior_experience: string
+          return: string
+          trail: string
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          activity: string
+          created_at?: string
+          difficulty: string
+          location: string
+          meet: string
+          native_land: string
+          prior_experience: string
+          return: string
+          trail: string
+          trip_id?: string
+          updated_at?: string
+        }
+        Update: {
+          activity?: string
+          created_at?: string
+          difficulty?: string
+          location?: string
+          meet?: string
+          native_land?: string
+          prior_experience?: string
+          return?: string
+          trail?: string
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_details_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: true
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_guides: {
         Row: {
           trip_id: string
@@ -631,87 +823,43 @@ export type Database = {
       }
       trip_prices: {
         Row: {
+          active: boolean
+          amount: number
+          archived_at: string | null
           created_at: string
-          driver_price: number | null
-          member_price: number
-          nonmember_price: number
-          stripe_driver_price_id: string | null
-          stripe_driver_product_id: string | null
-          stripe_member_price_id: string
-          stripe_nonmember_price_id: string
-          stripe_participant_product_id: string
+          stripe_price_id: string
+          stripe_product_id: string
+          ticket_type: Database["public"]["Enums"]["ticket_type"]
           trip_id: string
           updated_at: string
         }
         Insert: {
+          active?: boolean
+          amount: number
+          archived_at?: string | null
           created_at?: string
-          driver_price?: number | null
-          member_price: number
-          nonmember_price: number
-          stripe_driver_price_id?: string | null
-          stripe_driver_product_id?: string | null
-          stripe_member_price_id: string
-          stripe_nonmember_price_id: string
-          stripe_participant_product_id: string
+          stripe_price_id: string
+          stripe_product_id: string
+          ticket_type: Database["public"]["Enums"]["ticket_type"]
           trip_id: string
           updated_at?: string
         }
         Update: {
+          active?: boolean
+          amount?: number
+          archived_at?: string | null
           created_at?: string
-          driver_price?: number | null
-          member_price?: number
-          nonmember_price?: number
-          stripe_driver_price_id?: string | null
-          stripe_driver_product_id?: string | null
-          stripe_member_price_id?: string
-          stripe_nonmember_price_id?: string
-          stripe_participant_product_id?: string
+          stripe_price_id?: string
+          stripe_product_id?: string
+          ticket_type?: Database["public"]["Enums"]["ticket_type"]
           trip_id?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "prices_id_fkey"
+            foreignKeyName: "stripe_prices_trip_id_fkey"
             columns: ["trip_id"]
-            isOneToOne: true
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      trip_ticket_info: {
-        Row: {
-          created_at: string
-          driver_tickets_sold: number
-          driver_waitlist_only: boolean
-          participant_tickets_sold: number
-          participant_waitlist_only: boolean
-          trip_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          driver_tickets_sold?: number
-          driver_waitlist_only?: boolean
-          participant_tickets_sold?: number
-          participant_waitlist_only?: boolean
-          trip_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          driver_tickets_sold?: number
-          driver_waitlist_only?: boolean
-          participant_tickets_sold?: number
-          participant_waitlist_only?: boolean
-          trip_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trip_ticket_info_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
           },
@@ -719,43 +867,55 @@ export type Database = {
       }
       trips: {
         Row: {
+          access_code: string | null
           created_at: string
           description: string | null
-          difficulty: number | null
           driver_spots: number
           ends_at: string
+          gear: string | null
+          gear_questions: string[]
           id: string
-          name: string | null
+          name: string
           participant_spots: number
           picture: string | null
+          signup_status: Database["public"]["Enums"]["trip_signup_status"]
           starts_at: string
           updated_at: string
+          what_to_bring: string | null
         }
         Insert: {
+          access_code?: string | null
           created_at?: string
           description?: string | null
-          difficulty?: number | null
           driver_spots?: number
           ends_at: string
+          gear?: string | null
+          gear_questions: string[]
           id?: string
-          name?: string | null
+          name: string
           participant_spots?: number
           picture?: string | null
+          signup_status?: Database["public"]["Enums"]["trip_signup_status"]
           starts_at: string
           updated_at?: string
+          what_to_bring?: string | null
         }
         Update: {
+          access_code?: string | null
           created_at?: string
           description?: string | null
-          difficulty?: number | null
           driver_spots?: number
           ends_at?: string
+          gear?: string | null
+          gear_questions?: string[]
           id?: string
-          name?: string | null
+          name?: string
           participant_spots?: number
           picture?: string | null
+          signup_status?: Database["public"]["Enums"]["trip_signup_status"]
           starts_at?: string
           updated_at?: string
+          what_to_bring?: string | null
         }
         Relationships: []
       }
@@ -866,48 +1026,6 @@ export type Database = {
           },
         ]
       }
-      waiver_uploads: {
-        Row: {
-          bucket: string
-          created_at: string
-          id: string
-          path: string
-          ticket_id: string
-          user_id: string
-        }
-        Insert: {
-          bucket?: string
-          created_at?: string
-          id?: string
-          path: string
-          ticket_id: string
-          user_id: string
-        }
-        Update: {
-          bucket?: string
-          created_at?: string
-          id?: string
-          path?: string
-          ticket_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "waivers_ticket_id_fkey"
-            columns: ["ticket_id"]
-            isOneToOne: false
-            referencedRelation: "tickets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "waivers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -925,230 +1043,6 @@ export type Database = {
         Args: { event: Json }
         Returns: Json
       }
-      gbt_bit_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_bool_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_bool_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_bpchar_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_bytea_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_cash_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_cash_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_date_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_date_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_enum_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_enum_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_float4_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_float4_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_float8_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_float8_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_inet_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int2_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int2_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int4_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int4_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int8_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_int8_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_intv_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_intv_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_intv_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_macad_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_macad_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_macad8_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_macad8_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_numeric_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_oid_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_oid_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_text_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_time_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_time_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_timetz_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_ts_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_ts_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_tstz_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_uuid_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_uuid_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_var_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbt_var_fetch: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey_var_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey_var_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey16_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey16_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey2_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey2_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey32_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey32_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey4_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey4_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey8_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gbtreekey8_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
       get_role_code: {
         Args: { r: Database["public"]["Enums"]["user_role"] }
         Returns: number
@@ -1159,6 +1053,12 @@ export type Database = {
       guide_position: "new_guide" | "guide" | "longboard" | "alum"
       membership_length: "semester" | "year"
       ticket_type: "member" | "nonmember" | "driver"
+      trip_signup_status:
+        | "open"
+        | "closed"
+        | "access_code"
+        | "select_participants"
+        | "waitlist"
       user_role: "participant" | "guide" | "admin" | "superadmin"
       waitlist_status: "waiting" | "notification_sent" | "signed_up" | "expired"
     }
@@ -1295,6 +1195,13 @@ export const Constants = {
       guide_position: ["new_guide", "guide", "longboard", "alum"],
       membership_length: ["semester", "year"],
       ticket_type: ["member", "nonmember", "driver"],
+      trip_signup_status: [
+        "open",
+        "closed",
+        "access_code",
+        "select_participants",
+        "waitlist",
+      ],
       user_role: ["participant", "guide", "admin", "superadmin"],
       waitlist_status: ["waiting", "notification_sent", "signed_up", "expired"],
     },

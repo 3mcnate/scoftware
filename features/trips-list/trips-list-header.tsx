@@ -1,7 +1,6 @@
 "use client";
 
 import HeaderAuth from "@/components/auth/header-auth";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Undo2 } from "lucide-react";
 import Image from "next/image";

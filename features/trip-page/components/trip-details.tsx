@@ -1,9 +1,4 @@
-import {
-  Item,
-  ItemContent,
-  ItemGroup,
-  ItemSeparator,
-} from "@/components/ui/item";
+import { Item, ItemContent, ItemGroup, ItemSeparator } from "@/components/ui/item";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Calendar,
@@ -19,74 +14,29 @@ import {
 import { DifficultyModal } from "@/features/trip-page/components/difficulty-modal";
 import { TripDetailItem } from "@/features/trip-page/components/trip-detail-item";
 import Image from "next/image";
+import { formatDate, formatTime } from "@/utils/date-time";
+import { type InferModel } from "drizzle-orm";
+import { published_trips } from "@/drizzle/schema";
 
-interface Guide {
-  name: string;
-  email: string;
-  role: string;
-  image?: string;
-  initials: string;
-}
+type PublishedTrip = InferModel<typeof published_trips>;
 
 interface TripDetailsProps {
-  title: string;
-  image: string;
-  meetDate: string;
-  meetTime: string;
-  returnDate: string;
-  returnTime: string;
-  location: string;
-  nativeLand: string;
-  activity: string;
-  difficulty: string;
-  distance: string;
-  elevation: string;
-  memberPrice: number;
-  nonMemberPrice: number;
-  driverPrice: number;
-  description: string;
-  guides: Guide[];
-  priorExperience: string;
-  whatToBring: string[];
-  included: string[];
+  trip: PublishedTrip;
 }
 
-export function TripDetails({
-  title,
-  image,
-  meetDate,
-  meetTime,
-  returnDate,
-  returnTime,
-  location,
-  nativeLand,
-  activity,
-  difficulty,
-  distance,
-  elevation,
-  memberPrice,
-  nonMemberPrice,
-  driverPrice,
-  description,
-  guides,
-  priorExperience,
-}: TripDetailsProps) {
-  const whatToBring = [
-    "Sleeping bag",
-    "Sleeping pad",
-    "Day pack",
-    "Mess kit (utensils and bowl/plate/tupperware)",
-    "3+ liters of water",
-    "Hat/sunscreen/sunglasses",
-    "Comfortable, sturdy hiking shoes/boots",
-    "Comfortable hiking clothes",
-    "Toiletries/medications",
-    "Headlamp/flashlight",
-    "Rain jacket (prepare for potential rain)",
-    "Warm jacket",
-    "Warm clothes and layers for camping (it will get cold at night, as low as 40 °F!!)",
-    "$$ for 2 lunches",
-  ];
+type Guide = {
+  name: string;
+  email: string;
+  image?: string;
+  initials: string;
+};
+
+export function TripDetails({ trip }: TripDetailsProps) {
+  const guides: Guide[] = Array.isArray(trip.guides) ? (trip.guides as Guide[]) : [];
+  const whatToBring = Array.isArray(trip.what_to_bring) ? trip.what_to_bring : [];
+  const memberPrice = 0;
+  const nonMemberPrice = 0;
+  const driverPrice = 0;
 
   const included = [
     "Snacks",
@@ -103,8 +53,8 @@ export function TripDetails({
       {/* Hero Image */}
       <div className="relative h-[300px] sm:h-[400px] md:h-[500px] w-full overflow-hidden rounded-xl">
         <Image
-          src={image || "/placeholder.svg"}
-          alt={title}
+          src={trip.picture || "/placeholder.svg"}
+          alt={trip.name}
           fill
           className="object-cover"
         />
@@ -114,40 +64,29 @@ export function TripDetails({
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
         <div className="flex-1">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground text-balance leading-tight mb-3 lg:mb-4">
-            {title}
+            {trip.name}
           </h1>
           <p className="text-base sm:text-lg">
-            {meetDate} @ {meetTime} - {returnDate} @ {returnTime}
+            {`${formatDate(trip.start_date)} @ ${formatTime(trip.start_date)}`} - {`${formatDate(trip.end_date)} @ ${formatTime(trip.end_date)}`}
           </p>
         </div>
 
         <div className="lg:shrink-0">
-          <Item
-            variant="default"
-            className="bg-accent/10 lg:pl-0 lg:pt-0 w-full"
-          >
+          <Item variant="default" className="bg-accent/10 lg:pl-0 lg:pt-0 w-full">
             <ItemContent className="flex-col">
               <ItemGroup className="gap-3 lg:gap-2">
-                <div className="flex items-baseline justify-between gap-8">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Member
-                  </span>
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Member</span>
                   <span className="text-xl font-medium ">${memberPrice}</span>
                 </div>
                 <ItemSeparator className="block lg:hidden" />
-                <div className="flex items-baseline justify-between gap-8">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Non-Member
-                  </span>
-                  <span className="text-xl font-medium ">
-                    ${nonMemberPrice}
-                  </span>
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Non-Member</span>
+                  <span className="text-xl font-medium ">${nonMemberPrice}</span>
                 </div>
                 <ItemSeparator className="block lg:hidden" />
-                <div className="flex items-baseline justify-between gap-8">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Driver
-                  </span>
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Driver</span>
                   <span className="text-xl font-medium ">${driverPrice}</span>
                 </div>
               </ItemGroup>
@@ -163,47 +102,47 @@ export function TripDetails({
           value="Friday, 11/14, 7 A.M. @ Trader Joe's Elevators"
         />
 
-        <TripDetailItem
-          icon={Calendar}
-          label="Return"
-          value="Sunday, 11/16 around 6 P.M."
+        <TripDetailItem 
+          icon={Calendar} 
+          label="Return" 
+          value="Sunday, 11/16 around 6 P.M." 
         />
 
         <TripDetailItem
           icon={TentTree}
           label="Activity"
-          value="hiking, sightseeing, camping"
+          value={trip.activity}
         />
 
         <TripDetailItem
           icon={TrendingUp}
           label="Difficulty"
-          value="(4/10) Easy-Medium"
+          value={trip.difficulty}
           titleAction={<DifficultyModal />}
         />
 
         <TripDetailItem
           icon={Footprints}
           label="Trail"
-          value="Distance: ~6/7 miles, ~500 ft elevation"
+          value={trip.trail}
         />
 
         <TripDetailItem
           icon={Compass}
           label="Recommended Prior Experience"
-          value="none!"
+          value={trip.recommended_prior_experience}
         />
 
         <TripDetailItem
           icon={MapPin}
           label="Location of Trip"
-          value="Pfeiffer Big Sur State Park, Point Lobos State Natural Reserve"
+          value={trip.location}
         />
 
         <TripDetailItem
           icon={Mountain}
           label="Native Land"
-          value="Salinan, Esselen"
+          value={trip.native_land}
         />
       </ItemGroup>
 
@@ -212,7 +151,7 @@ export function TripDetails({
           <h2 className="text-2xl font-bold mb-4 text-foreground">Overview</h2>
           <div className="space-y-4">
             <p className="text-base leading-relaxed text-foreground">
-              {description}
+              {trip.description}
             </p>
           </div>
         </ItemContent>

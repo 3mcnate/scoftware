@@ -30,5 +30,7 @@
       "connectString": "postgresql://postgres:postgres@127.0.0.1:54322/postgres",
       "name": "scoftware dev"
     }
-  ]
+  ],
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false
 }

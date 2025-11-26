@@ -13,7 +13,6 @@ interface TripDetailItemProps {
   label: string;
   value: string;
   titleAction?: ReactNode;
-  details?: string | string[];
 }
 
 export function TripDetailItem({
