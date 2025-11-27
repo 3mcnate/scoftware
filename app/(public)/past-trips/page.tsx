@@ -1,4 +1,3 @@
-import { TripsListHeader } from "@/components/trips-list/trips-list-header";
 import { TripsList } from "@/components/trips-list/trips-list";
 import { getPastPublishedTrips } from "@/data/trips/get-past-published-trips";
 import { formatDate, formatTime } from "@/utils/date-time";
@@ -82,71 +81,79 @@ export default async function PastTripsPage({ searchParams }: PastTripsPageProps
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <TripsListHeader />
+    <>
+      <div className="flex justify-start">
+        <Button asChild variant="outline">
+          <Link href="/">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Current Trips
+          </Link>
+        </Button>
+      </div>
 
-      <main className="container px-4 py-6 md:py-8 md:px-6 mx-auto">
-        <div className="flex justify-start">
-          <Button asChild variant="outline">
-            <Link href="/">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Current Trips
-            </Link>
-          </Button>
+      <div className="mb-6 text-center py-10 md:py-10">
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+          Past Trips
+        </h1>
+        <p className="text-muted-foreground">{totalCount} trips completed</p>
+      </div>
+
+      <TripsList trips={pastTrips} isPast />
+
+      {totalPages > 1 && (
+        <div className="mt-10">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href={
+                    currentPage > 1
+                      ? `/past-trips?page=${currentPage - 1}`
+                      : "#"
+                  }
+                  aria-disabled={currentPage <= 1}
+                  className={
+                    currentPage <= 1 ? "pointer-events-none opacity-50" : ""
+                  }
+                />
+              </PaginationItem>
+
+              {getPageNumbers().map((page, index) =>
+                page === "ellipsis" ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      href={`/past-trips?page=${page}`}
+                      isActive={page === currentPage}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  href={
+                    currentPage < totalPages
+                      ? `/past-trips?page=${currentPage + 1}`
+                      : "#"
+                  }
+                  aria-disabled={currentPage >= totalPages}
+                  className={
+                    currentPage >= totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
-
-        <div className="mb-6 text-center py-10 md:py-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-            Past Trips
-          </h1>
-          <p className="text-muted-foreground">
-            {totalCount} trips completed
-          </p>
-        </div>
-
-        <TripsList trips={pastTrips} isPast />
-
-        {totalPages > 1 && (
-          <div className="mt-10">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href={currentPage > 1 ? `/past-trips?page=${currentPage - 1}` : "#"}
-                    aria-disabled={currentPage <= 1}
-                    className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-
-                {getPageNumbers().map((page, index) =>
-                  page === "ellipsis" ? (
-                    <PaginationItem key={`ellipsis-${index}`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  ) : (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        href={`/past-trips?page=${page}`}
-                        isActive={page === currentPage}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  )
-                )}
-
-                <PaginationItem>
-                  <PaginationNext
-                    href={currentPage < totalPages ? `/past-trips?page=${currentPage + 1}` : "#"}
-                    aria-disabled={currentPage >= totalPages}
-                    className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
-      </main>
-    </div>
+      )}
+    </>
   );
 }

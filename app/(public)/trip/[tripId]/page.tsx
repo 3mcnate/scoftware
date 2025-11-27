@@ -1,6 +1,5 @@
 "use server";
 
-import { TripHeader } from "@/components/trip-page/trip-header";
 import { TripDetails } from "@/components/trip-page/trip-details";
 import { SignupButtons } from "@/components/trip-page/signup-buttons";
 import { TripNavigation } from "@/components/trip-page/trip-navigation";
@@ -34,35 +33,31 @@ export default async function TripPage({
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <TripHeader />
+    <>
+      <TripDetails trip={trip} />
 
-      <main className="container px-4 py-6 md:py-8 md:px-6 mx-auto">
-        <TripDetails trip={trip} />
+      <SignupButtons className="my-8" />
 
-        <SignupButtons className="my-8" />
-
-        <TripNavigation
-          previousTrip={
-            previous
-              ? {
-                  id: previous.id,
-                  title: previous.name,
-                  date: formatDate(previous.start_date),
-                }
-              : undefined
-          }
-          nextTrip={
-            next
-              ? {
-                  id: next.id,
-                  title: next.name,
-                  date: formatDate(next.start_date),
-                }
-              : undefined
-          }
-        />
-      </main>
-    </div>
+      <TripNavigation
+        previousTrip={
+          previous
+            ? {
+                id: previous.id,
+                title: previous.name,
+                date: formatDate(previous.start_date),
+              }
+            : undefined
+        }
+        nextTrip={
+          next
+            ? {
+                id: next.id,
+                title: next.name,
+                date: formatDate(next.start_date),
+              }
+            : undefined
+        }
+      />
+    </>
   );
 }

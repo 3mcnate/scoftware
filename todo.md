@@ -25,10 +25,11 @@ Next up
 - make trip page have live info - done
 - make trip list page have live info - done
 - make past trips page - done
-- participant dashboard (view signed up trips) 
-- participant info form
+- participant dashboard mockup - done 
+- participant live trips
 - participant waiver
-- participant profile
+- participant information
+- participant settings
 - checkout (lets go)
 - live spot info checks
 - driver info form

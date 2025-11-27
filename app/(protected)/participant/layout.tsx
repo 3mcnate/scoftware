@@ -1,6 +1,5 @@
 import type React from "react"
-import { DashboardHeader } from "@/components/participant-dashboard/dashboard-header"
-import { DashboardTabs } from "@/components/participant-dashboard/dashboard-tabs"
+import { ParticipantDashboardHeader } from "@/components/participant-dashboard/dashboard-header"
 
 export default function DashboardLayout({
   children,
@@ -9,13 +8,8 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="min-h-screen">
-      <DashboardHeader />
-      <div className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <DashboardTabs />
-        </div>
-      </div>
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8">{children}</div>
+      <ParticipantDashboardHeader />
+      <div className="container px-4 py-6 md:py-8 md:px-6 mx-auto">{children}</div>
     </div>
   )
 }

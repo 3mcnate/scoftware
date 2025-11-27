@@ -1,28 +1,19 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Logo from "@/components/global/logo";
+import HeaderAuth from "@/components/auth/header-auth";
+import { DashboardTabs } from "@/components/participant-dashboard/dashboard-tabs";
 
-export function DashboardHeader() {
+export function ParticipantDashboardHeader() {
   return (
     <header className="border-b border-border">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-foreground flex items-center justify-center">
-            <span className="text-background font-semibold text-sm">T</span>
-          </div>
-          <span className="text-foreground font-semibold">TripManager</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-warning rounded-full" />
-          </Button>
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="/placeholder.svg?height=32&width=32" />
-            <AvatarFallback className="bg-secondary text-secondary-foreground">JD</AvatarFallback>
-          </Avatar>
+      <div className="container px-4 md:px-6 mx-auto h-16 flex items-center justify-between">
+        <Logo />
+        <HeaderAuth />
+      </div>
+			<div className="border-t border-border sticky top-0 z-50 bg-background">
+        <div className="container px-4 md:px-6 mx-auto">
+          <DashboardTabs />
         </div>
       </div>
     </header>
-  )
+  );
 }
