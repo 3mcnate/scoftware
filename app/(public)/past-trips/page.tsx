@@ -11,6 +11,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 const TRIPS_PER_PAGE = 35;
 
@@ -83,7 +86,16 @@ export default async function PastTripsPage({ searchParams }: PastTripsPageProps
       <TripsListHeader />
 
       <main className="container px-4 py-6 md:py-8 md:px-6 mx-auto">
-        <div className="mb-6 text-center py-10 md:py-20">
+        <div className="flex justify-start">
+          <Button asChild variant="outline">
+            <Link href="/">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Current Trips
+            </Link>
+          </Button>
+        </div>
+
+        <div className="mb-6 text-center py-10 md:py-10">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
             Past Trips
           </h1>
