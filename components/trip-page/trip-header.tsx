@@ -1,8 +1,8 @@
 "use client"
 
 import HeaderAuth from "@/components/auth/header-auth"
-import { SignupButtons } from "@/features/trip-page/components/signup-buttons"
-import TripHeaderInfo, { TripHeaderInfoBadges } from "@/features/trip-page/components/trip-header-info"
+import { SignupButtons } from "./signup-buttons"
+import TripHeaderInfo, { TripHeaderInfoBadges } from "./trip-header-info"
 import Image from "next/image"
 import Link from "next/link"
 

@@ -1,4 +1,4 @@
-import { TripsListHeader } from "@/features/trips-list/trips-list-header";
+import { TripsListHeader } from "@/components/trips-list/trips-list-header";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SearchX } from "lucide-react";

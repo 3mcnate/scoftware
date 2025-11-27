@@ -1,5 +1,5 @@
-import { TripsListHeader } from "@/features/trips-list/trips-list-header";
-import { TripsList } from "@/features/trips-list/trips-list";
+import { TripsListHeader } from "@/components/trips-list/trips-list-header";
+import { TripsList } from "@/components/trips-list/trips-list";
 import { getPastPublishedTrips } from "@/data/trips/get-past-published-trips";
 import { formatDate, formatTime } from "@/utils/date-time";
 import {

@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { SignupButtons } from "@/features/trip-page/components/signup-buttons";
+import { SignupButtons } from "@/components/trip-page/signup-buttons";
 
 const participantSpotsRemaining = 2;
 const participantSpotsTotal = 7;
