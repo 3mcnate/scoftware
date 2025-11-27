@@ -11,8 +11,8 @@ import {
   Clock,
   TentTree,
 } from "lucide-react";
-import { DifficultyModal } from "@/features/trip-page/components/difficulty-modal";
-import { TripDetailItem } from "@/features/trip-page/components/trip-detail-item";
+import { DifficultyModal } from "@/components/trip-page/difficulty-modal";
+import { TripDetailItem } from "@/components/trip-page/trip-detail-item";
 import Image from "next/image";
 import { formatDate, formatTime } from "@/utils/date-time";
 import { type InferSelectModel } from "drizzle-orm";

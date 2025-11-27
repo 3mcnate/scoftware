@@ -9,10 +9,10 @@ import { Map, User, Settings, CreditCard } from "lucide-react"
 type TabValue = "trips" | "my-information" | "membership" | "settings"
 
 const tabs: { value: TabValue; label: string; icon: React.ElementType; href: string }[] = [
-  { value: "trips", label: "Trips", icon: Map, href: "/dashboard/trips" },
-  { value: "my-information", label: "My Information", icon: User, href: "/dashboard/my-information" },
-  { value: "membership", label: "Membership", icon: CreditCard, href: "/dashboard/membership" },
-  { value: "settings", label: "Settings", icon: Settings, href: "/dashboard/settings" },
+  { value: "trips", label: "Trips", icon: Map, href: "/participant/trips" },
+  { value: "my-information", label: "My Information", icon: User, href: "/participant/my-information" },
+  { value: "membership", label: "Membership", icon: CreditCard, href: "/participant/membership" },
+  { value: "settings", label: "Settings", icon: Settings, href: "/participant/settings" },
 ]
 
 export function DashboardTabs() {

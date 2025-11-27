@@ -44,18 +44,18 @@ export function MyInformationTab() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="emergency-first-name">First Name</Label>
-                <Input id="emergency-first-name" placeholder="Enter first name" className="bg-input border-border" />
+                <Input id="emergency-first-name" placeholder="Enter first name" className="border-border" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="emergency-last-name">Last Name</Label>
-                <Input id="emergency-last-name" placeholder="Enter last name" className="bg-input border-border" />
+                <Input id="emergency-last-name" placeholder="Enter last name" className="border-border" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="emergency-relationship">Relationship</Label>
                 <Select>
-                  <SelectTrigger className="bg-input border-border">
+                  <SelectTrigger className="border-border">
                     <SelectValue placeholder="Select relationship" />
                   </SelectTrigger>
                   <SelectContent>
@@ -73,7 +73,7 @@ export function MyInformationTab() {
                   id="emergency-phone"
                   type="tel"
                   placeholder="+1 (555) 000-0000"
-                  className="bg-input border-border"
+                  className="border-border"
                 />
               </div>
             </div>
@@ -83,7 +83,7 @@ export function MyInformationTab() {
                 id="emergency-email"
                 type="email"
                 placeholder="emergency@example.com"
-                className="bg-input border-border"
+                className="border-border"
               />
             </div>
             <div className="space-y-2">
@@ -91,7 +91,7 @@ export function MyInformationTab() {
               <Textarea
                 id="emergency-address"
                 placeholder="Enter full address"
-                className="bg-input border-border resize-none"
+                className="border-border resize-none"
                 rows={2}
               />
             </div>
@@ -109,7 +109,7 @@ export function MyInformationTab() {
               <div className="space-y-2">
                 <Label htmlFor="blood-type">Blood Type</Label>
                 <Select>
-                  <SelectTrigger className="bg-input border-border">
+                  <SelectTrigger className="border-border">
                     <SelectValue placeholder="Select blood type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -127,7 +127,7 @@ export function MyInformationTab() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="dob">Date of Birth</Label>
-                <Input id="dob" type="date" className="bg-input border-border" />
+                <Input id="dob" type="date" className="border-border" />
               </div>
             </div>
             <div className="space-y-2">
@@ -135,7 +135,7 @@ export function MyInformationTab() {
               <Textarea
                 id="allergies"
                 placeholder="List any food, medication, or environmental allergies..."
-                className="bg-input border-border resize-none"
+                className="border-border resize-none"
                 rows={3}
               />
             </div>
@@ -144,7 +144,7 @@ export function MyInformationTab() {
               <Textarea
                 id="medications"
                 placeholder="List any medications you are currently taking..."
-                className="bg-input border-border resize-none"
+                className="border-border resize-none"
                 rows={3}
               />
             </div>
@@ -153,7 +153,7 @@ export function MyInformationTab() {
               <Textarea
                 id="conditions"
                 placeholder="List any chronic conditions, past surgeries, or health concerns..."
-                className="bg-input border-border resize-none"
+                className="border-border resize-none"
                 rows={3}
               />
             </div>
@@ -162,7 +162,7 @@ export function MyInformationTab() {
               <Textarea
                 id="dietary"
                 placeholder="List any dietary restrictions or preferences..."
-                className="bg-input border-border resize-none"
+                className="border-border resize-none"
                 rows={2}
               />
             </div>
@@ -182,18 +182,18 @@ export function MyInformationTab() {
                 <Input
                   id="insurance-provider"
                   placeholder="e.g., Blue Cross Blue Shield"
-                  className="bg-input border-border"
+                  className="border-border"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="policy-number">Policy Number</Label>
-                <Input id="policy-number" placeholder="Enter policy number" className="bg-input border-border" />
+                <Input id="policy-number" placeholder="Enter policy number" className="border-border" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="group-number">Group Number</Label>
-                <Input id="group-number" placeholder="Enter group number" className="bg-input border-border" />
+                <Input id="group-number" placeholder="Enter group number" className="border-border" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="insurance-phone">Insurance Phone</Label>
@@ -201,7 +201,7 @@ export function MyInformationTab() {
                   id="insurance-phone"
                   type="tel"
                   placeholder="+1 (800) 000-0000"
-                  className="bg-input border-border"
+                  className="border-border"
                 />
               </div>
             </div>
@@ -212,34 +212,34 @@ export function MyInformationTab() {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-base">Primary Care Physician</CardTitle>
-            <CardDescription>Your doctor's contact information</CardDescription>
+            <CardDescription>Your doctor&apos;s contact information</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="doctor-name">Doctor's Name</Label>
-                <Input id="doctor-name" placeholder="Dr. Jane Smith" className="bg-input border-border" />
+                <Label htmlFor="doctor-name">Doctor&apos;s Name</Label>
+                <Input id="doctor-name" placeholder="Dr. Jane Smith" className="border-border" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="doctor-phone">Doctor's Phone</Label>
+                <Label htmlFor="doctor-phone">Doctor&apos;s Phone</Label>
                 <Input
                   id="doctor-phone"
                   type="tel"
                   placeholder="+1 (555) 000-0000"
-                  className="bg-input border-border"
+                  className="border-border"
                 />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="clinic-name">Clinic/Hospital Name</Label>
-              <Input id="clinic-name" placeholder="Enter clinic or hospital name" className="bg-input border-border" />
+              <Input id="clinic-name" placeholder="Enter clinic or hospital name" className="border-border" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="clinic-address">Clinic Address</Label>
               <Textarea
                 id="clinic-address"
                 placeholder="Enter full address"
-                className="bg-input border-border resize-none"
+                className="border-border resize-none"
                 rows={2}
               />
             </div>

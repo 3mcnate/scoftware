@@ -1,9 +1,9 @@
 "use server";
 
-import { TripHeader } from "@/features/trip-page/components/trip-header";
-import { TripDetails } from "@/features/trip-page/components/trip-details";
-import { SignupButtons } from "@/features/trip-page/components/signup-buttons";
-import { TripNavigation } from "@/features/trip-page/components/trip-navigation";
+import { TripHeader } from "@/components/trip-page/trip-header";
+import { TripDetails } from "@/components/trip-page/trip-details";
+import { SignupButtons } from "@/components/trip-page/signup-buttons";
+import { TripNavigation } from "@/components/trip-page/trip-navigation";
 import { getPublishedTrip } from "@/data/trips/get-published-trip";
 import { getAdjacentPublishedTrips } from "@/data/trips/get-adjacent-published-trips";
 import { notFound } from "next/navigation";
