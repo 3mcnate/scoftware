@@ -170,3 +170,6 @@ The next morning we shall awaken at 8:30 am and start with a brisk breakfast as 
 		'{"Sleeping bag","Sleeping pad","Mess kit (utensils and bowl/plate/tupperware)","3+ liters of water","Hat/sunscreen/sunglasses","Comfortable hiking shoes","Comfortable hiking clothes","Toiletries/medications","Headlamp/flashlight","Warm clothes for night/sleeping","Swimsuit (optional)"}',
 		'[{"name": "Ryan Long", "email": "ryanwlon@usc.edu"}, {"name": "Piroska Darnyi", "email": "pdarnyi@usc.edu"}]'
 	);
+
+
+INSERT INTO "public"."tickets" ("id", "user_id", "trip_id", "created_at", "updated_at", "cancelled", "refunded", "cancelled_at", "stripe_payment_id", "type", "amount_paid", "stripe_refund_id") VALUES ('92c39690-a280-41f9-b9dd-32d822836e4b', 'd070655d-974c-45a5-a332-eb1f499e49fd', 'af6192f6-2565-49bf-ab29-9d2e97cb9740', '2025-11-27 23:06:52.904179+00', '2025-11-27 23:06:52.904179+00', 'false', 'false', null, 'pi_123', 'member', '80', null), ('a9c1a53c-a02b-4d7b-9c5c-6eb4f5cbecac', 'd070655d-974c-45a5-a332-eb1f499e49fd', 'd8aaea9d-85bf-4dcf-a63d-001e19dea7af', '2025-11-27 23:07:24.028357+00', '2025-11-27 23:07:24.028357+00', 'false', 'false', null, 'pi_456', 'member', '50', null);

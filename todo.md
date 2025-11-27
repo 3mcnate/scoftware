@@ -21,11 +21,13 @@
 - upcoming trips page ('/') - done
 - header auth component - done
 
-Next up
+11/26/25
 - make trip page have live info - done
 - make trip list page have live info - done
 - make past trips page - done
 - participant dashboard mockup - done 
+
+Next up
 - participant live trips 
 - participant information
 - participant waiver
