@@ -26,15 +26,15 @@ Next up
 - make trip list page have live info - done
 - make past trips page - done
 - participant dashboard mockup - done 
-- participant live trips
-- participant waiver
+- participant live trips 
 - participant information
+- participant waiver
 - participant settings
+- signup info/logic on trips page
 - checkout (lets go)
-- live spot info checks
 - driver info form
 - driver waiver
 - memberships
 - waitlists
 - past trips page
-- add "you must sign in or create an account to sign up for a trip alert"
+- add "you must sign in or create an account to sign up for a trip alert"p

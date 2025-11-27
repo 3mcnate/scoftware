@@ -1,12 +1,13 @@
-import { TripsListHeader } from "@/components/trips-list/trips-list-header";
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SearchX } from "lucide-react";
+import PublicHeader from "@/components/global/public-header";
 
 export default function TripNotFound() {
   return (
     <div className="min-h-screen bg-background">
-      <TripsListHeader />
+			<PublicHeader />
       
       <main className="container px-4 py-12 md:py-16 mx-auto">
         <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-6">
