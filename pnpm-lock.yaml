@@ -55,10 +55,7 @@ importers:
         version: 1.2.8(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@supabase-cache-helpers/postgrest-react-query':
         specifier: ^1.13.6
-        version: 1.13.6(@supabase/postgrest-js@2.80.0)(@tanstack/react-query@5.90.7(react@19.2.0))(react@19.2.0)
-      '@supabase/postgrest-js':
-        specifier: ^2.80.0
-        version: 2.80.0
+        version: 1.13.6(@supabase/postgrest-js@2.78.0)(@tanstack/react-query@5.90.7(react@19.2.0))(react@19.2.0)
       '@supabase/ssr':
         specifier: ^0.7.0
         version: 0.7.0(@supabase/supabase-js@2.78.0)
@@ -1596,10 +1593,6 @@ packages:
 
   '@supabase/postgrest-js@2.78.0':
     resolution: {integrity: sha512-AwhpYlSvJ+PSnPmIK8sHj7NGDyDENYfQGKrMtpVIEzQA2ApUjgpUGxzXWN4Z0wEtLQsvv7g4y9HVad9Hzo1TNA==}
-
-  '@supabase/postgrest-js@2.80.0':
-    resolution: {integrity: sha512-yKzehXlRbDoXIQefdRQnvaI9BEogoWIp/7+y/m5enZDKW2IP9aAgq5tU72sThcwftDJvknnIpEHAABG3qviEng==}
-    engines: {node: '>=20.0.0'}
 
   '@supabase/realtime-js@2.78.0':
     resolution: {integrity: sha512-rCs1zmLe7of7hj4s7G9z8rTqzWuNVtmwDr3FiCRCJFawEoa+RQO1xpZGbdeuVvVmKDyVN6b542Okci+117y/LQ==}
@@ -5522,18 +5515,18 @@ snapshots:
 
   '@standard-schema/utils@0.3.0': {}
 
-  '@supabase-cache-helpers/postgrest-core@0.12.3(@supabase/postgrest-js@2.80.0)':
+  '@supabase-cache-helpers/postgrest-core@0.12.3(@supabase/postgrest-js@2.78.0)':
     dependencies:
-      '@supabase/postgrest-js': 2.80.0
+      '@supabase/postgrest-js': 2.78.0
       fast-equals: 5.2.2
       flat: 6.0.1
       merge-anything: 5.1.7
       xregexp: 5.1.1
 
-  '@supabase-cache-helpers/postgrest-react-query@1.13.6(@supabase/postgrest-js@2.80.0)(@tanstack/react-query@5.90.7(react@19.2.0))(react@19.2.0)':
+  '@supabase-cache-helpers/postgrest-react-query@1.13.6(@supabase/postgrest-js@2.78.0)(@tanstack/react-query@5.90.7(react@19.2.0))(react@19.2.0)':
     dependencies:
-      '@supabase-cache-helpers/postgrest-core': 0.12.3(@supabase/postgrest-js@2.80.0)
-      '@supabase/postgrest-js': 2.80.0
+      '@supabase-cache-helpers/postgrest-core': 0.12.3(@supabase/postgrest-js@2.78.0)
+      '@supabase/postgrest-js': 2.78.0
       '@tanstack/react-query': 5.90.7(react@19.2.0)
       flat: 6.0.1
       react: 19.2.0
@@ -5555,10 +5548,6 @@ snapshots:
   '@supabase/postgrest-js@2.78.0':
     dependencies:
       '@supabase/node-fetch': 2.6.15
-      tslib: 2.8.1
-
-  '@supabase/postgrest-js@2.80.0':
-    dependencies:
       tslib: 2.8.1
 
   '@supabase/realtime-js@2.78.0':
