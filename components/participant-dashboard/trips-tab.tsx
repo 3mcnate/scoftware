@@ -18,17 +18,33 @@ import {
   Car,
   CircleAlert,
   ArrowUpRight,
+  Mail,
+  Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useUserTickets } from "@/data/participant/get-user-tickets";
 import { useAuth } from "@/hooks/use-auth";
-import { formatDate } from "@/utils/date-time";
+import { formatDate, formatTime } from "@/utils/date-time";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitialsFullname } from "@/utils/names";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 type TicketWithTrip = NonNullable<
   ReturnType<typeof useUserTickets>["data"]
 >[number];
+
+type Guide = {
+  name: string;
+  email: string;
+  image?: string;
+};
 
 export function TripsTab() {
   const auth = useAuth();
@@ -75,7 +91,7 @@ export function TripsTab() {
         {upcomingTickets.length === 0 ? (
           <p className="text-muted-foreground">No upcoming trips</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {upcomingTickets.map((ticket) => (
               <TripCard key={ticket.id} ticket={ticket} />
             ))}
@@ -88,7 +104,7 @@ export function TripsTab() {
           <h2 className="text-lg font-semibold text-foreground mb-4">
             Past Trips
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {pastTickets.map((ticket) => (
               <TripCard key={ticket.id} ticket={ticket} isPast />
             ))}
@@ -115,9 +131,14 @@ function TripCard({
   const isRefunded = ticket.refunded;
   const isConfirmed = ticket.waiver && !ticket.cancelled;
 
+	const startDate = formatDate(trip.start_date);
+	const startTime = formatTime(trip.start_date);
+	const endDate = formatDate(trip.end_date);
+	const endTime = formatTime(trip.end_date);
+
   return (
     <Card className="bg-card border-border overflow-hidden group hover:border-muted-foreground/30 transition-colors pt-0">
-      <Link href={`/trip/${trip.id}`} className="aspect-12/9 relative h-60 w-full md:w-auto">
+      <Link href={`/trip/${trip.id}`} className="relative h-65 w-full md:w-auto">
         <Image
           src={trip.picture}
           alt={trip.name}
@@ -184,15 +205,57 @@ function TripCard({
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="h-4 w-4 shrink-0" />
           <span>
-            {trip.start_date === trip.end_date
-              ? formatDate(trip.start_date)
-              : `${formatDate(trip.start_date)} - ${formatDate(trip.end_date)}`}
+            {startDate === endDate
+              ? `${startDate}, ${startTime} - ${endTime}`
+              : `${startDate} @ ${startTime} - ${endDate} @ ${endTime}`}
           </span>
         </div>
         <div className="flex items-center gap-2 text-sm">
           <Clock className="h-4 w-4 shrink-0" />
           <span>Meet: {trip.meet}</span>
         </div>
+        {(() => {
+          const guides: Guide[] = Array.isArray(trip.guides)
+            ? (trip.guides as Guide[])
+            : [];
+          if (guides.length === 0) return null;
+          return (
+            <Accordion type="single" collapsible className="w-full border-t border-border mt-2 pt-2">
+              <AccordionItem value="guides" className="border-none">
+                <AccordionTrigger className="py-2 text-sm hover:no-underline font-normal">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Contact the Guides
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2 pt-1">
+                    {guides.map((guide, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={guide.image} alt={guide.name} />
+                          <AvatarFallback className="text-xs bg-foreground text-background">
+                            {getInitialsFullname(guide.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm truncate">{guide.name}</p>
+                          <Link
+                            href={`mailto:${guide.email}`}
+                            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                          >
+                            <Mail className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{guide.email}</span>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          );
+        })()}
       </CardContent>
       {ticket.receipt_url && (
         <CardFooter>
@@ -200,7 +263,7 @@ function TripCard({
             href={ticket.receipt_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+            className="text-sm hover:text-muted-foreground transition-colors flex items-center gap-1"
           >
             View Receipt
             <ArrowUpRight className="h-3 w-3" />
@@ -216,7 +279,7 @@ function TripsTabSkeleton() {
     <div className="space-y-8">
       <div>
         <Skeleton className="h-6 w-32 mb-4" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3].map((i) => (
             <Card key={i} className="pt-0">
               <Skeleton className="h-60 w-full" />

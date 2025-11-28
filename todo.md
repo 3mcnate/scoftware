@@ -27,8 +27,10 @@
 - make past trips page - done
 - participant dashboard mockup - done 
 
-Next up
-- participant live trips 
+11/28/25
+- participant live trips - DONE
+
+Next Up
 - participant information
 - participant waiver
 - participant settings
