@@ -445,44 +445,6 @@ export type Database = {
         }
         Relationships: []
       }
-      public_trip_spot_info: {
-        Row: {
-          created_at: string
-          driver_spots: number
-          driver_spots_available: number
-          id: string
-          participant_spots: number
-          participant_spots_available: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          driver_spots: number
-          driver_spots_available: number
-          id: string
-          participant_spots: number
-          participant_spots_available: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          driver_spots?: number
-          driver_spots_available?: number
-          id?: string
-          participant_spots?: number
-          participant_spots_available?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "public_trip_spot_info_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       published_trips: {
         Row: {
           activity: string
@@ -502,6 +464,7 @@ export type Database = {
           start_date: string
           trail: string
           updated_at: string
+          visible: boolean
           what_to_bring: string[]
         }
         Insert: {
@@ -522,6 +485,7 @@ export type Database = {
           start_date: string
           trail: string
           updated_at?: string
+          visible?: boolean
           what_to_bring: string[]
         }
         Update: {
@@ -542,6 +506,7 @@ export type Database = {
           start_date?: string
           trail?: string
           updated_at?: string
+          visible?: boolean
           what_to_bring?: string[]
         }
         Relationships: [
@@ -594,6 +559,7 @@ export type Database = {
           type: Database["public"]["Enums"]["ticket_type"]
           updated_at: string
           user_id: string
+          waiver_id: string | null
         }
         Insert: {
           amount_paid: number
@@ -608,6 +574,7 @@ export type Database = {
           type: Database["public"]["Enums"]["ticket_type"]
           updated_at?: string
           user_id: string
+          waiver_id?: string | null
         }
         Update: {
           amount_paid?: number
@@ -622,13 +589,14 @@ export type Database = {
           type?: Database["public"]["Enums"]["ticket_type"]
           updated_at?: string
           user_id?: string
+          waiver_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "tickets_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
-            referencedRelation: "trips"
+            referencedRelation: "published_trips"
             referencedColumns: ["id"]
           },
           {
@@ -636,6 +604,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_waiver_id_fkey"
+            columns: ["waiver_id"]
+            isOneToOne: false
+            referencedRelation: "waiver_signatures"
             referencedColumns: ["id"]
           },
         ]
@@ -872,8 +847,7 @@ export type Database = {
           description: string | null
           driver_spots: number
           ends_at: string
-          gear: string | null
-          gear_questions: string[]
+          gear_questions: string[] | null
           id: string
           name: string
           participant_spots: number
@@ -887,13 +861,12 @@ export type Database = {
           access_code?: string | null
           created_at?: string
           description?: string | null
-          driver_spots?: number
+          driver_spots: number
           ends_at: string
-          gear?: string | null
-          gear_questions: string[]
+          gear_questions?: string[] | null
           id?: string
           name: string
-          participant_spots?: number
+          participant_spots: number
           picture?: string | null
           signup_status?: Database["public"]["Enums"]["trip_signup_status"]
           starts_at: string
@@ -906,8 +879,7 @@ export type Database = {
           description?: string | null
           driver_spots?: number
           ends_at?: string
-          gear?: string | null
-          gear_questions?: string[]
+          gear_questions?: string[] | null
           id?: string
           name?: string
           participant_spots?: number
@@ -1059,6 +1031,7 @@ export type Database = {
         | "access_code"
         | "select_participants"
         | "waitlist"
+        | "full"
       user_role: "participant" | "guide" | "admin" | "superadmin"
       waitlist_status: "waiting" | "notification_sent" | "signed_up" | "expired"
     }
@@ -1201,6 +1174,7 @@ export const Constants = {
         "access_code",
         "select_participants",
         "waitlist",
+        "full",
       ],
       user_role: ["participant", "guide", "admin", "superadmin"],
       waitlist_status: ["waiting", "notification_sent", "signed_up", "expired"],

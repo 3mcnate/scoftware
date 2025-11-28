@@ -28,16 +28,14 @@ export const trips = pgTable("trips", {
 	name: text().notNull(),
 	description: text(),
 	picture: text(),
-	driver_spots: integer().default(0).notNull(),
-	participant_spots: integer().default(8).notNull(),
+	driver_spots: integer().notNull(),
+	participant_spots: integer().notNull(),
 	ends_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	starts_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	gear: text(),
-	gear_questions: text().array().notNull(),
+	gear_questions: text().array(),
 	signup_status: trip_signup_status().default('open').notNull(),
 	what_to_bring: text(),
 	access_code: text(),
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 }, (table) => [
 	check("ends_after_start", sql`starts_at < ends_at`),
 	check("trips_driver_spots_check", sql`driver_spots >= 0`),
@@ -126,6 +124,7 @@ export const published_trips = pgTable("published_trips", {
 	description: text().notNull(),
 	what_to_bring: text().array().notNull(),
 	guides: jsonb().notNull(),
+	visible: boolean().default(true).notNull(),
 }, (table) => [
 	foreignKey({
 			columns: [table.id],

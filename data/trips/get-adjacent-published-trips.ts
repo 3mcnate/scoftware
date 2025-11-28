@@ -25,7 +25,8 @@ export async function getAdjacentPublishedTrips(
       .where(
         and(
           lt(published_trips.start_date, startDate),
-          ne(published_trips.id, tripId)
+          ne(published_trips.id, tripId),
+					published_trips.visible
         )
       )
       .orderBy(desc(published_trips.start_date))
@@ -40,7 +41,8 @@ export async function getAdjacentPublishedTrips(
       .where(
         and(
           gt(published_trips.start_date, startDate),
-          ne(published_trips.id, tripId)
+          ne(published_trips.id, tripId),
+					published_trips.visible
         )
       )
       .orderBy(asc(published_trips.start_date))
