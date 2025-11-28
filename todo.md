@@ -31,7 +31,7 @@
 - participant live trips - DONE
 
 Next Up
-- participant information
+- participant information 
 - participant waiver
 - participant settings
 - signup info/logic on trips page
@@ -41,4 +41,4 @@ Next Up
 - memberships
 - waitlists
 - past trips page
-- add "you must sign in or create an account to sign up for a trip alert"p
+- add "you must sign in or create an account to sign up for a trip alert"

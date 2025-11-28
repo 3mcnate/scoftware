@@ -138,6 +138,9 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12
     devDependencies:
+      '@postgres-language-server/cli':
+        specifier: ^0.17.2
+        version: 0.17.2
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.1.16
@@ -1008,6 +1011,53 @@ packages:
 
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
+
+  '@postgres-language-server/cli-aarch64-apple-darwin@0.17.2':
+    resolution: {integrity: sha512-NkWEdTjk+Kxw8nzt0UgD/1T8zeJET3Om4pY8OdW+hU9S3+8cqwzXCTf5jSbh7+PdIUoc1UMKMc+MiTzEUP9kEg==}
+    engines: {node: '>=20'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@postgres-language-server/cli-aarch64-linux-gnu@0.17.2':
+    resolution: {integrity: sha512-G+jGK2hFxLfbnMjhpn17Y+5tHZx+DdSNAOMYSx8gwlAYJqFjCvnuDDyZq1mP+/VlcJFhdkg1vbz9RaaMTl9+0Q==}
+    engines: {node: '>=20'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@postgres-language-server/cli-aarch64-windows-msvc@0.17.2':
+    resolution: {integrity: sha512-qDlWJfGPi3ZBDNqfPox0z7RGegWKlyFGBhng2eK+a7SHxSTmPKa+AVOHpEoxQ6aIHJtczTpX83Id0naznzbjzg==}
+    engines: {node: '>=20'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@postgres-language-server/cli-x86_64-apple-darwin@0.17.2':
+    resolution: {integrity: sha512-KkhWtXMqvyfqEIOWy32vH0tWaUJoriHVcxvI909wy2pBKUOwmZUN/eFfSZPIvZzCik9b4iorysrDLbvjD4hUbg==}
+    engines: {node: '>=20'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@postgres-language-server/cli-x86_64-linux-gnu@0.17.2':
+    resolution: {integrity: sha512-KErimwxkW/eDUspI2qw0J1RsJxDe6Czlk0NIf6o7Yp4YEkKpzOtULV2o8HWv4uN4UN+pttOzVcywJMCC0SRy+w==}
+    engines: {node: '>=20'}
+    cpu: [x64]
+    os: [linux]
+
+  '@postgres-language-server/cli-x86_64-linux-musl@0.17.2':
+    resolution: {integrity: sha512-MVPHqClu0WghQ17JFpoVymg8eDoSoGS51oHPvZEn0D5B7kuXO2cuOYJVvBby/NiuZBvJOV29zRTlzX8awJRmyQ==}
+    engines: {node: '>=20'}
+    cpu: [x64]
+    os: [linux]
+
+  '@postgres-language-server/cli-x86_64-windows-msvc@0.17.2':
+    resolution: {integrity: sha512-Z3Wki8zoIX29cUz+S8llgwL+9DZ5Sj1rigZytydjrucJ/pQCikztusOWbBJNziTgQYJdJX+u9A1408RryOPLMQ==}
+    engines: {node: '>=20'}
+    cpu: [x64]
+    os: [win32]
+
+  '@postgres-language-server/cli@0.17.2':
+    resolution: {integrity: sha512-fTtheEeB+G2McsSPb5VM7EcKijwViOoCfib0r6Sq4uFBf0yMRciDUz4a/MakotxaSQ3Q+Tk6it3ASCCLu1+XnQ==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   '@radix-ui/number@1.1.1':
     resolution: {integrity: sha512-MkKCwxlXTgz6CFoJx3pCwn07GKp36+aZyu/u2Ln2VrA5DcdyCZkASEDBTd8x5whTQQL5CiYf4prXKLcgQdv29g==}
@@ -4930,6 +4980,37 @@ snapshots:
       outvariant: 1.4.3
 
   '@open-draft/until@2.1.0': {}
+
+  '@postgres-language-server/cli-aarch64-apple-darwin@0.17.2':
+    optional: true
+
+  '@postgres-language-server/cli-aarch64-linux-gnu@0.17.2':
+    optional: true
+
+  '@postgres-language-server/cli-aarch64-windows-msvc@0.17.2':
+    optional: true
+
+  '@postgres-language-server/cli-x86_64-apple-darwin@0.17.2':
+    optional: true
+
+  '@postgres-language-server/cli-x86_64-linux-gnu@0.17.2':
+    optional: true
+
+  '@postgres-language-server/cli-x86_64-linux-musl@0.17.2':
+    optional: true
+
+  '@postgres-language-server/cli-x86_64-windows-msvc@0.17.2':
+    optional: true
+
+  '@postgres-language-server/cli@0.17.2':
+    optionalDependencies:
+      '@postgres-language-server/cli-aarch64-apple-darwin': 0.17.2
+      '@postgres-language-server/cli-aarch64-linux-gnu': 0.17.2
+      '@postgres-language-server/cli-aarch64-windows-msvc': 0.17.2
+      '@postgres-language-server/cli-x86_64-apple-darwin': 0.17.2
+      '@postgres-language-server/cli-x86_64-linux-gnu': 0.17.2
+      '@postgres-language-server/cli-x86_64-linux-musl': 0.17.2
+      '@postgres-language-server/cli-x86_64-windows-msvc': 0.17.2
 
   '@radix-ui/number@1.1.1': {}
 
