@@ -4,11 +4,12 @@ import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
 
 export const getUserTickets = (userId: string, client: TypedSupabaseClient) => {
 	return client.from("tickets").select(`
-			id, user_id, trip_id, created_at, updated_at, cancelled, refunded, cancelled_at, type, amount_paid,
+			id, user_id, trip_id, created_at, updated_at, 
+			cancelled, refunded, cancelled_at, type, amount_paid, receipt_url,
 			published_trips (
 				*
 			),
-			waiver_signatures (
+			waiver:waiver_signatures (
 				*
 			)
 		`)

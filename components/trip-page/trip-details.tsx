@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { DifficultyModal } from "@/components/trip-page/difficulty-modal";
 import { TripDetailItem } from "@/components/trip-page/trip-detail-item";
+import { TripPageWaiverAlert } from "@/components/trip-page/trip-page-waiver-alert";
 import Image from "next/image";
 import { formatDate, formatTime } from "@/utils/date-time";
 import { type InferSelectModel } from "drizzle-orm";
@@ -60,6 +61,9 @@ export function TripDetails({ trip }: TripDetailsProps) {
           className="object-cover"
         />
       </div>
+
+      {/* Waiver Alert */}
+      <TripPageWaiverAlert tripId={trip.id} />
 
       {/* Title and Pricing Section */}
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">

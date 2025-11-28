@@ -552,6 +552,7 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           id: string
+          receipt_url: string
           refunded: boolean
           stripe_payment_id: string
           stripe_refund_id: string | null
@@ -567,6 +568,7 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           id?: string
+          receipt_url?: string
           refunded?: boolean
           stripe_payment_id: string
           stripe_refund_id?: string | null
@@ -582,6 +584,7 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           id?: string
+          receipt_url?: string
           refunded?: boolean
           stripe_payment_id?: string
           stripe_refund_id?: string | null
