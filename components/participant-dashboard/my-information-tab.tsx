@@ -1,11 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
 import { z } from "zod/v4"
 import { isValidPhoneNumber } from "react-phone-number-input"
-import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import { toast } from "sonner"
 import { Save, Loader2 } from "lucide-react"
 
@@ -21,9 +20,9 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import { createClient } from "@/utils/supabase/browser"
 import { useAuth } from "@/hooks/use-auth"
 import { useParticipantInfo } from "@/data/participant/get-participant-info"
+import { useUpsertParticipantInfo } from "@/data/participant/upsert-participant-info"
 
 const ParticipantInfoSchema = z.object({
   usc_id: z.coerce
@@ -48,15 +47,12 @@ const ParticipantInfoSchema = z.object({
 
 type ParticipantInfoFormData = z.infer<typeof ParticipantInfoSchema>
 
-
-
 export function MyInformationTab() {
-  const supabase = createClient()
   const auth = useAuth()
   const userId = auth.status === "authenticated" ? auth.user.id : ""
-  const [isSaving, setIsSaving] = useState(false)
 
-  const { data: existingInfo, isLoading, refetch } = useParticipantInfo(userId)
+  const { data: existingInfo, isLoading } = useParticipantInfo(userId)
+  const { mutateAsync: upsertInfo, isPending: isSaving } = useUpsertParticipantInfo()
 
   const {
     control,
@@ -104,26 +100,16 @@ export function MyInformationTab() {
   const onSubmit = async (data: ParticipantInfoFormData) => {
     if (!userId) return
 
-    setIsSaving(true)
     try {
-      const { error } = await supabase
-        .from("participant_info")
-        .upsert({
+      await upsertInfo([
+        {
           user_id: userId,
           ...data,
-        })
-
-      if (error) {
-        toast.error(error.message)
-        return
-      }
-
+        },
+      ])
       toast.success("Information saved successfully")
-      await refetch()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save information")
-    } finally {
-      setIsSaving(false)
     }
   }
 
