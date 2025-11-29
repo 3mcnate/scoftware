@@ -74,3 +74,46 @@ VALUES
 		null,
 		'false'
 	);
+
+INSERT INTO
+	"public"."participant_info" (
+		"created_at",
+		"updated_at",
+		"allergies",
+		"medical_history",
+		"medications",
+		"dietary_restrictions",
+		"emergency_contact_name",
+		"emergency_contact_phone_number",
+		"emergency_contact_relationship",
+		"health_insurance_bin_number",
+		"health_insurance_group_number",
+		"health_insurance_member_id",
+		"health_insurance_provider",
+		"user_id",
+		"graduation_year",
+		"graduation_season",
+		"degree_path",
+		"usc_id"
+	)
+VALUES
+	(
+		'2025-11-29 07:21:39.488916+00',
+		'2025-11-29 07:24:42.645965+00',
+		'none',
+		'non',
+		'none',
+		'none',
+		'nicky klein',
+		'+16503871309',
+		'mother',
+		'2222',
+		'1234',
+		'1234',
+		'kaiser',
+		'd070655d-974c-45a5-a332-eb1f499e49fd',
+		'2025',
+		'spring',
+		'graduate',
+		'6961122849'
+	);

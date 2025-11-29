@@ -31,7 +31,7 @@
 - participant live trips - DONE
 
 Next Up
-- participant information 
+- participant information - done
 - participant waiver
 - participant settings
 - signup info/logic on trips page
