@@ -10,6 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
   Calendar,
   MapPin,
   Clock,
@@ -20,6 +28,7 @@ import {
   ArrowUpRight,
   Mail,
   Users,
+  Compass,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -89,7 +98,26 @@ export function TripsTab() {
           Upcoming Trips
         </h2>
         {upcomingTickets.length === 0 ? (
-          <p className="text-muted-foreground">No upcoming trips</p>
+          <Empty className="border rounded-lg">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Compass />
+              </EmptyMedia>
+              <EmptyTitle>No Upcoming Trips</EmptyTitle>
+              <EmptyDescription>
+                You haven&apos;t signed up for a trip yet. Click below to see
+                upcoming trips!
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button asChild>
+                <Link href="/">
+                  Browse Trips
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </EmptyContent>
+          </Empty>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {upcomingTickets.map((ticket) => (

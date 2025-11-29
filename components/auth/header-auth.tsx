@@ -17,6 +17,7 @@ import { getInitials } from "@/utils/names";
 import { createClient } from "@/utils/supabase/browser";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function HeaderAuth() {
@@ -36,7 +37,7 @@ export default function HeaderAuth() {
 
   if (auth.status === "unauthenticated" || auth.status === "error") {
     return (
-      <Button asChild variant={'default'}>
+      <Button asChild variant={"default"}>
         <Link href="/login">Sign in</Link>
       </Button>
     );
@@ -52,6 +53,8 @@ export default function HeaderAuth() {
 function HeaderAuthProfile({ userId }: { userId: string }) {
   const { data: profile, isPending } = useProfileById(userId);
   const [arrowDown, setArrowDown] = useState(true);
+  const pathname = usePathname();
+  const router = useRouter();
 
   if (isPending || !profile) {
     return (
@@ -65,12 +68,20 @@ function HeaderAuthProfile({ userId }: { userId: string }) {
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
+
+    if (
+      pathname.startsWith("/participant") ||
+      pathname.startsWith("/guide") ||
+      pathname.startsWith("/admin")
+    ) {
+      router.push("/login");
+    }
   };
 
   return (
     <DropdownMenu onOpenChange={() => setArrowDown(!arrowDown)}>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center gap-2 hover:cursor-pointer hover:opacity-80 transition-all" >
+        <div className="flex items-center gap-2 hover:cursor-pointer hover:opacity-80 transition-all">
           <Avatar className="h-10 w-10 border border-border">
             {profile.avatar ? (
               <AvatarImage src={profile.avatar} alt="User" />
@@ -83,7 +94,11 @@ function HeaderAuthProfile({ userId }: { userId: string }) {
               </>
             )}
           </Avatar>
-          {arrowDown ? <ChevronDown className="size-5" /> : <ChevronUp className="size-5" />}
+          {arrowDown ? (
+            <ChevronDown className="size-5" />
+          ) : (
+            <ChevronUp className="size-5" />
+          )}
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -99,4 +114,3 @@ function HeaderAuthProfile({ userId }: { userId: string }) {
     </DropdownMenu>
   );
 }
-

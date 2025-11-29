@@ -29,9 +29,9 @@
 
 11/28/25
 - participant live trips - DONE
+- participant information - done
 
 Next Up
-- participant information - done
 - participant waiver
 - participant settings
 - signup info/logic on trips page
