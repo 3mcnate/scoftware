@@ -50,11 +50,12 @@ const ParticipantInfoSchema = z.object({
     error: "Please select a graduation season",
   }),
   graduation_year: z
-		.string()
-		.regex(/^\d{4}$/, "Graduation year must be a valid year")
-		.refine(year => Number(year) >= currentYear && Number(year) <= currentYear + 10,
-			`Year must be between ${currentYear} and ${currentYear + 10}`
-		),
+    .string()
+    .regex(/^\d{4}$/, "Graduation year must be a valid year")
+    .refine(
+      (year) => Number(year) >= currentYear && Number(year) <= currentYear + 10,
+      `Year must be between ${currentYear} and ${currentYear + 10}`
+    ),
   emergency_contact_name: z
     .string()
     .min(1, "Emergency contact name is required"),
@@ -82,7 +83,7 @@ export function MyInformationTab() {
 
   const {
     data: existingInfo,
-    isLoading,
+    isPending,
     error: existingInfoError,
   } = useParticipantInfo(userId);
   const { mutateAsync: upsertInfo, isPending: isSaving } =
@@ -92,14 +93,15 @@ export function MyInformationTab() {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { isDirty },
   } = useForm<ParticipantInfoFormData>({
     resolver: standardSchemaResolver(ParticipantInfoSchema),
     defaultValues: {
       usc_id: "",
+      graduation_year: "",
       degree_path: undefined,
       graduation_season: undefined,
-      graduation_year: "",
       emergency_contact_name: "",
       emergency_contact_phone_number: "",
       emergency_contact_relationship: "",
@@ -140,8 +142,6 @@ export function MyInformationTab() {
       const info = existingInfo[0];
       reset({
         usc_id: `${info.usc_id}`,
-        degree_path: info.degree_path,
-        graduation_season: info.graduation_season,
         graduation_year: `${info.graduation_year}`,
         emergency_contact_name: info.emergency_contact_name,
         emergency_contact_phone_number: info.emergency_contact_phone_number,
@@ -156,7 +156,19 @@ export function MyInformationTab() {
         dietary_restrictions: info.dietary_restrictions,
       });
     }
-  }, [existingInfo, reset]);
+
+		// delay hack to get select fields to fill properly
+		const resetSelectFields = async () => {
+			await new Promise((resolve) => setTimeout(resolve, 1))
+      if (existingInfo?.length) {
+        const info = existingInfo[0];
+        setValue("graduation_season", info.graduation_season);
+        setValue("degree_path", info.degree_path);
+      }
+    };
+
+		resetSelectFields();
+  }, [existingInfo, reset, setValue]);
 
   const onSubmit = async (data: ParticipantInfoFormData) => {
     if (!userId) return;
@@ -166,7 +178,7 @@ export function MyInformationTab() {
         {
           user_id: userId,
           ...data,
-					graduation_year: Number(data.graduation_year) 
+          graduation_year: Number(data.graduation_year),
         },
       ]);
       toast.success("Information saved successfully");
@@ -177,7 +189,7 @@ export function MyInformationTab() {
     }
   };
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -193,7 +205,7 @@ export function MyInformationTab() {
             Personal Information
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Keep your emergency contact and healthcare information up to date
+            This information is shared with your guides before every trip. Make sure to keep your medical and emergency contact info updated. 
           </p>
         </div>
         <Button type="submit" disabled={isSaving || !isDirty}>
@@ -211,7 +223,7 @@ export function MyInformationTab() {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-base">USC Information</CardTitle>
-            <CardDescription>Your university identification</CardDescription>
+            <CardDescription>Helps us ensure only current USC students can sign up for trips</CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup>
@@ -314,7 +326,7 @@ export function MyInformationTab() {
                         <Input
                           {...field}
                           id="graduation_year"
-													type="number"
+                          type="number"
                           placeholder="2025"
                           disabled={isSaving}
                           aria-invalid={!!error}
