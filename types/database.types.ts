@@ -366,10 +366,13 @@ export type Database = {
         Row: {
           allergies: string
           created_at: string
+          degree_path: Database["public"]["Enums"]["degree_path_type"]
           dietary_restrictions: string
           emergency_contact_name: string
           emergency_contact_phone_number: string
           emergency_contact_relationship: string
+          graduation_season: Database["public"]["Enums"]["graduation_season_type"]
+          graduation_year: number
           health_insurance_bin_number: string
           health_insurance_group_number: string
           health_insurance_member_id: string
@@ -377,16 +380,19 @@ export type Database = {
           medical_history: string
           medications: string
           updated_at: string
-          usc_id: number
+          usc_id: string
           user_id: string
         }
         Insert: {
           allergies: string
           created_at?: string
+          degree_path: Database["public"]["Enums"]["degree_path_type"]
           dietary_restrictions: string
           emergency_contact_name: string
           emergency_contact_phone_number: string
           emergency_contact_relationship: string
+          graduation_season: Database["public"]["Enums"]["graduation_season_type"]
+          graduation_year: number
           health_insurance_bin_number: string
           health_insurance_group_number: string
           health_insurance_member_id: string
@@ -394,16 +400,19 @@ export type Database = {
           medical_history: string
           medications: string
           updated_at?: string
-          usc_id: number
+          usc_id: string
           user_id: string
         }
         Update: {
           allergies?: string
           created_at?: string
+          degree_path?: Database["public"]["Enums"]["degree_path_type"]
           dietary_restrictions?: string
           emergency_contact_name?: string
           emergency_contact_phone_number?: string
           emergency_contact_relationship?: string
+          graduation_season?: Database["public"]["Enums"]["graduation_season_type"]
+          graduation_year?: number
           health_insurance_bin_number?: string
           health_insurance_group_number?: string
           health_insurance_member_id?: string
@@ -411,7 +420,7 @@ export type Database = {
           medical_history?: string
           medications?: string
           updated_at?: string
-          usc_id?: number
+          usc_id?: string
           user_id?: string
         }
         Relationships: [
@@ -1022,9 +1031,15 @@ export type Database = {
         Args: { r: Database["public"]["Enums"]["user_role"] }
         Returns: number
       }
+      has_trip_ticket: {
+        Args: { trip: string; user: string }
+        Returns: boolean
+      }
     }
     Enums: {
       checkout_session_status: "open" | "complete" | "expired"
+      degree_path_type: "undergrad" | "graduate" | "pdp"
+      graduation_season_type: "spring" | "fall"
       guide_position: "new_guide" | "guide" | "longboard" | "alum"
       membership_length: "semester" | "year"
       ticket_type: "member" | "nonmember" | "driver"
@@ -1168,6 +1183,8 @@ export const Constants = {
   public: {
     Enums: {
       checkout_session_status: ["open", "complete", "expired"],
+      degree_path_type: ["undergrad", "graduate", "pdp"],
+      graduation_season_type: ["spring", "fall"],
       guide_position: ["new_guide", "guide", "longboard", "alum"],
       membership_length: ["semester", "year"],
       ticket_type: ["member", "nonmember", "driver"],
