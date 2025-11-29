@@ -34,8 +34,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { useAuth } from "@/hooks/use-auth";
-import { useParticipantInfo } from "@/data/participant/get-participant-info";
 import { useUpsertParticipantInfo } from "@/data/participant/upsert-participant-info";
+import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
+import type { Tables } from "@/types/database.types";
 
 const currentYear = new Date().getFullYear();
 
@@ -76,99 +77,49 @@ const ParticipantInfoSchema = z.object({
 });
 
 type ParticipantInfoFormData = z.infer<typeof ParticipantInfoSchema>;
+type ParticipantInfo = Tables<"participant_info">;
+interface MyInformationTabProps {
+  initialData?: ParticipantInfo | null;
+}
 
-export function MyInformationTab() {
+export function MyInformationTab({ initialData }: MyInformationTabProps) {
   const auth = useAuth();
   const userId = auth.status === "authenticated" ? auth.user.id : "";
 
-  const {
-    data: existingInfo,
-    isPending,
-    error: existingInfoError,
-  } = useParticipantInfo(userId);
   const { mutateAsync: upsertInfo, isPending: isSaving } =
     useUpsertParticipantInfo();
 
   const {
     control,
     handleSubmit,
-    reset,
-    setValue,
     formState: { isDirty },
+    reset,
   } = useForm<ParticipantInfoFormData>({
     resolver: standardSchemaResolver(ParticipantInfoSchema),
     defaultValues: {
-      usc_id: "",
-      graduation_year: "",
-      degree_path: undefined,
-      graduation_season: undefined,
-      emergency_contact_name: "",
-      emergency_contact_phone_number: "",
-      emergency_contact_relationship: "",
-      health_insurance_provider: "",
-      health_insurance_member_id: "",
-      health_insurance_group_number: "",
-      health_insurance_bin_number: "",
-      allergies: "",
-      medications: "",
-      medical_history: "",
-      dietary_restrictions: "",
+      usc_id: initialData?.usc_id ?? "",
+      graduation_year: initialData?.graduation_year?.toString() ?? "",
+      degree_path: initialData?.degree_path,
+      graduation_season: initialData?.graduation_season,
+      emergency_contact_name: initialData?.emergency_contact_name ?? "",
+      emergency_contact_phone_number:
+        initialData?.emergency_contact_phone_number ?? "",
+      emergency_contact_relationship:
+        initialData?.emergency_contact_relationship ?? "",
+      health_insurance_provider: initialData?.health_insurance_provider ?? "",
+      health_insurance_member_id: initialData?.health_insurance_member_id ?? "",
+      health_insurance_group_number:
+        initialData?.health_insurance_group_number ?? "",
+      health_insurance_bin_number:
+        initialData?.health_insurance_bin_number ?? "",
+      allergies: initialData?.allergies ?? "",
+      medications: initialData?.medications ?? "",
+      medical_history: initialData?.medical_history ?? "",
+      dietary_restrictions: initialData?.dietary_restrictions ?? "",
     },
   });
 
-  // Warn user about unsaved changes before leaving the page
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty) {
-        e.preventDefault();
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty]);
-
-  useEffect(() => {
-    if (existingInfoError)
-      toast.error(
-        existingInfoError instanceof Error
-          ? existingInfoError.message
-          : "Failed to load information"
-      );
-  }, [existingInfoError]);
-
-  useEffect(() => {
-    if (existingInfo?.length) {
-      const info = existingInfo[0];
-      reset({
-        usc_id: `${info.usc_id}`,
-        graduation_year: `${info.graduation_year}`,
-        emergency_contact_name: info.emergency_contact_name,
-        emergency_contact_phone_number: info.emergency_contact_phone_number,
-        emergency_contact_relationship: info.emergency_contact_relationship,
-        health_insurance_provider: info.health_insurance_provider,
-        health_insurance_member_id: info.health_insurance_member_id,
-        health_insurance_group_number: info.health_insurance_group_number,
-        health_insurance_bin_number: info.health_insurance_bin_number,
-        allergies: info.allergies,
-        medications: info.medications,
-        medical_history: info.medical_history,
-        dietary_restrictions: info.dietary_restrictions,
-      });
-    }
-
-		// delay hack to get select fields to fill properly
-		const resetSelectFields = async () => {
-			await new Promise((resolve) => setTimeout(resolve, 1))
-      if (existingInfo?.length) {
-        const info = existingInfo[0];
-        setValue("graduation_season", info.graduation_season);
-        setValue("degree_path", info.degree_path);
-      }
-    };
-
-		resetSelectFields();
-  }, [existingInfo, reset, setValue]);
+  useUnsavedChangesPrompt(isDirty);
 
   const onSubmit = async (data: ParticipantInfoFormData) => {
     if (!userId) return;
@@ -182,20 +133,13 @@ export function MyInformationTab() {
         },
       ]);
       toast.success("Information saved successfully");
+      reset(data);
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to save information"
       );
     }
   };
-
-  if (isPending) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -205,7 +149,8 @@ export function MyInformationTab() {
             Personal Information
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            This information is shared with your guides before every trip. Make sure to keep your medical and emergency contact info updated. 
+            This information is shared with your guides before every trip. Make
+            sure to keep your medical and emergency contact info updated.
           </p>
         </div>
         <Button type="submit" disabled={isSaving || !isDirty}>
@@ -223,7 +168,9 @@ export function MyInformationTab() {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-base">USC Information</CardTitle>
-            <CardDescription>Helps us ensure only current USC students can sign up for trips</CardDescription>
+            <CardDescription>
+              Helps us ensure only current USC students can sign up for trips
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup>
