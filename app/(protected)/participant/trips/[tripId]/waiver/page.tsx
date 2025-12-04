@@ -24,6 +24,82 @@ const trips: Record<string, { name: string; date: string }> = {
   "4": { name: "Pacific Coast Highway", date: "Mar 8-12, 2026" },
 }
 
+const tiptapContent = {
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "This is a normal sentence with "
+        },
+        {
+          "type": "text",
+          "text": "bold",
+          "marks": [
+            { "type": "bold" }
+          ]
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "text",
+          "text": "italic",
+          "marks": [
+            { "type": "italic" }
+          ]
+        },
+        {
+          "type": "text",
+          "text": ", and "
+        },
+        {
+          "type": "text",
+          "text": "underlined",
+          "marks": [
+            { "type": "underline" }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " text all in one paragraph."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "This is a second paragraph that also includes a link to "
+        },
+        {
+          "type": "text",
+          "text": "OpenAI",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "https://openai.com",
+                "target": "_blank",
+                "rel": "noopener noreferrer"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    }
+  ]
+}
+
+
 const waiverSections = [
   {
     id: "assumption-of-risk",
