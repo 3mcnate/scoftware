@@ -148,9 +148,8 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
           <h2 className="text-lg font-semibold text-foreground">
             Personal Information
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            This information is shared with your guides before every trip. Make
-            sure to keep your medical and emergency contact info updated.
+          <p className="text-sm mt-1">
+            This information helps us keep you safe! It will be shared with your guides before every trip, so you only have to enter it once :)
           </p>
         </div>
         <Button type="submit" disabled={isSaving || !isDirty}>

@@ -32,13 +32,14 @@
 - participant information - done
 
 Next Up
-- participant waiver
+- fix truncation for trip details
+- participant waiver 
+- memberships
 - participant settings
 - signup info/logic on trips page
 - checkout (lets go)
 - driver info form
 - driver waiver
-- memberships
 - waitlists
 - past trips page
 - add "you must sign in or create an account to sign up for a trip alert"

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, ChevronRight } from "lucide-react";
 import { useUserTickets } from "@/data/participant/get-user-tickets";
 import { useAuth } from "@/hooks/use-auth";
+import Link from "next/link";
 
 interface TripPageWaiverAlertProps {
   tripId: string;
@@ -19,9 +20,13 @@ export function TripPageWaiverAlert({ tripId }: TripPageWaiverAlertProps) {
     return null;
   }
 
-	const now = new Date()
+  const now = new Date();
   const tripTicket = tickets?.find(
-    (t) => t.trip_id === tripId && !t.cancelled && !t.waiver && new Date(t.published_trips.start_date) > now
+    (t) =>
+      t.trip_id === tripId &&
+      !t.cancelled &&
+      !t.waiver &&
+      new Date(t.published_trips.start_date) > now
   );
 
   if (!tripTicket) {
@@ -33,14 +38,17 @@ export function TripPageWaiverAlert({ tripId }: TripPageWaiverAlertProps) {
       <AlertTriangle className="h-4 w-4 text-warning" />
       <div className="flex flex-1 items-center justify-between gap-4">
         <div>
-          <AlertTitle >Waiver Required</AlertTitle>
+          <AlertTitle>Waiver Required</AlertTitle>
           <AlertDescription className="text-muted-foreground">
-            You&apos;re signed up for this trip, but you must sign the waiver before coming.
+            You&apos;re signed up for this trip, but you must sign the waiver
+            before coming.
           </AlertDescription>
         </div>
-        <Button variant="outline" className="shrink-0">
-          Sign Waiver
-          <ChevronRight className="h-4 w-4" />
+        <Button asChild variant="outline" className="shrink-0">
+          <Link href={`/participant/trips/${tripId}/waiver`}>
+            Sign Waiver
+            <ChevronRight className="h-4 w-4" />
+          </Link>
         </Button>
       </div>
     </Alert>

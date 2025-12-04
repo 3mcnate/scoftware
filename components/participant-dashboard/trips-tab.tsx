@@ -74,7 +74,9 @@ export function TripsTab() {
     (t) => t.published_trips && new Date(t.published_trips.start_date) < now
   );
 
-  const waiverCount = upcomingTickets.filter((t) => !t.waiver && !t.cancelled).length;
+  const waiverCount = upcomingTickets.filter(
+    (t) => !t.waiver && !t.cancelled
+  ).length;
 
   return (
     <div className="space-y-8">
@@ -105,14 +107,13 @@ export function TripsTab() {
               </EmptyMedia>
               <EmptyTitle>No Upcoming Trips</EmptyTitle>
               <EmptyDescription>
-                You haven&apos;t signed up for a trip yet. Click below to see
-                upcoming trips!
+                You haven&apos;t signed up for a trip yet.
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button asChild>
                 <Link href="/">
-                  Browse Trips
+                  Lets go
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -159,14 +160,17 @@ function TripCard({
   const isRefunded = ticket.refunded;
   const isConfirmed = ticket.waiver && !ticket.cancelled;
 
-	const startDate = formatDate(trip.start_date);
-	const startTime = formatTime(trip.start_date);
-	const endDate = formatDate(trip.end_date);
-	const endTime = formatTime(trip.end_date);
+  const startDate = formatDate(trip.start_date);
+  const startTime = formatTime(trip.start_date);
+  const endDate = formatDate(trip.end_date);
+  const endTime = formatTime(trip.end_date);
 
   return (
     <Card className="bg-card border-border overflow-hidden group hover:border-muted-foreground/30 transition-colors pt-0">
-      <Link href={`/trip/${trip.id}`} className="relative h-65 w-full md:w-auto">
+      <Link
+        href={`/trip/${trip.id}`}
+        className="relative h-65 w-full md:w-auto"
+      >
         <Image
           src={trip.picture}
           alt={trip.name}
@@ -176,7 +180,9 @@ function TripCard({
       </Link>
       <CardHeader className="space-y-2">
         <Link href={`/trip/${trip.id}`}>
-          <h3 className="font-semibold text-foreground hover:underline hover:opacity-60 transition-all">{trip.name}</h3>
+          <h3 className="font-semibold text-foreground hover:underline hover:opacity-60 transition-all">
+            {trip.name}
+          </h3>
         </Link>
         <div className="flex flex-wrap gap-1">
           {isCancelled && (
@@ -189,7 +195,7 @@ function TripCard({
               Confirmed
             </Badge>
           )}
-					{isPast && !isCancelled && (
+          {isPast && !isCancelled && (
             <Badge className="bg-muted text-muted-foreground">Completed</Badge>
           )}
           {waiverRequired && (
@@ -198,12 +204,7 @@ function TripCard({
               Waiver Required
             </Badge>
           )}
-					{isRefunded && (
-            <Badge className="">
-              Refunded
-            </Badge>
-          )}
-          
+          {isRefunded && <Badge className="">Refunded</Badge>}
         </div>
         {isDriver && (
           <Alert className="py-2">
@@ -215,12 +216,21 @@ function TripCard({
         )}
         <div className="w-full flex flex-col gap-2">
           {waiverRequired && (
-            <Button variant="outline" className="w-full justify-between">
-              <div className="flex gap-2 items-center">
-                <CircleAlert className="size-4" />
-                Sign Waiver
-              </div>
-              <ChevronRight className="h-4 w-4" />
+            <Button
+              asChild
+              variant="outline"
+              className="w-full justify-between"
+            >
+              <Link
+                href={`/participant/trips/${trip.id}/waiver`}
+                className="flex gap-2 items-center justify-between"
+              >
+                <div className="flex gap-2 items-center">
+                  <CircleAlert className="size-4" />
+                  Sign Waiver
+                </div>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
             </Button>
           )}
         </div>
@@ -248,7 +258,11 @@ function TripCard({
             : [];
           if (guides.length === 0) return null;
           return (
-            <Accordion type="single" collapsible className="w-full border-t border-border mt-2 pt-2">
+            <Accordion
+              type="single"
+              collapsible
+              className="w-full border-t border-border mt-2 pt-2"
+            >
               <AccordionItem value="guides" className="border-none">
                 <AccordionTrigger className="py-2 text-sm hover:no-underline font-normal">
                   <div className="flex items-center gap-2">

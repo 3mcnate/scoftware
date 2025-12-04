@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SearchX } from "lucide-react";
-import PublicHeader from "@/components/global/public-header";
 
 export default function TripNotFound() {
   return (
