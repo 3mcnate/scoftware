@@ -560,6 +560,7 @@ export type Database = {
           cancelled: boolean
           cancelled_at: string | null
           created_at: string
+          driver_waiver_filepath: string | null
           id: string
           receipt_url: string
           refunded: boolean
@@ -569,12 +570,14 @@ export type Database = {
           type: Database["public"]["Enums"]["ticket_type"]
           updated_at: string
           user_id: string
+          waiver_filepath: string | null
         }
         Insert: {
           amount_paid: number
           cancelled?: boolean
           cancelled_at?: string | null
           created_at?: string
+          driver_waiver_filepath?: string | null
           id?: string
           receipt_url?: string
           refunded?: boolean
@@ -584,12 +587,14 @@ export type Database = {
           type: Database["public"]["Enums"]["ticket_type"]
           updated_at?: string
           user_id: string
+          waiver_filepath?: string | null
         }
         Update: {
           amount_paid?: number
           cancelled?: boolean
           cancelled_at?: string | null
           created_at?: string
+          driver_waiver_filepath?: string | null
           id?: string
           receipt_url?: string
           refunded?: boolean
@@ -599,6 +604,7 @@ export type Database = {
           type?: Database["public"]["Enums"]["ticket_type"]
           updated_at?: string
           user_id?: string
+          waiver_filepath?: string | null
         }
         Relationships: [
           {
@@ -846,7 +852,7 @@ export type Database = {
         Row: {
           content: string
           created_at: string
-          id: number
+          id: string
           template_id: string
           trip_id: string
           type: Database["public"]["Enums"]["ticket_type"]
@@ -855,7 +861,7 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
-          id?: number
+          id?: string
           template_id: string
           trip_id: string
           type: Database["public"]["Enums"]["ticket_type"]
@@ -864,7 +870,7 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string
-          id?: number
+          id?: string
           template_id?: string
           trip_id?: string
           type?: Database["public"]["Enums"]["ticket_type"]
@@ -990,7 +996,8 @@ export type Database = {
         Row: {
           created_at: string
           event: Database["public"]["Enums"]["waiver_event"]
-          id: number
+          file_path: string | null
+          id: string
           ip_address: string
           trip_id: string
           user_agent: string
@@ -999,7 +1006,8 @@ export type Database = {
         Insert: {
           created_at?: string
           event: Database["public"]["Enums"]["waiver_event"]
-          id?: number
+          file_path?: string | null
+          id?: string
           ip_address: string
           trip_id: string
           user_agent?: string
@@ -1008,7 +1016,8 @@ export type Database = {
         Update: {
           created_at?: string
           event?: Database["public"]["Enums"]["waiver_event"]
-          id?: number
+          file_path?: string | null
+          id?: string
           ip_address?: string
           trip_id?: string
           user_agent?: string
