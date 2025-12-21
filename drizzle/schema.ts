@@ -1,4 +1,4 @@
-import { pgTable, foreignKey, uuid, timestamp, text, unique, pgSchema, uniqueIndex, index, check, varchar, jsonb, boolean, smallint, pgPolicy, integer, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, uuid, timestamp, text, unique, pgSchema, uniqueIndex, index, check, varchar, jsonb, boolean, smallint, pgPolicy, integer, numeric, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const auth = pgSchema("auth");
@@ -190,4 +190,37 @@ export const waiver_templates = pgTable("waiver_templates", {
 	active: boolean().default(false).notNull(),
 }, (table) => [
 	uniqueIndex("active_waiver_template_types").using("btree", table.type.asc().nullsLast().op("enum_ops")).where(sql`(active = true)`),
+]);
+
+export const tickets = pgTable("tickets", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	user_id: uuid().notNull(),
+	trip_id: uuid().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	cancelled: boolean().default(false).notNull(),
+	refunded: boolean().default(false).notNull(),
+	cancelled_at: timestamp({ withTimezone: true, mode: 'string' }),
+	stripe_payment_id: text().notNull(),
+	type: ticket_type().notNull(),
+	amount_paid: numeric().notNull(),
+	stripe_refund_id: text(),
+	receipt_url: text().default('https://www.stripe.com').notNull(),
+	driver_waiver_filepath: text(),
+	waiver_filepath: text(),
+}, (table) => [
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [published_trips.id],
+			name: "tickets_trip_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "tickets_user_id_fkey"
+		}),
+	unique("tickets_unique_trip_participant").on(table.user_id, table.trip_id),
+	unique("tickets_stripe_checkout_session_id_key").on(table.stripe_payment_id),
+	unique("tickets_stripe_refund_id_key").on(table.stripe_refund_id),
+	pgPolicy("Participants can select their own tickets", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(user_id = ( SELECT auth.uid() AS uid))` }),
 ]);

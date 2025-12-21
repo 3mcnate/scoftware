@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { trips, waiver_events, profiles, waiver_templates, trip_waivers, usersInAuth, published_trips } from "./schema";
+import { trips, waiver_events, profiles, waiver_templates, trip_waivers, usersInAuth, published_trips, tickets } from "./schema";
 
 export const waiver_eventsRelations = relations(waiver_events, ({one}) => ({
 	trip: one(trips, {
@@ -24,6 +24,7 @@ export const profilesRelations = relations(profiles, ({one, many}) => ({
 		fields: [profiles.id],
 		references: [usersInAuth.id]
 	}),
+	tickets: many(tickets),
 }));
 
 export const trip_waiversRelations = relations(trip_waivers, ({one}) => ({
@@ -45,9 +46,21 @@ export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	profiles: many(profiles),
 }));
 
-export const published_tripsRelations = relations(published_trips, ({one}) => ({
+export const published_tripsRelations = relations(published_trips, ({one, many}) => ({
 	trip: one(trips, {
 		fields: [published_trips.id],
 		references: [trips.id]
+	}),
+	tickets: many(tickets),
+}));
+
+export const ticketsRelations = relations(tickets, ({one}) => ({
+	published_trip: one(published_trips, {
+		fields: [tickets.trip_id],
+		references: [published_trips.id]
+	}),
+	profile: one(profiles, {
+		fields: [tickets.user_id],
+		references: [profiles.id]
 	}),
 }));

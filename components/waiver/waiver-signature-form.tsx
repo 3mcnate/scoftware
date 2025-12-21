@@ -1,34 +1,100 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
+import { Loader2, FileCheck, ExternalLink } from "lucide-react";
+import { differenceInYears } from "date-fns";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import {differenceInYears} from 'date-fns'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface WaiverSignatureFormProps {
+  tripId: string;
+  waiverId: string;
   tripName: string;
 }
 
-export function WaiverSignatureForm({ tripName }: WaiverSignatureFormProps) {
+export function WaiverSignatureForm({ tripId, waiverId, tripName }: WaiverSignatureFormProps) {
   const [consentChecked, setConsentChecked] = useState(false);
   const [acknowledgmentChecked, setAcknowledgmentChecked] = useState(false);
   const [finalSignature, setFinalSignature] = useState("");
   const [birthday, setBirthday] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signedWaiverPath, setSignedWaiverPath] = useState<string | null>(null);
 
-	const age = differenceInYears(new Date(), new Date(birthday));
+  const age = differenceInYears(new Date(), new Date(birthday));
 
   const canSubmit =
     consentChecked &&
     acknowledgmentChecked &&
     finalSignature.trim() &&
-		age >= 18;
+    age >= 18 &&
+    !isSubmitting;
 
-  const handleSubmitWaiver = () => {
-    
+  const handleSubmitWaiver = async () => {
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/waivers/sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullLegalName: finalSignature.trim(),
+          birthday,
+          tripId,
+          waiverId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit waiver");
+      }
+
+      setSignedWaiverPath(data.filepath);
+      toast.success("Waiver signed successfully!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to submit waiver");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const waiverViewUrl = signedWaiverPath
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/authenticated/waivers/${signedWaiverPath}`
+    : null;
+
+  if (signedWaiverPath) {
+    return (
+      <Card className="border-2 border-green-500/50 bg-green-50/50 dark:bg-green-950/20">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2 text-green-700 dark:text-green-400">
+            <FileCheck className="h-5 w-5" />
+            Waiver Signed Successfully
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <AlertTitle>Your waiver for {tripName} has been submitted</AlertTitle>
+            <AlertDescription className="mt-2">
+              A copy of your signed waiver has been saved. You can view or download it using the link below.
+            </AlertDescription>
+          </Alert>
+          <Button asChild variant="outline" className="w-full">
+            <a href={waiverViewUrl!} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              View Signed Waiver
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-2 border-border">
@@ -108,7 +174,8 @@ export function WaiverSignatureForm({ tripName }: WaiverSignatureFormProps) {
           className="w-full mt-4"
           size="lg"
         >
-          Submit Waiver
+          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          {isSubmitting ? "Submitting..." : "Submit Waiver"}
         </Button>
       </CardContent>
     </Card>
