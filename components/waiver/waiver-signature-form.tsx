@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useSignWaiver } from "@/data/waivers";
+import { useSignWaiver } from "@/data/waivers/sign-waiver";
 
 const WaiverSignatureSchema = z
   .object({
@@ -39,7 +39,7 @@ interface WaiverSignatureFormProps {
   tripName: string;
 }
 
-export function WaiverSignatureForm({ tripId, waiverId, tripName }: WaiverSignatureFormProps) {
+export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormProps) {
   const { mutate: signWaiver, isPending, data: signedData } = useSignWaiver();
 
   const { control, handleSubmit, watch } = useForm<WaiverSignatureFormData>({
@@ -85,7 +85,7 @@ export function WaiverSignatureForm({ tripId, waiverId, tripName }: WaiverSignat
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
-            <AlertTitle>Your waiver for {tripName} has been submitted</AlertTitle>
+            <AlertTitle>Your waiver has been submitted</AlertTitle>
             <AlertDescription className="mt-2">
               A copy of your signed waiver has been saved. You can view or download it using the link below.
             </AlertDescription>

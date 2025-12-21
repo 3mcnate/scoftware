@@ -15,13 +15,6 @@ import {
 import type { JSONContent } from "@tiptap/core"
 import { WaiverSignatureForm } from "../../../../../../components/waiver/waiver-signature-form"
 
-const trips: Record<string, { name: string; date: string }> = {
-  "1": { name: "Grand Canyon Adventure", date: "Dec 15-18, 2025" },
-  "2": { name: "Yellowstone Expedition", date: "Jan 5-10, 2026" },
-  "3": { name: "Yosemite Camping Trip", date: "Feb 20-23, 2026" },
-  "4": { name: "Pacific Coast Highway", date: "Mar 8-12, 2026" },
-}
-
 const tiptapContent: JSONContent = {
   type: "doc",
   content: [
@@ -189,10 +182,9 @@ const tiptapContent: JSONContent = {
 interface WaiverPageProps {
   params: Promise<{ tripId: string }>
 }
-
+// TODO: query params for driver/participant waiver
 export default async function WaiverPage({ params }: WaiverPageProps) {
   const { tripId } = await params
-  const trip = trips[tripId] || { name: "Unknown Trip", date: "" }
 
   const waiverHtml = generateHTML(tiptapContent, [
     StarterKit,
@@ -208,10 +200,6 @@ export default async function WaiverPage({ params }: WaiverPageProps) {
             <BreadcrumbLink asChild>
               <Link href="/participant/trips">Trips</Link>
             </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{trip.name}</BreadcrumbPage>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -233,7 +221,7 @@ export default async function WaiverPage({ params }: WaiverPageProps) {
         </CardContent>
       </Card>
 
-      <WaiverSignatureForm tripName={trip.name} />
+      <WaiverSignatureForm tripId={tripId} />
     </div>
   )
 }

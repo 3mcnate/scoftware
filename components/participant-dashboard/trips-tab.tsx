@@ -75,7 +75,7 @@ export function TripsTab() {
   );
 
   const waiverCount = upcomingTickets.filter(
-    (t) => !t.waiver && !t.cancelled
+    (t) => !t.waiver_filepath && !t.cancelled
   ).length;
 
   return (
@@ -154,11 +154,11 @@ function TripCard({
   const trip = ticket.published_trips;
   if (!trip) return null;
 
-  const waiverRequired = !ticket.waiver && !isPast && !ticket.cancelled;
+  const waiverRequired = !ticket.waiver_filepath && !isPast && !ticket.cancelled;
   const isDriver = ticket.type === "driver";
   const isCancelled = ticket.cancelled;
   const isRefunded = ticket.refunded;
-  const isConfirmed = ticket.waiver && !ticket.cancelled;
+  const isConfirmed = ticket.waiver_filepath && !ticket.cancelled;
 
   const startDate = formatDate(trip.start_date);
   const startTime = formatTime(trip.start_date);

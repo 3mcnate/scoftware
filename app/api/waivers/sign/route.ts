@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { createServerClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { getTripWaiver, createWaiverEvent, updateTicketWaiverFilepath, getTicketByUserAndTrip } from "@/data/waivers";
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
+import { getTripWaiver } from "@/data/waivers/get-trip-waiver";
+import { getTicketByUserAndTrip, updateTicketWaiverFilepath } from "@/data/waivers/update-ticket-waiver";
+import { createWaiverEvent } from "@/data/waivers/create-waiver-event";
 
 const signWaiverSchema = z.object({
 	fullLegalName: z.string().min(1, "Full legal name is required"),
