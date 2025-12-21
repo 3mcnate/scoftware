@@ -87,8 +87,8 @@ VALUES
 		'Falls and Feathers at Whitney Canyon
 ',
 		'/trip-pic-3.webp',
-		'2025-12-06 17:00:00+00',
-		'2025-12-07 01:00:00+00',
+		'2026-12-06 17:00:00+00',
+		'2026-12-07 01:00:00+00',
 		'Saturday 12/6 at Hecuba in the Village @9AM',
 		'5 PM (probs earlier)',
 		'hiking, frolicking, waterfall watching, bird watching, nature center',

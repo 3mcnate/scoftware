@@ -26,7 +26,7 @@ INSERT INTO
 		"phone_change",
 		"phone_change_token",
 		"phone_change_sent_at",
-		"confirmed_at",
+
 		"email_change_token_current",
 		"email_change_confirm_status",
 		"banned_until",
@@ -64,7 +64,7 @@ VALUES
 		'',
 		'',
 		null,
-		'2025-11-26 23:04:47.830735+00',
+
 		'',
 		'0',
 		null,

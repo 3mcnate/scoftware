@@ -13,12 +13,13 @@ Native Land: Salinan, Esselen
 
 
 Waiver backend setup:
-waivers table
+trip_waivers table -> rows generated from waiver_templates table
 - waiver id
 - trip_id
 - waiver type
 - html_content
 - created_at
+
 
 On trip publish or waiver change:
 	if the waiver has been signed
@@ -29,12 +30,6 @@ On trip publish or waiver change:
 Whenever user has yet to sign waiver:
 	load most recent waiver with matching trip_id 
 
-signed_waivers
-	id
-	user_id
-	created_at
-	url
-
 When user signs waiver:
 	add to waiver events audit logging table
 	generate static signed waiver with link
@@ -43,3 +38,4 @@ When user signs waiver:
 
 	
 
+Create a backend api route to process waiver completions. 

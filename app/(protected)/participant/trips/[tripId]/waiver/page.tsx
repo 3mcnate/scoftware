@@ -13,7 +13,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import type { JSONContent } from "@tiptap/core"
-import { WaiverSignatureForm } from "./waiver-signature-form"
+import { WaiverSignatureForm } from "../../../../../../components/waiver/waiver-signature-form"
 
 const trips: Record<string, { name: string; date: string }> = {
   "1": { name: "Grand Canyon Adventure", date: "Dec 15-18, 2025" },
@@ -222,9 +222,6 @@ export default async function WaiverPage({ params }: WaiverPageProps) {
 
       <div>
         <h1 className="text-2xl font-bold text-foreground">Participant Waiver</h1>
-        <p className="text-muted-foreground mt-1">
-          Please read the waiver carefully and sign below to acknowledge your understanding.
-        </p>
       </div>
 
       <Card>
