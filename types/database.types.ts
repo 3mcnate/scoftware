@@ -569,7 +569,6 @@ export type Database = {
           type: Database["public"]["Enums"]["ticket_type"]
           updated_at: string
           user_id: string
-          waiver_id: string | null
         }
         Insert: {
           amount_paid: number
@@ -585,7 +584,6 @@ export type Database = {
           type: Database["public"]["Enums"]["ticket_type"]
           updated_at?: string
           user_id: string
-          waiver_id?: string | null
         }
         Update: {
           amount_paid?: number
@@ -601,7 +599,6 @@ export type Database = {
           type?: Database["public"]["Enums"]["ticket_type"]
           updated_at?: string
           user_id?: string
-          waiver_id?: string | null
         }
         Relationships: [
           {
@@ -616,13 +613,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tickets_waiver_id_fkey"
-            columns: ["waiver_id"]
-            isOneToOne: false
-            referencedRelation: "waiver_signatures"
             referencedColumns: ["id"]
           },
         ]
@@ -852,6 +842,51 @@ export type Database = {
           },
         ]
       }
+      trip_waivers: {
+        Row: {
+          content: string
+          created_at: string
+          id: number
+          template_id: string
+          trip_id: string
+          type: Database["public"]["Enums"]["ticket_type"]
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: number
+          template_id: string
+          trip_id: string
+          type: Database["public"]["Enums"]["ticket_type"]
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: number
+          template_id?: string
+          trip_id?: string
+          type?: Database["public"]["Enums"]["ticket_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_waivers_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "waiver_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_waivers_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trips: {
         Row: {
           access_code: string | null
@@ -951,64 +986,74 @@ export type Database = {
           },
         ]
       }
-      waiver_signatures: {
+      waiver_events: {
         Row: {
-          confirmation_email_sent_at: string
-          consent_text: string
           created_at: string
-          document_hash: string
-          document_id: string
-          drawn_signature: string
-          email: string
-          id: string
+          event: Database["public"]["Enums"]["waiver_event"]
+          id: number
           ip_address: string
-          signature_hash: string
-          signed_at: string
-          typed_date: string
-          typed_name: string
+          trip_id: string
+          user_agent: string
           user_id: string
         }
         Insert: {
-          confirmation_email_sent_at: string
-          consent_text: string
           created_at?: string
-          document_hash: string
-          document_id: string
-          drawn_signature: string
-          email: string
-          id?: string
+          event: Database["public"]["Enums"]["waiver_event"]
+          id?: number
           ip_address: string
-          signature_hash: string
-          signed_at: string
-          typed_date: string
-          typed_name: string
+          trip_id: string
+          user_agent?: string
           user_id: string
         }
         Update: {
-          confirmation_email_sent_at?: string
-          consent_text?: string
           created_at?: string
-          document_hash?: string
-          document_id?: string
-          drawn_signature?: string
-          email?: string
-          id?: string
+          event?: Database["public"]["Enums"]["waiver_event"]
+          id?: number
           ip_address?: string
-          signature_hash?: string
-          signed_at?: string
-          typed_date?: string
-          typed_name?: string
+          trip_id?: string
+          user_agent?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "waiver_signatures_user_id_fkey"
+            foreignKeyName: "waiver_events_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waiver_events_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
+      }
+      waiver_templates: {
+        Row: {
+          active: boolean
+          content: string
+          created_at: string
+          id: string
+          type: Database["public"]["Enums"]["ticket_type"]
+        }
+        Insert: {
+          active?: boolean
+          content: string
+          created_at?: string
+          id?: string
+          type: Database["public"]["Enums"]["ticket_type"]
+        }
+        Update: {
+          active?: boolean
+          content?: string
+          created_at?: string
+          id?: string
+          type?: Database["public"]["Enums"]["ticket_type"]
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -1052,6 +1097,7 @@ export type Database = {
         | "full"
       user_role: "participant" | "guide" | "admin" | "superadmin"
       waitlist_status: "waiting" | "notification_sent" | "signed_up" | "expired"
+      waiver_event: "user_opened" | "user_signed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1198,6 +1244,7 @@ export const Constants = {
       ],
       user_role: ["participant", "guide", "admin", "superadmin"],
       waitlist_status: ["waiting", "notification_sent", "signed_up", "expired"],
+      waiver_event: ["user_opened", "user_signed"],
     },
   },
 } as const

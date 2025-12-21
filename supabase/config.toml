@@ -97,7 +97,7 @@ port = 54324
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# NOTE: Run supabase db reset after making any changes to storage/buckes
+# NOTE: Run supabase db reset after making any changes to storage/buckets
 
 [storage]
 enabled = true

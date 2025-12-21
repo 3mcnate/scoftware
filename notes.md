@@ -38,4 +38,3 @@ When user signs waiver:
 
 	
 
-Create a backend api route to process waiver completions. 
