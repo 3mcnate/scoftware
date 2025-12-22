@@ -3,7 +3,7 @@
 import { TripDetails } from "@/components/trip-page/trip-details";
 import { SignupButtons } from "@/components/trip-page/signup-buttons";
 import { TripNavigation } from "@/components/trip-page/trip-navigation";
-import { getPublishedTrip } from "@/data/trips/get-published-trip";
+import { getVisiblePublishedTrip } from "@/data/trips/get-published-trip";
 import { getAdjacentPublishedTrips } from "@/data/trips/get-adjacent-published-trips";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/utils/date-time";
@@ -17,7 +17,7 @@ export default async function TripPage({
   let trip = null;
 
   try {
-    trip = await getPublishedTrip(tripId);
+    trip = await getVisiblePublishedTrip(tripId);
   } catch (e) {
     console.log("error fetching trip", e);
     notFound();

@@ -12,11 +12,17 @@ import {
 	updateTicketWaiverFilepath,
 } from "@/data/waivers/update-ticket-waiver";
 import { createWaiverEvent } from "@/data/waivers/create-waiver-event";
-import { generateHTML } from "@tiptap/html";
-import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
-import LinkExtension from "@tiptap/extension-link";
 import { isAdult } from "@/utils/date-time";
+import { generateWaiverHTML } from "@/utils/tiptap";
+import { JSONContent } from "@tiptap/core";
+import {
+	ACKNOWLEDGE_AND_ACCEPT_TEXT,
+	ELECTRONIC_SIGNATURE_CONSENT_TEXT,
+} from "@/components/waiver/waiver-checkbox-text";
+import { getProfileName } from "@/data/profiles/get-profile";
+import { userHasTicket } from "@/data/ticketes/user-has-ticket";
+import { sanitizeObjectName } from "@/utils/storage";
+import { getPublishedTrip, getVisiblePublishedTrip } from "@/data/trips/get-published-trip";
 
 const signWaiverSchema = z.object({
 	fullLegalName: z.string().min(1, "Full legal name is required"),
@@ -28,11 +34,22 @@ const signWaiverSchema = z.object({
 	waiverId: z.uuid("Invalid waiver ID"),
 });
 
+interface PdfMetadata {
+	title: string;
+	profileName: string;
+	email: string;
+	userId: string;
+	signedAt: string;
+	ipAddress: string;
+	userAgent: string;
+	signatureId: string;
+	fullLegalName: string;
+	birthday: string;
+}
+
 async function generateWaiverPdf(
 	htmlContent: string,
-	fullLegalName: string,
-	birthday: string,
-	signedAt: string,
+	metadata: PdfMetadata,
 ): Promise<Buffer> {
 	const isLocal = process.env.NEXT_PUBLIC_ENV === "development";
 
@@ -56,17 +73,49 @@ async function generateWaiverPdf(
 	try {
 		const page = await browser.newPage();
 
+		const headerHtml = `
+			<div style="margin-bottom: 32px; padding: 16px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 6px;">
+				<h3 style="margin-bottom: 12px; font-size: 16px; font-weight: 600; border-bottom: 1px solid #ccc; padding-bottom: 8px;">Document Signature Information</h3>
+				<div style="font-size: 13px;">
+					<div><span style="font-weight: 500;">Signed by:</span> ${metadata.profileName}</div>
+					<div><span style="font-weight: 500;">Email:</span> ${metadata.email}</div>
+					<div><span style="font-weight: 500;">User ID:</span> ${metadata.userId}</div>
+					<div><span style="font-weight: 500;">Signed at:</span> ${metadata.signedAt}</div>
+					<div><span style="font-weight: 500;">IP Address:</span> ${metadata.ipAddress}</div>
+					<div style="grid-column: 1 / -1;"><span style="font-weight: 500;">Browser:</span> ${metadata.userAgent}</div>
+					<div style="grid-column: 1 / -1;"><span style="font-weight: 500;">Signature ID:</span> ${metadata.signatureId}</div>
+				</div>
+			</div>
+		`;
+
 		const signatureHtml = `
 			<div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #333;">
+				<h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 600;">Acknowledgments</h3>
+				<div style="margin-bottom: 16px; padding: 12px; background-color: #f5f5f5; border-radius: 4px;">
+					<div style="display: flex; align-items: flex-start; gap: 8px;">
+						<span style="font-size: 16px;">&#9745;</span>
+						<span style="font-size: 14px; line-height: 1.5;">${ELECTRONIC_SIGNATURE_CONSENT_TEXT.trim()}</span>
+					</div>
+				</div>
+				<div style="margin-bottom: 16px; padding: 12px; background-color: #f5f5f5; border-radius: 4px;">
+					<div style="display: flex; align-items: flex-start; gap: 8px;">
+						<span style="font-size: 16px;">&#9745;</span>
+						<span style="font-size: 14px; line-height: 1.5;">${ACKNOWLEDGE_AND_ACCEPT_TEXT.trim()}</span>
+					</div>
+				</div>
 				<h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 600;">Signature</h3>
 				<div style="margin-bottom: 12px;">
-					<span style="font-weight: 500;">Full Legal Name:</span> ${fullLegalName}
+					<span style="font-weight: 500;">Full Legal Name:</span> ${metadata.fullLegalName}
 				</div>
 				<div style="margin-bottom: 12px;">
-					<span style="font-weight: 500;">Date of Birth:</span> ${birthday}
+					<span style="font-weight: 500;">Date of Birth:</span> ${metadata.birthday}
 				</div>
 				<div style="margin-bottom: 12px;">
-					<span style="font-weight: 500;">Signed At:</span> ${signedAt}
+					<span style="font-weight: 500;">Signed At:</span> ${
+			new Date(metadata.signedAt).toLocaleString("en-US", {
+				timeZone: "America/Los_Angeles",
+			})
+		} Pacific Time
 				</div>
 				<div style="margin-top: 24px; font-style: italic; color: #666;">
 					This document was electronically signed and is legally binding.
@@ -84,7 +133,6 @@ async function generateWaiverPdf(
 							font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 							line-height: 1.6;
 							padding: 40px;
-							max-width: 800px;
 							margin: 0 auto;
 						}
 						h1, h2, h3 {
@@ -100,6 +148,8 @@ async function generateWaiverPdf(
 					</style>
 				</head>
 				<body>
+					${headerHtml}
+					<h1 style="margin-bottom: 24px; font-size: 24px; font-weight: 700;">${metadata.title}</h1>
 					${htmlContent}
 					${signatureHtml}
 				</body>
@@ -140,7 +190,16 @@ export async function POST(request: NextRequest) {
 
 	const { fullLegalName, birthday, tripId, waiverId } = parseResult.data;
 
-	const waiver = await getTripWaiver(waiverId);
+	const [waiver, hasTicket, publishedTrip] = await Promise.all([
+		getTripWaiver(waiverId),
+		userHasTicket(user.id, tripId),
+		getPublishedTrip(tripId)
+	]);
+
+	if (!publishedTrip) {
+		return NextResponse.json({ error: "Trip not found" }, { status: 404 });
+	}
+
 	if (!waiver) {
 		return NextResponse.json({ error: "Waiver not found" }, { status: 404 });
 	}
@@ -151,8 +210,7 @@ export async function POST(request: NextRequest) {
 		});
 	}
 
-	const ticket = await getTicketByUserAndTrip(user.id, tripId);
-	if (!ticket) {
+	if (!hasTicket) {
 		return NextResponse.json({ error: "No ticket found for this trip" }, {
 			status: 404,
 		});
@@ -160,22 +218,46 @@ export async function POST(request: NextRequest) {
 
 	const isDriverWaiver = waiver.type === "driver";
 
+	const ipAddress = request.headers.get("x-forwarded-for") ||
+		request.headers.get("x-real-ip") || "unknown";
+	const userAgent = request.headers.get("user-agent") || "unknown";
+	const documentId = crypto.randomUUID().slice(-11);
+	
+	const profileName = await getProfileName(user.id);
+
+	if (!profileName) {
+		return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+	}
+
+	const filename = sanitizeObjectName(`WAIVER-${waiver.type}-${profileName}-${publishedTrip.name}-${documentId}`);
+	const filepath = `${user.id}/${filename}`;
+
+	const waiverEvent = await createWaiverEvent({
+		event: "user_signed",
+		user_id: user.id,
+		trip_id: tripId,
+		ip_address: ipAddress,
+		user_agent: userAgent,
+		file_path: filepath,
+	});
+
+	
+
 	const signedAt = new Date().toISOString();
 
-	const waiverHtml = generateHTML(waiver.content as JSONContent, [
-		StarterKit,
-		Underline,
-		LinkExtension.configure({ openOnClick: false }),
-	]);
-	const pdfBuffer = await generateWaiverPdf(
-		waiverHtml,
+	const waiverHtml = generateWaiverHTML(waiver.content as JSONContent);
+	const pdfBuffer = await generateWaiverPdf(waiverHtml, {
+		title: waiver.title,
+		profileName,
+		email: user.email ?? "unknown",
+		userId: user.id,
+		signedAt,
+		ipAddress,
+		userAgent,
+		signatureId: waiverEvent.id,
 		fullLegalName,
 		birthday,
-		signedAt,
-	);
-
-	const documentId = crypto.randomUUID();
-	const filepath = `${user.id}/${documentId}`;
+	});
 
 	const serviceClient = await createServiceRoleClient();
 	const { error: uploadError } = await serviceClient.storage
@@ -192,21 +274,7 @@ export async function POST(request: NextRequest) {
 		});
 	}
 
-	const ipAddress = request.headers.get("x-forwarded-for") ||
-		request.headers.get("x-real-ip") || "unknown";
-	const userAgent = request.headers.get("user-agent") || "unknown";
-
-	await Promise.all([
-		updateTicketWaiverFilepath(user.id, tripId, filepath, isDriverWaiver),
-		createWaiverEvent({
-			event: "user_signed",
-			user_id: user.id,
-			trip_id: tripId,
-			ip_address: ipAddress,
-			user_agent: userAgent,
-			file_path: filepath,
-		}),
-	]);
+	await updateTicketWaiverFilepath(user.id, tripId, filepath, isDriverWaiver);
 
 	return NextResponse.json({
 		success: true,
