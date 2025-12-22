@@ -25,7 +25,7 @@ export function TripPageWaiverAlert({ tripId }: TripPageWaiverAlertProps) {
     (t) =>
       t.trip_id === tripId &&
       !t.cancelled &&
-      !t.waiver &&
+      !t.waiver_filepath &&
       new Date(t.published_trips.start_date) > now
   );
 

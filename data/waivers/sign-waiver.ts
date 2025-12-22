@@ -10,6 +10,8 @@ interface SignWaiverInput {
 interface SignWaiverResponse {
 	success: boolean;
 	filepath: string;
+	signatureId: string;
+	signedAt: string;
 }
 
 async function signWaiver(input: SignWaiverInput): Promise<SignWaiverResponse> {

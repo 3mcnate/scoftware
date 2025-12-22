@@ -8,10 +8,11 @@ import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
 import { getTripWaiver } from "@/data/waivers/get-trip-waiver";
 import {
+	getTicketByUserAndTrip,
 	updateTicketWaiverFilepath,
 } from "@/data/waivers/update-ticket-waiver";
 import { createWaiverEvent } from "@/data/waivers/create-waiver-event";
-import { isAdult } from "@/utils/date-time";
+import { formatDate, isAdult } from "@/utils/date-time";
 import { generateWaiverHTML } from "@/utils/tiptap";
 import { JSONContent } from "@tiptap/core";
 import {
@@ -169,6 +170,7 @@ async function generateWaiverPdf(
 	}
 }
 
+// TODO: prevent users from signing waiver if they've already signed it
 export async function POST(request: NextRequest) {
 	const signedAt = new Date().toISOString();
 
@@ -191,9 +193,9 @@ export async function POST(request: NextRequest) {
 
 	const { fullLegalName, birthday, tripId, waiverId } = parseResult.data;
 
-	const [waiver, hasTicket, publishedTrip, profileName] = await Promise.all([
+	const [waiver, ticket, publishedTrip, profileName] = await Promise.all([
 		getTripWaiver(waiverId),
-		userHasTicket(user.id, tripId),
+		getTicketByUserAndTrip(user.id, tripId),
 		getPublishedTrip(tripId),
 		getProfileName(user.id),
 	]);
@@ -212,10 +214,17 @@ export async function POST(request: NextRequest) {
 		});
 	}
 
-	if (!hasTicket) {
+	if (!ticket) {
 		return NextResponse.json({ error: "No ticket found for this trip" }, {
 			status: 404,
 		});
+	}
+
+	if (
+		(ticket.waiver_filepath && waiver.type === "participant") ||
+		(ticket.driver_waiver_filepath && waiver.type === "driver")
+	) {
+		return NextResponse.json({ error: "Waiver already signed" }, { status: 400 });
 	}
 
 	if (!profileName) {
@@ -240,10 +249,11 @@ export async function POST(request: NextRequest) {
 		ip_address: ipAddress,
 		user_agent: userAgent,
 		file_path: filepath,
-		created_at: signedAt
+		created_at: signedAt,
 	});
 
 	const waiverHtml = generateWaiverHTML(waiver.content as JSONContent);
+
 	const pdfBuffer = await generateWaiverPdf(waiverHtml, {
 		title: waiver.title,
 		profileName,
@@ -277,5 +287,7 @@ export async function POST(request: NextRequest) {
 	return NextResponse.json({
 		success: true,
 		filepath,
+		signatureId: waiverEvent.id,
+		signedAt,
 	});
 }

@@ -1,6 +1,6 @@
 import { db } from "@/utils/drizzle";
 import { tickets } from "@/drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, InferSelectModel } from "drizzle-orm";
 
 export async function updateTicketWaiverFilepath(
 	userId: string,
@@ -24,7 +24,9 @@ export async function updateTicketWaiverFilepath(
 	return result[0];
 }
 
-export async function getTicketByUserAndTrip(userId: string, tripId: string) {
+export type GetTicketReturn = InferSelectModel<typeof tickets> | null
+
+export async function getTicketByUserAndTrip(userId: string, tripId: string): Promise<GetTicketReturn> {
 	const result = await db
 		.select()
 		.from(tickets)
