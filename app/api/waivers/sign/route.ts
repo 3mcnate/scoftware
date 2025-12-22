@@ -1,15 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod/v4";
-import { createServerClient, createServiceRoleClient } from "@/utils/supabase/server";
+import {
+	createServerClient,
+	createServiceRoleClient,
+} from "@/utils/supabase/server";
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
 import { getTripWaiver } from "@/data/waivers/get-trip-waiver";
-import { getTicketByUserAndTrip, updateTicketWaiverFilepath } from "@/data/waivers/update-ticket-waiver";
+import {
+	getTicketByUserAndTrip,
+	updateTicketWaiverFilepath,
+} from "@/data/waivers/update-ticket-waiver";
 import { createWaiverEvent } from "@/data/waivers/create-waiver-event";
+import { generateHTML } from "@tiptap/html";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import LinkExtension from "@tiptap/extension-link";
+import { isAdult } from "@/utils/date-time";
 
 const signWaiverSchema = z.object({
 	fullLegalName: z.string().min(1, "Full legal name is required"),
-	birthday: z.iso.date("Invalid birthday format"),
+	birthday: z.iso.date("Invalid birthday format").refine(
+		(birthday) => isAdult(birthday),
+		"Must be over 18 years old to sign waiver",
+	),
 	tripId: z.uuid("Invalid trip ID"),
 	waiverId: z.uuid("Invalid waiver ID"),
 });
@@ -18,17 +32,18 @@ async function generateWaiverPdf(
 	htmlContent: string,
 	fullLegalName: string,
 	birthday: string,
-	signedAt: string
+	signedAt: string,
 ): Promise<Buffer> {
 	const isLocal = process.env.NEXT_PUBLIC_ENV === "development";
 
 	let browser;
-	
+
 	if (isLocal) {
 		browser = await puppeteer.launch({
 			args: ["--no-sandbox", "--disable-setuid-sandbox"],
 			headless: true,
-			executablePath: process.env.CHROME_EXECUTABLE_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+			executablePath: process.env.CHROME_EXECUTABLE_PATH ||
+				"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
 		});
 	} else {
 		browser = await puppeteer.launch({
@@ -119,7 +134,7 @@ export async function POST(request: NextRequest) {
 	if (!parseResult.success) {
 		return NextResponse.json(
 			{ error: "Invalid request", details: parseResult.error.issues },
-			{ status: 400 }
+			{ status: 400 },
 		);
 	}
 
@@ -131,18 +146,33 @@ export async function POST(request: NextRequest) {
 	}
 
 	if (waiver.trip_id !== tripId) {
-		return NextResponse.json({ error: "Waiver does not belong to this trip" }, { status: 400 });
+		return NextResponse.json({ error: "Waiver does not belong to this trip" }, {
+			status: 400,
+		});
 	}
 
 	const ticket = await getTicketByUserAndTrip(user.id, tripId);
 	if (!ticket) {
-		return NextResponse.json({ error: "No ticket found for this trip" }, { status: 404 });
+		return NextResponse.json({ error: "No ticket found for this trip" }, {
+			status: 404,
+		});
 	}
 
 	const isDriverWaiver = waiver.type === "driver";
 
 	const signedAt = new Date().toISOString();
-	const pdfBuffer = await generateWaiverPdf(waiver.content, fullLegalName, birthday, signedAt);
+
+	const waiverHtml = generateHTML(waiver.content as JSONContent, [
+		StarterKit,
+		Underline,
+		LinkExtension.configure({ openOnClick: false }),
+	]);
+	const pdfBuffer = await generateWaiverPdf(
+		waiverHtml,
+		fullLegalName,
+		birthday,
+		signedAt,
+	);
 
 	const documentId = crypto.randomUUID();
 	const filepath = `${user.id}/${documentId}`;
@@ -157,10 +187,13 @@ export async function POST(request: NextRequest) {
 
 	if (uploadError) {
 		console.error("Failed to upload waiver PDF:", uploadError);
-		return NextResponse.json({ error: "Failed to upload waiver document" }, { status: 500 });
+		return NextResponse.json({ error: "Failed to upload waiver document" }, {
+			status: 500,
+		});
 	}
 
-	const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+	const ipAddress = request.headers.get("x-forwarded-for") ||
+		request.headers.get("x-real-ip") || "unknown";
 	const userAgent = request.headers.get("user-agent") || "unknown";
 
 	await Promise.all([

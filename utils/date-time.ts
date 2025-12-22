@@ -17,6 +17,6 @@ export const formatTime = (value: string) =>
 
 export function isAdult(birthday: string) {
 	const [y, m, d] = birthday.split("-").map(n => Number(n))
-  const birthDate = new Date(y, m, d);
+  const birthDate = new Date(y, m-1, d);
   return differenceInYears(new Date(), birthDate) >= 18;
 }

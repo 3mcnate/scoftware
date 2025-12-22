@@ -129,7 +129,7 @@ export function WaiverSignatureForm({
                   />
                   <Label
                     htmlFor="consent"
-                    className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
+                    className="text-sm leading-relaxed cursor-pointer"
                   >
                     By checking here, you are consenting to the use of your
                     electronic signature in lieu of an original signature on
@@ -166,7 +166,7 @@ export function WaiverSignatureForm({
                   />
                   <Label
                     htmlFor="acknowledgment"
-                    className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
+                    className="text-sm leading-relaxed cursor-pointer"
                   >
                     By checking this box I acknowledge that I have carefully
                     read this entire waiver and release, fully understand its

@@ -4,7 +4,6 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import LinkExtension from "@tiptap/extension-link";
 import { z } from "zod/v4";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,6 +17,7 @@ import { WaiverSignatureForm } from "../../../../../../components/waiver/waiver-
 import { getTripWaiverByTripAndType } from "@/data/waivers/get-trip-waiver";
 import { createServerClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+import { userHasTicket } from "@/data/ticketes/user-has-ticket";
 
 const waiverTypeSchema = z
   .enum(["participant", "driver"])
@@ -64,6 +64,16 @@ export default async function WaiverPage({
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const hasTicket = await userHasTicket(user.id, tripId);
+
+	if (!hasTicket) {
+		return (
+      <div className="w-full text-center">
+        <p>You don&apos;t have a ticket for this trip</p>
+      </div>
+    );
+	}
 
   if (!waiver) {
     return (
