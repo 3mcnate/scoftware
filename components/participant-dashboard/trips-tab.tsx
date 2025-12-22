@@ -44,6 +44,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { createClient } from "@/utils/supabase/browser";
+import { toast, useSonner } from "sonner";
+import { useRouter } from "next/navigation";
 
 type TicketWithTrip = NonNullable<
   ReturnType<typeof useUserTickets>["data"]
@@ -154,7 +157,8 @@ function TripCard({
   const trip = ticket.published_trips;
   if (!trip) return null;
 
-  const waiverRequired = !ticket.waiver_filepath && !isPast && !ticket.cancelled;
+  const waiverRequired =
+    !ticket.waiver_filepath && !isPast && !ticket.cancelled;
   const isDriver = ticket.type === "driver";
   const isCancelled = ticket.cancelled;
   const isRefunded = ticket.refunded;
@@ -164,6 +168,20 @@ function TripCard({
   const startTime = formatTime(trip.start_date);
   const endDate = formatDate(trip.end_date);
   const endTime = formatTime(trip.end_date);
+
+  const handleOpenWaiver = async () => {
+    const supabase = createClient();
+    if (ticket.waiver_filepath) {
+      const { data, error } = await supabase.storage
+        .from("waivers")
+        .createSignedUrl(ticket.waiver_filepath, 60);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      window.open(data.signedUrl, "_blank");
+    }
+  };
 
   return (
     <Card className="bg-card border-border overflow-hidden group hover:border-muted-foreground/30 transition-colors pt-0">
@@ -300,7 +318,7 @@ function TripCard({
         })()}
       </CardContent>
       {ticket.receipt_url && (
-        <CardFooter>
+        <CardFooter className="flex flex-col items-start gap-2">
           <Link
             href={ticket.receipt_url}
             target="_blank"
@@ -310,6 +328,15 @@ function TripCard({
             View Receipt
             <ArrowUpRight className="h-3 w-3" />
           </Link>
+          {ticket.waiver_filepath && (
+            <div
+              className="text-sm hover:text-muted-foreground hover:cursor-pointer transition-colors flex items-center gap-1"
+              onClick={handleOpenWaiver}
+            >
+              View Signed Waiver
+              <ArrowUpRight className="h-3 w-3" />
+            </div>
+          )}
         </CardFooter>
       )}
     </Card>

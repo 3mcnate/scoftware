@@ -8,7 +8,6 @@ import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
 import { getTripWaiver } from "@/data/waivers/get-trip-waiver";
 import {
-	getTicketByUserAndTrip,
 	updateTicketWaiverFilepath,
 } from "@/data/waivers/update-ticket-waiver";
 import { createWaiverEvent } from "@/data/waivers/create-waiver-event";
@@ -22,7 +21,7 @@ import {
 import { getProfileName } from "@/data/profiles/get-profile";
 import { userHasTicket } from "@/data/ticketes/user-has-ticket";
 import { sanitizeObjectName } from "@/utils/storage";
-import { getPublishedTrip, getVisiblePublishedTrip } from "@/data/trips/get-published-trip";
+import { getPublishedTrip } from "@/data/trips/get-published-trip";
 
 const signWaiverSchema = z.object({
 	fullLegalName: z.string().min(1, "Full legal name is required"),
@@ -118,7 +117,7 @@ async function generateWaiverPdf(
 		} Pacific Time
 				</div>
 				<div style="margin-top: 24px; font-style: italic; color: #666;">
-					This document was electronically signed and is legally binding.
+					This document was electronically signed and is legally binding. Please save this document for your records.
 				</div>
 			</div>
 		`;
@@ -171,6 +170,8 @@ async function generateWaiverPdf(
 }
 
 export async function POST(request: NextRequest) {
+	const signedAt = new Date().toISOString();
+
 	const supabase = await createServerClient();
 	const { data: { user } } = await supabase.auth.getUser();
 
@@ -190,10 +191,11 @@ export async function POST(request: NextRequest) {
 
 	const { fullLegalName, birthday, tripId, waiverId } = parseResult.data;
 
-	const [waiver, hasTicket, publishedTrip] = await Promise.all([
+	const [waiver, hasTicket, publishedTrip, profileName] = await Promise.all([
 		getTripWaiver(waiverId),
 		userHasTicket(user.id, tripId),
-		getPublishedTrip(tripId)
+		getPublishedTrip(tripId),
+		getProfileName(user.id),
 	]);
 
 	if (!publishedTrip) {
@@ -216,21 +218,20 @@ export async function POST(request: NextRequest) {
 		});
 	}
 
-	const isDriverWaiver = waiver.type === "driver";
-
-	const ipAddress = request.headers.get("x-forwarded-for") ||
-		request.headers.get("x-real-ip") || "unknown";
-	const userAgent = request.headers.get("user-agent") || "unknown";
-	const documentId = crypto.randomUUID().slice(-11);
-	
-	const profileName = await getProfileName(user.id);
-
 	if (!profileName) {
 		return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 	}
 
-	const filename = sanitizeObjectName(`WAIVER-${waiver.type}-${profileName}-${publishedTrip.name}-${documentId}`);
-	const filepath = `${user.id}/${filename}`;
+	const isDriverWaiver = waiver.type === "driver";
+	const ipAddress = request.headers.get("x-forwarded-for") ||
+		request.headers.get("x-real-ip") || "unknown";
+	const userAgent = request.headers.get("user-agent") || "unknown";
+	const documentId = crypto.randomUUID().slice(-11);
+
+	const filename = sanitizeObjectName(
+		`WAIVER-${waiver.type}-${profileName}-${publishedTrip.name}-${documentId}`,
+	);
+	const filepath = `${user.id}/${filename}`.slice(0, 1024);
 
 	const waiverEvent = await createWaiverEvent({
 		event: "user_signed",
@@ -239,11 +240,8 @@ export async function POST(request: NextRequest) {
 		ip_address: ipAddress,
 		user_agent: userAgent,
 		file_path: filepath,
+		created_at: signedAt
 	});
-
-	
-
-	const signedAt = new Date().toISOString();
 
 	const waiverHtml = generateWaiverHTML(waiver.content as JSONContent);
 	const pdfBuffer = await generateWaiverPdf(waiverHtml, {
@@ -269,7 +267,7 @@ export async function POST(request: NextRequest) {
 
 	if (uploadError) {
 		console.error("Failed to upload waiver PDF:", uploadError);
-		return NextResponse.json({ error: "Failed to upload waiver document" }, {
+		return NextResponse.json({ error: "Failed to save waiver document" }, {
 			status: 500,
 		});
 	}

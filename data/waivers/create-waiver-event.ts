@@ -4,7 +4,7 @@ import { InferInsertModel } from "drizzle-orm";
 
 type WaiverEventInsert = InferInsertModel<typeof waiver_events>;
 
-export async function createWaiverEvent(data: Omit<WaiverEventInsert, "id" | "created_at">) {
+export async function createWaiverEvent(data: Omit<WaiverEventInsert, "id">) {
 	const result = await db
 		.insert(waiver_events)
 		.values(data)
