@@ -854,6 +854,7 @@ export type Database = {
           created_at: string
           id: string
           template_id: string
+          title: string
           trip_id: string
           type: Database["public"]["Enums"]["participant_type"]
           updated_at: string
@@ -863,6 +864,7 @@ export type Database = {
           created_at?: string
           id?: string
           template_id: string
+          title: string
           trip_id: string
           type: Database["public"]["Enums"]["participant_type"]
           updated_at?: string
@@ -872,6 +874,7 @@ export type Database = {
           created_at?: string
           id?: string
           template_id?: string
+          title?: string
           trip_id?: string
           type?: Database["public"]["Enums"]["participant_type"]
           updated_at?: string
@@ -1046,6 +1049,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          title: string
           type: Database["public"]["Enums"]["ticket_price_type"]
         }
         Insert: {
@@ -1053,6 +1057,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          title: string
           type: Database["public"]["Enums"]["ticket_price_type"]
         }
         Update: {
@@ -1060,6 +1065,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          title?: string
           type?: Database["public"]["Enums"]["ticket_price_type"]
         }
         Relationships: []

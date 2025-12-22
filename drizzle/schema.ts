@@ -145,6 +145,7 @@ export const waiver_templates = pgTable("waiver_templates", {
 	content: text().notNull(),
 	type: ticket_price_type().notNull(),
 	active: boolean().default(false).notNull(),
+	title: text().notNull(),
 }, (table) => [
 	uniqueIndex("active_waiver_template_types").using("btree", table.type.asc().nullsLast().op("enum_ops")).where(sql`(active = true)`),
 ]);
@@ -190,6 +191,7 @@ export const trip_waivers = pgTable("trip_waivers", {
 	content: text().notNull(),
 	template_id: uuid().notNull(),
 	type: participant_type().notNull(),
+	title: text().notNull(),
 }, (table) => [
 	foreignKey({
 			columns: [table.template_id],

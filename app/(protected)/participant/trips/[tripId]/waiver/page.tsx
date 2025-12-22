@@ -1,9 +1,10 @@
-import Link from "next/link"
-import { generateHTML } from "@tiptap/html"
-import StarterKit from "@tiptap/starter-kit"
-import Underline from "@tiptap/extension-underline"
-import LinkExtension from "@tiptap/extension-link"
-import { Card, CardContent } from "@/components/ui/card"
+import Link from "next/link";
+import { generateHTML } from "@tiptap/html";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import LinkExtension from "@tiptap/extension-link";
+import { z } from "zod/v4";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,9 +12,12 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import type { JSONContent } from "@tiptap/core"
-import { WaiverSignatureForm } from "../../../../../../components/waiver/waiver-signature-form"
+} from "@/components/ui/breadcrumb";
+import type { JSONContent } from "@tiptap/core";
+import { WaiverSignatureForm } from "../../../../../../components/waiver/waiver-signature-form";
+import { getTripWaiverByTripAndType } from "@/data/waivers/get-trip-waiver";
+
+const waiverTypeSchema = z.enum(["participant", "driver"]);
 
 const tiptapContent: JSONContent = {
   type: "doc",
@@ -177,24 +181,46 @@ const tiptapContent: JSONContent = {
       ],
     },
   ],
-}
+};
 
 interface WaiverPageProps {
-  params: Promise<{ tripId: string }>
-	searchParams: { type: "participant" | "driver" }
+  params: Promise<{ tripId: string }>;
+  searchParams: Promise<{ type?: string }>;
 }
-// TODO: query params for driver/participant waiver
-export default async function WaiverPage({ params, searchParams }: WaiverPageProps) {
-  const { tripId } = await params
 
-	// get waiver
-	
+export default async function WaiverPage({
+  params,
+  searchParams,
+}: WaiverPageProps) {
+  const { tripId } = await params;
+  const { type } = await searchParams;
+
+  const parsedType = waiverTypeSchema.safeParse(type);
+
+  if (!parsedType.success) {
+    return (
+      <div className="w-full text-center">
+        <p>Error: Invalid waiver type. Must specify type=participant or type=driver.</p>
+      </div>
+    );
+  }
+
+  const waiverType = parsedType.data;
+  const waiver = await getTripWaiverByTripAndType(tripId, waiverType);
+
+  if (!waiver) {
+    return (
+      <div className="w-full text-center">
+        <p>Error - couldn&apos;t get waiver, please contact the guides</p>
+      </div>
+    );
+  }
 
   const waiverHtml = generateHTML(tiptapContent, [
     StarterKit,
     Underline,
     LinkExtension.configure({ openOnClick: false }),
-  ])
+  ]);
 
   return (
     <div className="max-w-3xl space-y-6 mx-auto">
@@ -213,7 +239,9 @@ export default async function WaiverPage({ params, searchParams }: WaiverPagePro
       </Breadcrumb>
 
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Participant Waiver</h1>
+        <h1 className="text-2xl font-bold text-foreground">
+          {waiver.title}
+        </h1>
       </div>
 
       <Card>
@@ -225,7 +253,7 @@ export default async function WaiverPage({ params, searchParams }: WaiverPagePro
         </CardContent>
       </Card>
 
-      <WaiverSignatureForm tripId={tripId} />
+      <WaiverSignatureForm tripId={tripId} waiverId={waiver.id} />
     </div>
-  )
+  );
 }
