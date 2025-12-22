@@ -1,11 +1,10 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { z } from "zod/v4";
 import { toast } from "sonner";
 import { Loader2, FileCheck, ExternalLink } from "lucide-react";
-import { differenceInYears } from "date-fns";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useSignWaiver } from "@/data/waivers/sign-waiver";
+import { isAdult } from "@/utils/date-time";
+import { FieldError } from "@/components/ui/field";
+import { useEffect } from "react";
 
 const WaiverSignatureSchema = z
   .object({
@@ -26,10 +28,10 @@ const WaiverSignatureSchema = z
     fullLegalName: z.string().min(1, "Full legal name is required"),
     birthday: z.string().min(1, "Birthday is required"),
   })
-  .refine(
-    (data) => differenceInYears(new Date(), new Date(data.birthday)) >= 18,
-    { message: "You must be 18 or older to sign this waiver", path: ["birthday"] }
-  );
+  .refine((data) => isAdult(data.birthday), {
+    message: "You must be 18 or older to sign this waiver",
+    path: ["birthday"],
+  });
 
 type WaiverSignatureFormData = z.infer<typeof WaiverSignatureSchema>;
 
@@ -38,10 +40,13 @@ interface WaiverSignatureFormProps {
   waiverId: string;
 }
 
-export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormProps) {
+export function WaiverSignatureForm({
+  tripId,
+  waiverId,
+}: WaiverSignatureFormProps) {
   const { mutate: signWaiver, isPending, data: signedData } = useSignWaiver();
 
-  const { control, handleSubmit, watch } = useForm<WaiverSignatureFormData>({
+  const { control, handleSubmit } = useForm<WaiverSignatureFormData>({
     resolver: standardSchemaResolver(WaiverSignatureSchema),
     defaultValues: {
       consentChecked: false as unknown as true,
@@ -51,8 +56,10 @@ export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormPro
     },
   });
 
-  const birthday = watch("birthday");
-  const age = birthday ? differenceInYears(new Date(), new Date(birthday)) : null;
+  const birthday = useWatch({ control, name: "birthday" });
+	useEffect(() => {
+		console.log("birthday", birthday)
+	}, [birthday])
 
   const onSubmit = (data: WaiverSignatureFormData) => {
     signWaiver(
@@ -86,7 +93,8 @@ export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormPro
           <Alert>
             <AlertTitle>Your waiver has been submitted</AlertTitle>
             <AlertDescription className="mt-2">
-              A copy of your signed waiver has been saved. You can view or download it using the link below.
+              A copy of your signed waiver has been saved. You can view or
+              download it using the link below.
             </AlertDescription>
           </Alert>
           <Button asChild variant="outline" className="w-full">
@@ -110,28 +118,36 @@ export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormPro
           <Controller
             control={control}
             name="consentChecked"
-            render={({ field }) => (
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  id="consent"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  className="mt-0.5"
-                />
-                <Label htmlFor="consent" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
-                  By checking here, you are consenting to the use of your electronic
-                  signature in lieu of an original signature on paper. You have the
-                  right to request that you sign a paper copy instead. By checking here,
-                  you are waiving that right. After consent, you may, upon written
-                  request to us, obtain a paper copy of an electronic record. No fee
-                  will be charged for such copy and no special hardware or software is
-                  required to view it. Your agreement to use an electronic signature
-                  with us for any documents will continue until such time as you notify
-                  us in writing that you no longer wish to use an electronic signature.
-                  There is no penalty for withdrawing your consent. You should always
-                  make sure that we have a current email address in order to contact you
-                  regarding any changes, if necessary.
-                </Label>
+            render={({ field, fieldState: { error } }) => (
+              <div>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="consent"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="mt-0.5"
+                  />
+                  <Label
+                    htmlFor="consent"
+                    className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
+                  >
+                    By checking here, you are consenting to the use of your
+                    electronic signature in lieu of an original signature on
+                    paper. You have the right to request that you sign a paper
+                    copy instead. By checking here, you are waiving that right.
+                    After consent, you may, upon written request to us, obtain a
+                    paper copy of an electronic record. No fee will be charged
+                    for such copy and no special hardware or software is
+                    required to view it. Your agreement to use an electronic
+                    signature with us for any documents will continue until such
+                    time as you notify us in writing that you no longer wish to
+                    use an electronic signature. There is no penalty for
+                    withdrawing your consent. You should always make sure that
+                    we have a current email address in order to contact you
+                    regarding any changes, if necessary.
+                  </Label>
+                </div>
+                <FieldError errors={error ? [error] : undefined} />
               </div>
             )}
           />
@@ -139,21 +155,28 @@ export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormPro
           <Controller
             control={control}
             name="acknowledgmentChecked"
-            render={({ field }) => (
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  id="acknowledgment"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  className="mt-0.5"
-                />
-                <Label htmlFor="acknowledgment" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
-                  By checking this box I acknowledge that I have carefully read this entire waiver and release,
-                  fully understand its contents, and voluntarily agree to all of its
-                  terms, including the release of liability, and intend this
-                  acknowledgment to be a complete and unconditional acceptance of the
-                  entire document.
-                </Label>
+            render={({ field, fieldState: { error } }) => (
+              <div>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="acknowledgment"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="mt-0.5"
+                  />
+                  <Label
+                    htmlFor="acknowledgment"
+                    className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
+                  >
+                    By checking this box I acknowledge that I have carefully
+                    read this entire waiver and release, fully understand its
+                    contents, and voluntarily agree to all of its terms,
+                    including the release of liability, and intend this
+                    acknowledgment to be a complete and unconditional acceptance
+                    of the entire document.
+                  </Label>
+                </div>
+                <FieldError errors={error ? [error] : undefined} />
               </div>
             )}
           />
@@ -162,7 +185,7 @@ export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormPro
             <Controller
               control={control}
               name="fullLegalName"
-              render={({ field, fieldState }) => (
+              render={({ field, fieldState: { error } }) => (
                 <div>
                   <Label htmlFor="full-legal-name" className="text-sm">
                     Full Legal Name
@@ -173,9 +196,7 @@ export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormPro
                     className="mt-1"
                     {...field}
                   />
-                  {fieldState.error && (
-                    <p className="text-sm text-destructive mt-1">{fieldState.error.message}</p>
-                  )}
+                  <FieldError errors={error ? [error] : undefined} />
                 </div>
               )}
             />
@@ -183,7 +204,7 @@ export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormPro
             <Controller
               control={control}
               name="birthday"
-              render={({ field, fieldState }) => (
+              render={({ field, fieldState: { error } }) => (
                 <div>
                   <Label htmlFor="birthday" className="text-sm">
                     Your Birthday
@@ -194,12 +215,11 @@ export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormPro
                     className="mt-1"
                     {...field}
                   />
-                  {fieldState.error && (
-                    <p className="text-sm text-destructive mt-1">{fieldState.error.message}</p>
-                  )}
-                  {age !== null && age < 18 && !fieldState.error && (
+                  <FieldError errors={error ? [error] : undefined} />
+                  {birthday !== null && !isAdult(birthday) && !error && (
                     <p className="text-destructive text-sm mt-1">
-                      You must be over 18 to submit this waiver. If you are under 18, contact the guides for this trip.
+                      You must be over 18 to submit this waiver. If you are
+                      under 18, contact the guides for this trip.
                     </p>
                   )}
                 </div>
@@ -207,7 +227,12 @@ export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormPro
             />
           </div>
 
-          <Button type="submit" disabled={isPending} className="w-full mt-4" size="lg">
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="w-full mt-4"
+            size="lg"
+          >
             {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             {isPending ? "Submitting..." : "Submit Waiver"}
           </Button>

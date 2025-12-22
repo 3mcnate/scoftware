@@ -142,7 +142,7 @@ export const published_trips = pgTable("published_trips", {
 export const waiver_templates = pgTable("waiver_templates", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	content: text().notNull(),
+	content: jsonb().notNull(),
 	type: ticket_price_type().notNull(),
 	active: boolean().default(false).notNull(),
 	title: text().notNull(),
@@ -188,7 +188,7 @@ export const trip_waivers = pgTable("trip_waivers", {
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	trip_id: uuid().notNull(),
-	content: text().notNull(),
+	content: jsonb().notNull(),
 	template_id: uuid().notNull(),
 	type: participant_type().notNull(),
 	title: text().notNull(),

@@ -850,7 +850,7 @@ export type Database = {
       }
       trip_waivers: {
         Row: {
-          content: string
+          content: Json
           created_at: string
           id: string
           template_id: string
@@ -860,7 +860,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          content: string
+          content: Json
           created_at?: string
           id?: string
           template_id: string
@@ -870,7 +870,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          content?: string
+          content?: Json
           created_at?: string
           id?: string
           template_id?: string
@@ -1046,7 +1046,7 @@ export type Database = {
       waiver_templates: {
         Row: {
           active: boolean
-          content: string
+          content: Json
           created_at: string
           id: string
           title: string
@@ -1054,7 +1054,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
-          content: string
+          content: Json
           created_at?: string
           id?: string
           title: string
@@ -1062,7 +1062,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
-          content?: string
+          content?: Json
           created_at?: string
           id?: string
           title?: string
