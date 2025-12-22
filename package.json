@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "gentypes": "supabase gen types typescript --local > types/database.types.ts",
+    "gentypes": "supabase gen types typescript --local > types/database.types.ts && drizzle-kit pull && sed -i \"\" \"s/.default(')/.default('')/g\" '/Users/nateboxer/code/scoftware/drizzle/schema.ts'",
     "sbrestart": "supabase stop && supabase start"
   },
   "dependencies": {

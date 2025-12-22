@@ -36,7 +36,6 @@ type WaiverSignatureFormData = z.infer<typeof WaiverSignatureSchema>;
 interface WaiverSignatureFormProps {
   tripId: string;
   waiverId: string;
-  tripName: string;
 }
 
 export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormProps) {
@@ -64,7 +63,7 @@ export function WaiverSignatureForm({ tripId, waiverId }: WaiverSignatureFormPro
         waiverId,
       },
       {
-        onSuccess: () => toast.success("Waiver signed successfully!"),
+        onSuccess: () => toast.success("Waiver signed successfully"),
         onError: (error) => toast.error(error.message),
       }
     );

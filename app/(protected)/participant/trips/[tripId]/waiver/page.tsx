@@ -181,10 +181,14 @@ const tiptapContent: JSONContent = {
 
 interface WaiverPageProps {
   params: Promise<{ tripId: string }>
+	searchParams: { type: "participant" | "driver" }
 }
 // TODO: query params for driver/participant waiver
-export default async function WaiverPage({ params }: WaiverPageProps) {
+export default async function WaiverPage({ params, searchParams }: WaiverPageProps) {
   const { tripId } = await params
+
+	// get waiver
+	
 
   const waiverHtml = generateHTML(tiptapContent, [
     StarterKit,

@@ -1,4 +1,4 @@
-import { pgTable, foreignKey, uuid, timestamp, text, unique, pgSchema, uniqueIndex, index, check, varchar, jsonb, boolean, smallint, pgPolicy, integer, numeric, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, pgSchema, uniqueIndex, index, check, uuid, varchar, timestamp, jsonb, boolean, text, smallint, foreignKey, pgPolicy, integer, unique, numeric, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const auth = pgSchema("auth");
@@ -16,57 +16,14 @@ export const degree_path_type = pgEnum("degree_path_type", ['undergrad', 'gradua
 export const graduation_season_type = pgEnum("graduation_season_type", ['spring', 'fall'])
 export const guide_position = pgEnum("guide_position", ['new_guide', 'guide', 'longboard', 'alum'])
 export const membership_length = pgEnum("membership_length", ['semester', 'year'])
-export const ticket_type = pgEnum("ticket_type", ['member', 'nonmember', 'driver'])
+export const participant_type = pgEnum("participant_type", ['participant', 'driver'])
+export const ticket_price_type = pgEnum("ticket_price_type", ['member', 'nonmember', 'driver'])
 export const trip_signup_status = pgEnum("trip_signup_status", ['open', 'closed', 'access_code', 'select_participants', 'waitlist', 'full'])
 export const user_role = pgEnum("user_role", ['participant', 'guide', 'admin', 'superadmin'])
 export const waitlist_status = pgEnum("waitlist_status", ['waiting', 'notification_sent', 'signed_up', 'expired'])
 export const waiver_event = pgEnum("waiver_event", ['user_opened', 'user_signed'])
 
 export const refresh_tokens_id_seqInAuth = auth.sequence("refresh_tokens_id_seq", {  startWith: "1", increment: "1", minValue: "1", maxValue: "9223372036854775807", cache: "1", cycle: false })
-
-export const waiver_events = pgTable("waiver_events", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	event: waiver_event().notNull(),
-	user_id: uuid().notNull(),
-	trip_id: uuid().notNull(),
-	ip_address: text().notNull(),
-	user_agent: text().default('unknown').notNull(),
-	file_path: text(),
-}, (table) => [
-	foreignKey({
-			columns: [table.trip_id],
-			foreignColumns: [trips.id],
-			name: "waiver_events_trip_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.user_id],
-			foreignColumns: [profiles.id],
-			name: "waiver_events_user_id_fkey"
-		}),
-]);
-
-export const trip_waivers = pgTable("trip_waivers", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	trip_id: uuid().notNull(),
-	content: text().notNull(),
-	type: ticket_type().notNull(),
-	template_id: uuid().notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.template_id],
-			foreignColumns: [waiver_templates.id],
-			name: "trip_waivers_template_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.trip_id],
-			foreignColumns: [trips.id],
-			name: "trip_waivers_trip_id_fkey"
-		}),
-	unique("trip_ticket_type_unique").on(table.trip_id, table.type),
-]);
 
 export const usersInAuth = auth.table("users", {
 	instance_id: uuid(),
@@ -186,7 +143,7 @@ export const waiver_templates = pgTable("waiver_templates", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	content: text().notNull(),
-	type: ticket_type().notNull(),
+	type: ticket_price_type().notNull(),
 	active: boolean().default(false).notNull(),
 }, (table) => [
 	uniqueIndex("active_waiver_template_types").using("btree", table.type.asc().nullsLast().op("enum_ops")).where(sql`(active = true)`),
@@ -202,7 +159,7 @@ export const tickets = pgTable("tickets", {
 	refunded: boolean().default(false).notNull(),
 	cancelled_at: timestamp({ withTimezone: true, mode: 'string' }),
 	stripe_payment_id: text().notNull(),
-	type: ticket_type().notNull(),
+	type: ticket_price_type().notNull(),
 	amount_paid: numeric().notNull(),
 	stripe_refund_id: text(),
 	receipt_url: text().default('https://www.stripe.com').notNull(),
@@ -223,4 +180,47 @@ export const tickets = pgTable("tickets", {
 	unique("tickets_stripe_checkout_session_id_key").on(table.stripe_payment_id),
 	unique("tickets_stripe_refund_id_key").on(table.stripe_refund_id),
 	pgPolicy("Participants can select their own tickets", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(user_id = ( SELECT auth.uid() AS uid))` }),
+]);
+
+export const trip_waivers = pgTable("trip_waivers", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	trip_id: uuid().notNull(),
+	content: text().notNull(),
+	template_id: uuid().notNull(),
+	type: participant_type().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.template_id],
+			foreignColumns: [waiver_templates.id],
+			name: "trip_waivers_template_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "trip_waivers_trip_id_fkey"
+		}),
+]);
+
+export const waiver_events = pgTable("waiver_events", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	event: waiver_event().notNull(),
+	user_id: uuid().notNull(),
+	trip_id: uuid().notNull(),
+	ip_address: text().notNull(),
+	user_agent: text().default('unknown').notNull(),
+	file_path: text(),
+}, (table) => [
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "waiver_events_trip_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "waiver_events_user_id_fkey"
+		}),
 ]);

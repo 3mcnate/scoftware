@@ -567,7 +567,7 @@ export type Database = {
           stripe_payment_id: string
           stripe_refund_id: string | null
           trip_id: string
-          type: Database["public"]["Enums"]["ticket_type"]
+          type: Database["public"]["Enums"]["ticket_price_type"]
           updated_at: string
           user_id: string
           waiver_filepath: string | null
@@ -584,7 +584,7 @@ export type Database = {
           stripe_payment_id: string
           stripe_refund_id?: string | null
           trip_id: string
-          type: Database["public"]["Enums"]["ticket_type"]
+          type: Database["public"]["Enums"]["ticket_price_type"]
           updated_at?: string
           user_id: string
           waiver_filepath?: string | null
@@ -601,7 +601,7 @@ export type Database = {
           stripe_payment_id?: string
           stripe_refund_id?: string | null
           trip_id?: string
-          type?: Database["public"]["Enums"]["ticket_type"]
+          type?: Database["public"]["Enums"]["ticket_price_type"]
           updated_at?: string
           user_id?: string
           waiver_filepath?: string | null
@@ -812,7 +812,7 @@ export type Database = {
           created_at: string
           stripe_price_id: string
           stripe_product_id: string
-          ticket_type: Database["public"]["Enums"]["ticket_type"]
+          ticket_type: Database["public"]["Enums"]["ticket_price_type"]
           trip_id: string
           updated_at: string
         }
@@ -823,7 +823,7 @@ export type Database = {
           created_at?: string
           stripe_price_id: string
           stripe_product_id: string
-          ticket_type: Database["public"]["Enums"]["ticket_type"]
+          ticket_type: Database["public"]["Enums"]["ticket_price_type"]
           trip_id: string
           updated_at?: string
         }
@@ -834,7 +834,7 @@ export type Database = {
           created_at?: string
           stripe_price_id?: string
           stripe_product_id?: string
-          ticket_type?: Database["public"]["Enums"]["ticket_type"]
+          ticket_type?: Database["public"]["Enums"]["ticket_price_type"]
           trip_id?: string
           updated_at?: string
         }
@@ -855,7 +855,7 @@ export type Database = {
           id: string
           template_id: string
           trip_id: string
-          type: Database["public"]["Enums"]["ticket_type"]
+          type: Database["public"]["Enums"]["participant_type"]
           updated_at: string
         }
         Insert: {
@@ -864,7 +864,7 @@ export type Database = {
           id?: string
           template_id: string
           trip_id: string
-          type: Database["public"]["Enums"]["ticket_type"]
+          type: Database["public"]["Enums"]["participant_type"]
           updated_at?: string
         }
         Update: {
@@ -873,7 +873,7 @@ export type Database = {
           id?: string
           template_id?: string
           trip_id?: string
-          type?: Database["public"]["Enums"]["ticket_type"]
+          type?: Database["public"]["Enums"]["participant_type"]
           updated_at?: string
         }
         Relationships: [
@@ -1046,21 +1046,21 @@ export type Database = {
           content: string
           created_at: string
           id: string
-          type: Database["public"]["Enums"]["ticket_type"]
+          type: Database["public"]["Enums"]["ticket_price_type"]
         }
         Insert: {
           active?: boolean
           content: string
           created_at?: string
           id?: string
-          type: Database["public"]["Enums"]["ticket_type"]
+          type: Database["public"]["Enums"]["ticket_price_type"]
         }
         Update: {
           active?: boolean
           content?: string
           created_at?: string
           id?: string
-          type?: Database["public"]["Enums"]["ticket_type"]
+          type?: Database["public"]["Enums"]["ticket_price_type"]
         }
         Relationships: []
       }
@@ -1096,7 +1096,8 @@ export type Database = {
       graduation_season_type: "spring" | "fall"
       guide_position: "new_guide" | "guide" | "longboard" | "alum"
       membership_length: "semester" | "year"
-      ticket_type: "member" | "nonmember" | "driver"
+      participant_type: "participant" | "driver"
+      ticket_price_type: "member" | "nonmember" | "driver"
       trip_signup_status:
         | "open"
         | "closed"
@@ -1242,7 +1243,8 @@ export const Constants = {
       graduation_season_type: ["spring", "fall"],
       guide_position: ["new_guide", "guide", "longboard", "alum"],
       membership_length: ["semester", "year"],
-      ticket_type: ["member", "nonmember", "driver"],
+      participant_type: ["participant", "driver"],
+      ticket_price_type: ["member", "nonmember", "driver"],
       trip_signup_status: [
         "open",
         "closed",
