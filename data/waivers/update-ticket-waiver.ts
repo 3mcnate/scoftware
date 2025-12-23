@@ -1,5 +1,5 @@
 import { db } from "@/utils/drizzle";
-import { tickets } from "@/drizzle/schema";
+import { published_trips, tickets } from "@/drizzle/schema";
 import { eq, and, InferSelectModel } from "drizzle-orm";
 
 export async function updateTicketWaiverFilepath(

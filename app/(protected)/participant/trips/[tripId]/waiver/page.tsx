@@ -15,6 +15,7 @@ import { createServerClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import { generateWaiverHTML } from "@/utils/tiptap";
 import { getTicketByUserAndTrip } from "@/data/waivers/update-ticket-waiver";
+import { getPublishedTrip } from "@/data/trips/get-published-trip";
 
 const waiverTypeSchema = z
   .enum(["participant", "driver"])
@@ -64,12 +65,15 @@ export default async function WaiverPage({
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const ticket = await getTicketByUserAndTrip(user.id, tripId);
+  const [ticket, trip] = await Promise.all([
+    getTicketByUserAndTrip(user.id, tripId),
+    getPublishedTrip(tripId),
+  ]);
 
-  if (!ticket) {
+  if (!ticket || !trip) {
     return (
       <div className="w-full text-center">
-        <p>You don&apos;t have a ticket for this trip</p>
+        <p>404: Trip not found or you don&apos;t have a ticket for this trip</p>
       </div>
     );
   }
@@ -93,7 +97,7 @@ export default async function WaiverPage({
     );
   }
 
-	// TODO: log waiver view event
+  // TODO: log waiver view event
 
   const waiverHtml = generateWaiverHTML(waiver.content as JSONContent);
 
@@ -105,6 +109,10 @@ export default async function WaiverPage({
             <BreadcrumbLink asChild>
               <Link href="/participant/trips">Trips</Link>
             </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{trip.name}</BreadcrumbPage>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

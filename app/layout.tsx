@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-// @ts-expect-error - allow side-effect global CSS import in Next.js root layout
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import TanstackQueryProvider from "@/components/providers/tanstack-query-provider";

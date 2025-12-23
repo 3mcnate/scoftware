@@ -12,7 +12,7 @@ import {
 	updateTicketWaiverFilepath,
 } from "@/data/waivers/update-ticket-waiver";
 import { createWaiverEvent } from "@/data/waivers/create-waiver-event";
-import { formatDate, isAdult } from "@/utils/date-time";
+import { isAdult } from "@/utils/date-time";
 import { generateWaiverHTML } from "@/utils/tiptap";
 import { JSONContent } from "@tiptap/core";
 import {
@@ -20,7 +20,6 @@ import {
 	ELECTRONIC_SIGNATURE_CONSENT_TEXT,
 } from "@/components/waiver/waiver-checkbox-text";
 import { getProfileName } from "@/data/profiles/get-profile";
-import { userHasTicket } from "@/data/ticketes/user-has-ticket";
 import { sanitizeObjectName } from "@/utils/storage";
 import { getPublishedTrip } from "@/data/trips/get-published-trip";
 

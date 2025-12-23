@@ -18,6 +18,7 @@ import {
   ACKNOWLEDGE_AND_ACCEPT_TEXT,
   ELECTRONIC_SIGNATURE_CONSENT_TEXT,
 } from "@/components/waiver/waiver-checkbox-text";
+import { useRevalidateTables } from "@supabase-cache-helpers/postgrest-react-query";
 
 const WaiverSignatureSchema = z
   .object({
@@ -49,6 +50,10 @@ export function WaiverSignatureForm({
   const router = useRouter();
   const { mutate: signWaiver, isPending } = useSignWaiver();
 
+  const revalidate = useRevalidateTables([
+    { schema: "public", table: "tickets" },
+  ]);
+
   const { control, handleSubmit } = useForm<WaiverSignatureFormData>({
     resolver: standardSchemaResolver(WaiverSignatureSchema),
     defaultValues: {
@@ -70,12 +75,13 @@ export function WaiverSignatureForm({
         waiverId,
       },
       {
-        onSuccess: (response) => {
+        onSuccess: async (response) => {
           const params = new URLSearchParams({
             filepath: response.filepath,
             signatureId: response.signatureId,
             signedAt: response.signedAt,
           });
+					await revalidate();
           router.push(`/participant/trips/${tripId}/waiver/success?${params}`);
         },
         onError: (error) => toast.error(error.message),
@@ -183,7 +189,7 @@ export function WaiverSignatureForm({
           size="lg"
         >
           {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-          {isPending ? "Submitting..." : "Submit Waiver"}
+          {isPending ? "Submitting..." : "Sign Waiver"}
         </Button>
       </form>
     </div>

@@ -45,8 +45,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { createClient } from "@/utils/supabase/browser";
-import { toast, useSonner } from "sonner";
-import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type TicketWithTrip = NonNullable<
   ReturnType<typeof useUserTickets>["data"]
@@ -160,9 +160,11 @@ function TripCard({
   const waiverRequired =
     !ticket.waiver_filepath && !isPast && !ticket.cancelled;
   const isDriver = ticket.type === "driver";
+  const driverWaiverRequired =
+    isDriver && !ticket.driver_waiver_filepath && !isPast && !ticket.cancelled;
   const isCancelled = ticket.cancelled;
   const isRefunded = ticket.refunded;
-  const isConfirmed = ticket.waiver_filepath && !ticket.cancelled;
+  const isConfirmed = ticket.waiver_filepath && !ticket.cancelled && (!isDriver || ticket.driver_waiver_filepath);
 
   const startDate = formatDate(trip.start_date);
   const startTime = formatTime(trip.start_date);
@@ -175,6 +177,20 @@ function TripCard({
       const { data, error } = await supabase.storage
         .from("waivers")
         .createSignedUrl(ticket.waiver_filepath, 60);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      window.open(data.signedUrl, "_blank");
+    }
+  };
+
+	const handleOpenDriverWaiver = async () => {
+    const supabase = createClient();
+    if (ticket.driver_waiver_filepath) {
+      const { data, error } = await supabase.storage
+        .from("waivers")
+        .createSignedUrl(ticket.driver_waiver_filepath, 60);
       if (error) {
         toast.error(error.message);
         return;
@@ -197,26 +213,26 @@ function TripCard({
         />
       </Link>
       <CardHeader className="space-y-2">
-        <Link href={`/trip/${trip.id}`}>
-          <h3 className="font-semibold text-foreground hover:underline hover:opacity-60 transition-all">
-            {trip.name}
-          </h3>
-        </Link>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-2">
+          <Link href={`/trip/${trip.id}`} className="mr-2">
+            <h3 className="font-semibold text-foreground hover:underline hover:opacity-60 transition-all">
+              {trip.name}
+            </h3>
+          </Link>
           {isCancelled && (
             <Badge className="bg-destructive text-white hover:bg-destructive">
               Cancelled
             </Badge>
           )}
           {isConfirmed && (
-            <Badge className="bg-green-600 text-white hover:bg-green-600">
+            <Badge className="bg-green-600 text-white hover:bg-green-600/80">
               Confirmed
             </Badge>
           )}
           {isPast && !isCancelled && (
             <Badge className="bg-muted text-muted-foreground">Completed</Badge>
           )}
-          {waiverRequired && (
+          {(waiverRequired || driverWaiverRequired) && (
             <Badge className="bg-warning text-warning-foreground hover:bg-warning">
               <AlertTriangle className="h-3 w-3 mr-1" />
               Waiver Required
@@ -232,12 +248,18 @@ function TripCard({
             </AlertTitle>
           </Alert>
         )}
-        <div className="w-full flex flex-col gap-2">
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div
+          className={cn("mb-6 space-y-2", {
+            hidden: !waiverRequired && !driverWaiverRequired,
+          })}
+        >
           {waiverRequired && (
             <Button
               asChild
               variant="outline"
-              className="w-full justify-between"
+              className="w-full justify-between bg-warning/20"
             >
               <Link
                 href={`/participant/trips/${trip.id}/waiver`}
@@ -245,15 +267,31 @@ function TripCard({
               >
                 <div className="flex gap-2 items-center">
                   <CircleAlert className="size-4" />
-                  Sign Waiver
+                  Sign Participant Waiver
+                </div>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          )}
+          {driverWaiverRequired && (
+            <Button
+              asChild
+              variant="outline"
+              className="w-full justify-between bg-warning/20"
+            >
+              <Link
+                href={`/participant/trips/${trip.id}/waiver?type=driver`}
+                className="flex gap-2 items-center justify-between"
+              >
+                <div className="flex gap-2 items-center">
+                  <CircleAlert className="size-4" />
+                  Sign Driver Waiver
                 </div>
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </Button>
           )}
         </div>
-      </CardHeader>
-      <CardContent className="space-y-2">
         <div className="flex items-center gap-2 text-sm">
           <MapPin className="h-4 w-4 shrink-0" />
           <span>{trip.location}</span>
@@ -317,8 +355,8 @@ function TripCard({
           );
         })()}
       </CardContent>
-      {ticket.receipt_url && (
-        <CardFooter className="flex flex-col items-start gap-2">
+      <CardFooter className="flex flex-col items-start gap-2">
+        {ticket.receipt_url && (
           <Link
             href={ticket.receipt_url}
             target="_blank"
@@ -328,17 +366,26 @@ function TripCard({
             View Receipt
             <ArrowUpRight className="h-3 w-3" />
           </Link>
-          {ticket.waiver_filepath && (
-            <div
-              className="text-sm hover:text-muted-foreground hover:cursor-pointer transition-colors flex items-center gap-1"
-              onClick={handleOpenWaiver}
-            >
-              View Signed Waiver
-              <ArrowUpRight className="h-3 w-3" />
-            </div>
-          )}
-        </CardFooter>
-      )}
+        )}
+        {ticket.waiver_filepath && (
+          <div
+            className="text-sm hover:text-muted-foreground hover:cursor-pointer transition-colors flex items-center gap-1"
+            onClick={handleOpenWaiver}
+          >
+            View Signed Participant Waiver
+            <ArrowUpRight className="h-3 w-3" />
+          </div>
+        )}
+				{ticket.driver_waiver_filepath && (
+          <div
+            className="text-sm hover:text-muted-foreground hover:cursor-pointer transition-colors flex items-center gap-1"
+            onClick={handleOpenDriverWaiver}
+          >
+            View Signed Driver Waiver
+            <ArrowUpRight className="h-3 w-3" />
+          </div>
+        )}
+      </CardFooter>
     </Card>
   );
 }
