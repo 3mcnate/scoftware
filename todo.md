@@ -37,6 +37,8 @@
 
 12/23/25
 - memberships - use stripe metadata for reconciliation
+- chore: squash supabase migrations
+- chore: create client/server folder structure under data/
 
 Next Up
 - fix truncation for trip details

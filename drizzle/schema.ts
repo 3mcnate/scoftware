@@ -1,4 +1,4 @@
-import { pgTable, pgSchema, uniqueIndex, index, check, uuid, varchar, timestamp, jsonb, boolean, text, smallint, foreignKey, pgPolicy, integer, unique, numeric, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, pgSchema, uniqueIndex, index, check, uuid, varchar, timestamp, jsonb, boolean, text, smallint, foreignKey, pgPolicy, unique, integer, numeric, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const auth = pgSchema("auth");
@@ -88,6 +88,19 @@ export const profiles = pgTable("profiles", {
 	pgPolicy("Allow user to select own profile", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))` }),
 ]);
 
+export const memberships = pgTable("memberships", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	user_id: uuid().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	expires_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	stripe_payment_id: text().notNull(),
+	length: membership_length().notNull(),
+	cancelled: boolean().default(false).notNull(),
+	receipt_url: text().notNull(),
+}, (table) => [
+	unique("memberships_stripe_payment_id_key").on(table.stripe_payment_id),
+]);
+
 export const trips = pgTable("trips", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -137,34 +150,6 @@ export const published_trips = pgTable("published_trips", {
 		}),
 	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"], using: sql`has_trip_ticket(( SELECT auth.uid() AS uid), id)` }),
 	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"] }),
-]);
-
-export const waiver_events = pgTable("waiver_events", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	event: waiver_event().notNull(),
-	user_id: uuid().notNull(),
-	trip_id: uuid().notNull(),
-	ip_address: text().notNull(),
-	user_agent: text().default('unknown').notNull(),
-	file_path: text(),
-	waiver_id: uuid().notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.trip_id],
-			foreignColumns: [trips.id],
-			name: "waiver_events_trip_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.user_id],
-			foreignColumns: [profiles.id],
-			name: "waiver_events_user_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.waiver_id],
-			foreignColumns: [trip_waivers.id],
-			name: "waiver_events_waiver_id_fkey"
-		}),
 ]);
 
 export const tickets = pgTable("tickets", {
@@ -230,3 +215,40 @@ export const waiver_templates = pgTable("waiver_templates", {
 	title: text().notNull(),
 	type: participant_type().default('participant').notNull(),
 });
+
+export const waiver_events = pgTable("waiver_events", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	event: waiver_event().notNull(),
+	user_id: uuid().notNull(),
+	trip_id: uuid().notNull(),
+	ip_address: text().notNull(),
+	user_agent: text().default('unknown').notNull(),
+	file_path: text(),
+	waiver_id: uuid().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "waiver_events_trip_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "waiver_events_user_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.waiver_id],
+			foreignColumns: [trip_waivers.id],
+			name: "waiver_events_waiver_id_fkey"
+		}),
+]);
+
+export const membership_prices = pgTable("membership_prices", {
+	length: membership_length().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	stripe_price_id: text().notNull(),
+	unit_amount: integer().notNull(),
+}, (table) => [
+	unique("membership_prices_stripe_price_id_key").on(table.stripe_price_id),
+]);

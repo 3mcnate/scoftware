@@ -281,26 +281,32 @@ export type Database = {
       }
       memberships: {
         Row: {
+          cancelled: boolean
           created_at: string
           expires_at: string
           id: string
           length: Database["public"]["Enums"]["membership_length"]
+          receipt_url: string
           stripe_payment_id: string
           user_id: string
         }
         Insert: {
+          cancelled?: boolean
           created_at?: string
           expires_at: string
           id?: string
           length: Database["public"]["Enums"]["membership_length"]
+          receipt_url: string
           stripe_payment_id: string
           user_id: string
         }
         Update: {
+          cancelled?: boolean
           created_at?: string
           expires_at?: string
           id?: string
           length?: Database["public"]["Enums"]["membership_length"]
+          receipt_url?: string
           stripe_payment_id?: string
           user_id?: string
         }
