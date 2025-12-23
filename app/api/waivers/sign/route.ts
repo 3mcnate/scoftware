@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
 		});
 	}
 
-	if (!ticket) {
+	if (!ticket || (ticket.type !== 'driver' && waiver.type === 'driver')) {
 		return NextResponse.json({ error: "No ticket found for this trip" }, {
 			status: 404,
 		});
@@ -249,6 +249,7 @@ export async function POST(request: NextRequest) {
 		user_agent: userAgent,
 		file_path: filepath,
 		created_at: signedAt,
+		waiver_id: waiver.id,
 	});
 
 	const waiverHtml = generateWaiverHTML(waiver.content as JSONContent);

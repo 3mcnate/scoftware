@@ -12,10 +12,13 @@ import type { JSONContent } from "@tiptap/core";
 import { WaiverSignatureForm } from "../../../../../../components/waiver/waiver-signature-form";
 import { getTripWaiverByTripAndType } from "@/data/waivers/get-trip-waiver";
 import { createServerClient } from "@/utils/supabase/server";
-import { NextResponse } from "next/server";
+import { NextResponse, userAgent } from "next/server";
 import { generateWaiverHTML } from "@/utils/tiptap";
 import { getTicketByUserAndTrip } from "@/data/waivers/update-ticket-waiver";
 import { getPublishedTrip } from "@/data/trips/get-published-trip";
+import { createWaiverEvent } from "@/data/waivers/create-waiver-event";
+import { getUserIP } from "@/utils/logging";
+import { headers } from "next/headers";
 
 const waiverTypeSchema = z
   .enum(["participant", "driver"])
@@ -100,6 +103,18 @@ export default async function WaiverPage({
   // TODO: log waiver view event
 
   const waiverHtml = generateWaiverHTML(waiver.content as JSONContent);
+
+	const headersList = await headers();
+	const ip = await getUserIP();
+
+	await createWaiverEvent({
+		event: 'user_opened',
+		ip_address: ip,
+		trip_id: tripId,
+		user_agent: headersList.get('user-agent') || "unknown",
+		user_id: user.id,
+		waiver_id: waiver.id
+	})
 
   return (
     <div className="max-w-3xl space-y-6 mx-auto">

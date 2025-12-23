@@ -139,15 +139,32 @@ export const published_trips = pgTable("published_trips", {
 	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
-export const waiver_templates = pgTable("waiver_templates", {
+export const waiver_events = pgTable("waiver_events", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	content: jsonb().notNull(),
-	type: ticket_price_type().notNull(),
-	active: boolean().default(false).notNull(),
-	title: text().notNull(),
+	event: waiver_event().notNull(),
+	user_id: uuid().notNull(),
+	trip_id: uuid().notNull(),
+	ip_address: text().notNull(),
+	user_agent: text().default('unknown').notNull(),
+	file_path: text(),
+	waiver_id: uuid().notNull(),
 }, (table) => [
-	uniqueIndex("active_waiver_template_types").using("btree", table.type.asc().nullsLast().op("enum_ops")).where(sql`(active = true)`),
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "waiver_events_trip_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "waiver_events_user_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.waiver_id],
+			foreignColumns: [trip_waivers.id],
+			name: "waiver_events_waiver_id_fkey"
+		}),
 ]);
 
 export const tickets = pgTable("tickets", {
@@ -189,8 +206,8 @@ export const trip_waivers = pgTable("trip_waivers", {
 	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	trip_id: uuid().notNull(),
 	content: jsonb().notNull(),
-	template_id: uuid().notNull(),
 	type: participant_type().notNull(),
+	template_id: uuid().notNull(),
 	title: text().notNull(),
 }, (table) => [
 	foreignKey({
@@ -205,24 +222,11 @@ export const trip_waivers = pgTable("trip_waivers", {
 		}),
 ]);
 
-export const waiver_events = pgTable("waiver_events", {
+export const waiver_templates = pgTable("waiver_templates", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	event: waiver_event().notNull(),
-	user_id: uuid().notNull(),
-	trip_id: uuid().notNull(),
-	ip_address: text().notNull(),
-	user_agent: text().default('unknown').notNull(),
-	file_path: text(),
-}, (table) => [
-	foreignKey({
-			columns: [table.trip_id],
-			foreignColumns: [trips.id],
-			name: "waiver_events_trip_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.user_id],
-			foreignColumns: [profiles.id],
-			name: "waiver_events_user_id_fkey"
-		}),
-]);
+	content: jsonb().notNull(),
+	active: boolean().default(false).notNull(),
+	title: text().notNull(),
+	type: participant_type().default('participant').notNull(),
+});

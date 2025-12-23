@@ -1005,6 +1005,7 @@ export type Database = {
           trip_id: string
           user_agent: string
           user_id: string
+          waiver_id: string
         }
         Insert: {
           created_at?: string
@@ -1015,6 +1016,7 @@ export type Database = {
           trip_id: string
           user_agent?: string
           user_id: string
+          waiver_id: string
         }
         Update: {
           created_at?: string
@@ -1025,6 +1027,7 @@ export type Database = {
           trip_id?: string
           user_agent?: string
           user_id?: string
+          waiver_id?: string
         }
         Relationships: [
           {
@@ -1041,6 +1044,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "waiver_events_waiver_id_fkey"
+            columns: ["waiver_id"]
+            isOneToOne: false
+            referencedRelation: "trip_waivers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       waiver_templates: {
@@ -1050,7 +1060,7 @@ export type Database = {
           created_at: string
           id: string
           title: string
-          type: Database["public"]["Enums"]["ticket_price_type"]
+          type: Database["public"]["Enums"]["participant_type"]
         }
         Insert: {
           active?: boolean
@@ -1058,7 +1068,7 @@ export type Database = {
           created_at?: string
           id?: string
           title: string
-          type: Database["public"]["Enums"]["ticket_price_type"]
+          type?: Database["public"]["Enums"]["participant_type"]
         }
         Update: {
           active?: boolean
@@ -1066,7 +1076,7 @@ export type Database = {
           created_at?: string
           id?: string
           title?: string
-          type?: Database["public"]["Enums"]["ticket_price_type"]
+          type?: Database["public"]["Enums"]["participant_type"]
         }
         Relationships: []
       }
