@@ -12,7 +12,7 @@ import type { JSONContent } from "@tiptap/core";
 import { WaiverSignatureForm } from "../../../../../../components/waiver/waiver-signature-form";
 import { getTripWaiverByTripAndType } from "@/data/waivers/get-trip-waiver";
 import { createServerClient } from "@/utils/supabase/server";
-import { NextResponse, userAgent } from "next/server";
+import { NextResponse } from "next/server";
 import { generateWaiverHTML } from "@/utils/tiptap";
 import { getTicketByUserAndTrip } from "@/data/waivers/update-ticket-waiver";
 import { getPublishedTrip } from "@/data/trips/get-published-trip";

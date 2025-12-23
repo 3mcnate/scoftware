@@ -225,7 +225,7 @@ function TripCard({
             </Badge>
           )}
           {isConfirmed && (
-            <Badge className="bg-green-600 text-white hover:bg-green-600/80">
+            <Badge>
               Confirmed
             </Badge>
           )}
@@ -235,10 +235,10 @@ function TripCard({
           {(waiverRequired || driverWaiverRequired) && (
             <Badge className="bg-warning text-warning-foreground hover:bg-warning">
               <AlertTriangle className="h-3 w-3 mr-1" />
-              Waiver Required
+              Action Required
             </Badge>
           )}
-          {isRefunded && <Badge className="">Refunded</Badge>}
+          {isRefunded && <Badge className="bg-blue-300">Refunded</Badge>}
         </div>
         {isDriver && (
           <Alert className="py-2">
