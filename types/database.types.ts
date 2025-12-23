@@ -80,51 +80,6 @@ export type Database = {
           },
         ]
       }
-      checkout_sessions: {
-        Row: {
-          created_at: string
-          expires_at: string
-          id: string
-          status: Database["public"]["Enums"]["checkout_session_status"]
-          stripe_checkout_session_id: string | null
-          trip_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          status?: Database["public"]["Enums"]["checkout_session_status"]
-          stripe_checkout_session_id?: string | null
-          trip_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          status?: Database["public"]["Enums"]["checkout_session_status"]
-          stripe_checkout_session_id?: string | null
-          trip_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "checkout_sessions_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: false
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "checkout_sessions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       driver_info: {
         Row: {
           affirm_good_condition: boolean
@@ -302,6 +257,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      membership_prices: {
+        Row: {
+          created_at: string
+          length: Database["public"]["Enums"]["membership_length"]
+          stripe_price_id: string
+          unit_amount: number
+        }
+        Insert: {
+          created_at?: string
+          length: Database["public"]["Enums"]["membership_length"]
+          stripe_price_id: string
+          unit_amount: number
+        }
+        Update: {
+          created_at?: string
+          length?: Database["public"]["Enums"]["membership_length"]
+          stripe_price_id?: string
+          unit_amount?: number
+        }
+        Relationships: []
       }
       memberships: {
         Row: {
@@ -676,6 +652,58 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "trips"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_checkout_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          price_id: string
+          status: Database["public"]["Enums"]["checkout_session_status"]
+          stripe_cs_id: string
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          price_id: string
+          status?: Database["public"]["Enums"]["checkout_session_status"]
+          stripe_cs_id: string
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          price_id?: string
+          status?: Database["public"]["Enums"]["checkout_session_status"]
+          stripe_cs_id?: string
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_sessions_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkout_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_checkout_sessions_price_id_fkey"
+            columns: ["price_id"]
+            isOneToOne: false
+            referencedRelation: "trip_prices"
+            referencedColumns: ["stripe_price_id"]
           },
         ]
       }

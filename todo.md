@@ -31,15 +31,19 @@
 - participant live trips - DONE
 - participant information - done
 
+12/22/25
+- participant waiver - done
+- driver waiver - done
+
+12/23/25
+- memberships - use stripe metadata for reconciliation
+
 Next Up
 - fix truncation for trip details
-- participant waiver 
-- memberships
 - participant settings
 - signup info/logic on trips page
 - checkout (lets go)
 - driver info form
-- driver waiver
 - waitlists
 - past trips page
 - add "you must sign in or create an account to sign up for a trip alert"

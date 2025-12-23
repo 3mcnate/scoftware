@@ -1,0 +1,1 @@
+INSERT INTO "public"."membership_prices" ("length", "created_at", "stripe_price_id", "unit_amount") VALUES ('semester', '2025-12-23 20:54:35.145468+00', 'price_1ShRjJFqRKvou0I4Md63isNp', '2500'), ('year', '2025-12-23 20:55:12.778748+00', 'price_1ShRKrFqRKvou0I49PLpBsVr', '3500');

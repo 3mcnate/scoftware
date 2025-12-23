@@ -1,17 +1,16 @@
 "use client"
 
 import React from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
 // This component reproduces the copy and structure from
 // https://www.scoutfitters.org/become-a-member
 export function MembershipTab(): React.ReactElement {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 mx-auto max-w-3xl">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">BECOME A MEMBER</h1>
-        <h3 className="mt-4 text-sm font-semibold uppercase text-muted-foreground max-w-3xl">
+        <h3 className="mt-4 text-sm font-semibold uppercase text-muted-foreground">
           AT SC OUTFITTERS, WE LIVE FOR THE CHANCE TO BRING THE WONDERS OF THE WILDERNESS TO OUR FELLOW TROJANS AND DEVELOP A COMMUNITY AROUND OUR SHARED PASSION FOR THE OUTDOORS.
         </h3>
         <p className="mt-4 text-sm max-w-3xl">
@@ -26,11 +25,7 @@ export function MembershipTab(): React.ReactElement {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Membership Perks</CardTitle>
-        </CardHeader>
-        <CardContent>
+          <h3 className="text-lg font-semibold">Membership Perks</h3>
           <ul className="list-disc pl-5 space-y-2 text-sm">
             <li>Priority trip sign-ups!</li>
             <li>Lower cost trips!</li>
@@ -48,8 +43,6 @@ export function MembershipTab(): React.ReactElement {
               <Button variant="outline">HALF YEAR (FALL 2025) $25</Button>
             </a>
           </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
