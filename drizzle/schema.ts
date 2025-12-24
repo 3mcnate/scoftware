@@ -1,4 +1,4 @@
-import { pgTable, foreignKey, pgPolicy, uuid, text, pgSchema, uniqueIndex, index, check, varchar, timestamp, jsonb, boolean, smallint, unique, integer, numeric, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, pgSchema, uniqueIndex, index, check, uuid, varchar, timestamp, jsonb, boolean, text, smallint, unique, integer, foreignKey, pgPolicy, numeric, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const auth = pgSchema("auth");
@@ -24,21 +24,6 @@ export const waitlist_status = pgEnum("waitlist_status", ['waiting', 'notificati
 export const waiver_event = pgEnum("waiver_event", ['user_opened', 'user_signed'])
 
 export const refresh_tokens_id_seqInAuth = auth.sequence("refresh_tokens_id_seq", {  startWith: "1", increment: "1", minValue: "1", maxValue: "9223372036854775807", cache: "1", cycle: false })
-
-export const profiles = pgTable("profiles", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	first_name: text().notNull(),
-	last_name: text().notNull(),
-	avatar: text(),
-	phone: text().default('').notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.id],
-			foreignColumns: [usersInAuth.id],
-			name: "profiles_id_fkey"
-		}).onUpdate("cascade").onDelete("cascade"),
-	pgPolicy("Allow user to select own profile", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))` }),
-]);
 
 export const usersInAuth = auth.table("users", {
 	instance_id: uuid(),
@@ -258,4 +243,19 @@ export const memberships = pgTable("memberships", {
 		}),
 	unique("memberships_stripe_payment_id_key").on(table.stripe_payment_id),
 	pgPolicy("Allow users to view their memberships", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(user_id = ( SELECT auth.uid() AS uid))` }),
+]);
+
+export const profiles = pgTable("profiles", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	first_name: text().notNull(),
+	last_name: text().notNull(),
+	avatar: text(),
+	phone: text().default('').notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.id],
+			foreignColumns: [usersInAuth.id],
+			name: "profiles_id_fkey"
+		}).onUpdate("cascade").onDelete("cascade"),
+	pgPolicy("Allow user to select own profile", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))` }),
 ]);

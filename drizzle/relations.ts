@@ -1,19 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { usersInAuth, profiles, trips, published_trips, tickets, waiver_templates, trip_waivers, waiver_events, memberships } from "./schema";
-
-export const profilesRelations = relations(profiles, ({one, many}) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [profiles.id],
-		references: [usersInAuth.id]
-	}),
-	tickets: many(tickets),
-	waiver_events: many(waiver_events),
-	memberships: many(memberships),
-}));
-
-export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
-	profiles: many(profiles),
-}));
+import { trips, published_trips, tickets, profiles, waiver_templates, trip_waivers, waiver_events, memberships, usersInAuth } from "./schema";
 
 export const published_tripsRelations = relations(published_trips, ({one, many}) => ({
 	trip: one(trips, {
@@ -37,6 +23,16 @@ export const ticketsRelations = relations(tickets, ({one}) => ({
 	profile: one(profiles, {
 		fields: [tickets.user_id],
 		references: [profiles.id]
+	}),
+}));
+
+export const profilesRelations = relations(profiles, ({one, many}) => ({
+	tickets: many(tickets),
+	waiver_events: many(waiver_events),
+	memberships: many(memberships),
+	usersInAuth: one(usersInAuth, {
+		fields: [profiles.id],
+		references: [usersInAuth.id]
 	}),
 }));
 
@@ -76,4 +72,8 @@ export const membershipsRelations = relations(memberships, ({one}) => ({
 		fields: [memberships.user_id],
 		references: [profiles.id]
 	}),
+}));
+
+export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
+	profiles: many(profiles),
 }));

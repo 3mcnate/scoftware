@@ -3,5 +3,5 @@ import { useUpdateMutation } from "@supabase-cache-helpers/postgrest-react-query
 
 export const useUpdateProfile = () => {
 	const client = createClient();
-	return useUpdateMutation(client.from("profiles"), ["id"]);
+	return useUpdateMutation(client.from("profiles"), ["id"], '*');
 };

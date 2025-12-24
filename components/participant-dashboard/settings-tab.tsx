@@ -51,8 +51,6 @@ export function SettingsTab() {
   const userId = auth.status === "authenticated" ? auth.user.id : "";
   const email = auth.status === "authenticated" ? auth.user.email : "";
 
-  console.log("user", auth.status === "authenticated" ? auth.user : "");
-
   const { data: profile, isLoading } = useProfileById(userId);
   const { mutateAsync: updateProfile, isPending: isSaving } =
     useUpdateProfile();
@@ -78,13 +76,17 @@ export function SettingsTab() {
   const onSubmit = async (data: ProfileFormData) => {
     if (!userId) return;
 
+		console.log("userId", userId)
+
     try {
-      await updateProfile({
+      const result = await updateProfile({
         id: userId,
         first_name: data.first_name,
         last_name: data.last_name,
         phone: data.phone,
       });
+
+			console.log(result)
 
       toast.success("Profile updated successfully");
       reset(data);
