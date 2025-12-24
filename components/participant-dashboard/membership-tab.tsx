@@ -103,7 +103,7 @@ function ActiveMembershipCard({ membership }: { membership: Membership }) {
             <div>
               <CardTitle>Active Membership</CardTitle>
               <CardDescription>
-                {lengthLabel} - {periodLabel}
+                {lengthLabel}, {periodLabel}
               </CardDescription>
             </div>
           </div>
