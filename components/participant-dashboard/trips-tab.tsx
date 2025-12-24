@@ -233,7 +233,7 @@ function TripCard({
             <Badge className="bg-muted text-muted-foreground">Completed</Badge>
           )}
           {(waiverRequired || driverWaiverRequired) && (
-            <Badge className="bg-warning text-warning-foreground hover:bg-warning">
+            <Badge className="bg-warning/40 text-warning-foreground">
               <AlertTriangle className="h-3 w-3 mr-1" />
               Action Required
             </Badge>
