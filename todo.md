@@ -44,8 +44,9 @@
 - participant settings - done!
 - trip pic zoom - doneish
 
-11/24/25
-
+12/24/25
+- fix middleware route protection, add ?next=path query param to login page - done
+- guide/admin layout
 
 Next Up
 - driver info form

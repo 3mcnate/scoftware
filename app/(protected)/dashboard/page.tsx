@@ -6,7 +6,7 @@ export default async function DashboardRedirect() {
   const supabase = await createServerClient();
   const { data, error } = await supabase.auth.getClaims();
   if (!data || error) {
-    redirect("/");
+    redirect("/login");
   }
 
   if (!data.claims) {
