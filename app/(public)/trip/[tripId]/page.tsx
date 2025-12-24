@@ -6,7 +6,7 @@ import { TripNavigation } from "@/components/trip-page/trip-navigation";
 import { getVisiblePublishedTrip } from "@/data/server/trips/get-published-trip";
 import { getAdjacentPublishedTrips } from "@/data/server/trips/get-adjacent-published-trips";
 import { notFound } from "next/navigation";
-import { formatDate } from "@/utils/date-time";
+import { formatDateWithWeekday } from "@/utils/date-time";
 
 export default async function TripPage({
   params,
@@ -44,7 +44,7 @@ export default async function TripPage({
             ? {
                 id: previous.id,
                 title: previous.name,
-                date: formatDate(previous.start_date),
+                date: formatDateWithWeekday(previous.start_date),
               }
             : undefined
         }
@@ -53,7 +53,7 @@ export default async function TripPage({
             ? {
                 id: next.id,
                 title: next.name,
-                date: formatDate(next.start_date),
+                date: formatDateWithWeekday(next.start_date),
               }
             : undefined
         }

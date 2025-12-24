@@ -1,6 +1,6 @@
 import { TripsList } from "@/components/trips-list/trips-list";
 import { getUpcomingPublishedTrips } from "@/data/server/trips/get-upcoming-published-trips";
-import { formatDate, formatTime } from "@/utils/date-time";
+import { formatDateWithWeekday, formatTime } from "@/utils/date-time";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { History, Undo2 } from "lucide-react";
@@ -12,9 +12,9 @@ export default async function TripsPage() {
     id: trip.id,
     picture: trip.picture,
     title: trip.name,
-    startDate: formatDate(trip.start_date),
+    startDate: formatDateWithWeekday(trip.start_date),
     startTime: formatTime(trip.start_date),
-    endDate: formatDate(trip.end_date),
+    endDate: formatDateWithWeekday(trip.end_date),
     endTime: formatTime(trip.end_date),
     activity: trip.activity,
     difficulty: trip.difficulty,

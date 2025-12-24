@@ -8,7 +8,6 @@
     body {
       margin: 0;
       padding: 20px;
-      font-family: 'Courier New', Courier, monospace;
       background-color: #ffffff;
     }
     .container {
@@ -34,8 +33,7 @@
 <body>
   <div class="container">
     <img src="{{ .SiteURL }}/logo.png" alt="Logo" class="logo">
-    <h3>Confirm your email address:</h3>
-    <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email</a></p>
+    <h3><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email</a>Click here to confirm your email address</h3>
     <p>This link will expire in 24 hours.</p>
   </div>
 </body>

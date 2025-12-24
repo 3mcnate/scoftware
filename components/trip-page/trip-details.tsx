@@ -15,7 +15,7 @@ import { DifficultyModal } from "@/components/trip-page/difficulty-modal";
 import { TripDetailItem } from "@/components/trip-page/trip-detail-item";
 import { TripPageWaiverAlert } from "@/components/trip-page/trip-page-waiver-alert";
 import Image from "next/image";
-import { formatDate, formatTime } from "@/utils/date-time";
+import { formatDateWithWeekday, formatTime } from "@/utils/date-time";
 import { type InferSelectModel } from "drizzle-orm";
 import { published_trips } from "@/drizzle/schema";
 import { getInitialsFullname } from "@/utils/names";
@@ -72,7 +72,7 @@ export function TripDetails({ trip }: TripDetailsProps) {
             {trip.name}
           </h1>
           <p className="text-base sm:text-lg">
-            {`${formatDate(trip.start_date)} @ ${formatTime(trip.start_date)}`} - {`${formatDate(trip.end_date)} @ ${formatTime(trip.end_date)}`}
+            {`${formatDateWithWeekday(trip.start_date)} @ ${formatTime(trip.start_date)}`} - {`${formatDateWithWeekday(trip.end_date)} @ ${formatTime(trip.end_date)}`}
           </p>
         </div>
 

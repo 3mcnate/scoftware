@@ -1,9 +1,16 @@
 import { Enums } from "@/types/database.types";
 import { differenceInYears, isBefore } from "date-fns";
 
-export const formatDate = (value: string) =>
+export const formatDateWithWeekday = (value: string) =>
 	new Date(value).toLocaleDateString("en-US", {
 		weekday: "long",
+		month: "long",
+		day: "numeric",
+		year: "numeric",
+	});
+
+export const formatDate = (value: string) =>
+	new Date(value).toLocaleDateString("en-US", {
 		month: "long",
 		day: "numeric",
 		year: "numeric",

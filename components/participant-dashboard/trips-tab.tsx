@@ -34,7 +34,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useUserTickets } from "@/data/client/participant/get-user-tickets";
 import { useAuth } from "@/hooks/use-auth";
-import { formatDate, formatTime } from "@/utils/date-time";
+import { formatDateWithWeekday, formatTime } from "@/utils/date-time";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitialsFullname } from "@/utils/names";
@@ -166,9 +166,9 @@ function TripCard({
   const isRefunded = ticket.refunded;
   const isConfirmed = ticket.waiver_filepath && !ticket.cancelled && (!isDriver || ticket.driver_waiver_filepath);
 
-  const startDate = formatDate(trip.start_date);
+  const startDate = formatDateWithWeekday(trip.start_date);
   const startTime = formatTime(trip.start_date);
-  const endDate = formatDate(trip.end_date);
+  const endDate = formatDateWithWeekday(trip.end_date);
   const endTime = formatTime(trip.end_date);
 
   const handleOpenWaiver = async () => {

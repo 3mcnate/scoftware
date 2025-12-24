@@ -1,6 +1,6 @@
 import { TripsList } from "@/components/trips-list/trips-list";
 import { getPastPublishedTrips } from "@/data/server/trips/get-past-published-trips";
-import { formatDate, formatTime } from "@/utils/date-time";
+import { formatDateWithWeekday, formatTime } from "@/utils/date-time";
 import {
   Pagination,
   PaginationContent,
@@ -36,9 +36,9 @@ export default async function PastTripsPage({ searchParams }: PastTripsPageProps
     id: trip.id,
     picture: trip.picture,
     title: trip.name,
-    startDate: formatDate(trip.start_date),
+    startDate: formatDateWithWeekday(trip.start_date),
     startTime: formatTime(trip.start_date),
-    endDate: formatDate(trip.end_date),
+    endDate: formatDateWithWeekday(trip.end_date),
     endTime: formatTime(trip.end_date),
     activity: trip.activity,
     difficulty: trip.difficulty,
