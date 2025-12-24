@@ -22,7 +22,7 @@ export default function AuthLayout({
 		  </div>
 		  <div className="bg-muted relative hidden lg:block">
 			<Image
-			  src="/auth-image-3.jpg"
+			  src="/auth-image-2.jpg"
 			  alt="Image"
 			  className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
 			  fill

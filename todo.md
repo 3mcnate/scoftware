@@ -42,6 +42,9 @@
 
 12/23/25
 - participant settings - done!
+- trip pic zoom - doneish
+
+11/24/25
 
 
 Next Up
@@ -56,12 +59,15 @@ Next Up
 small things
 - fix truncation for trip details
 
+chores
+- switch to amazon ses
 
 guide basics
 - guide info
 - create/edit/publish trips
 - participant management
-- view participants
+- participants list
+- guides list
 
 admin stuff
 - trip cycles

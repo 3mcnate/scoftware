@@ -18,6 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SC Outfitters",
   description: "SC Outfitters Trips Platform",
+	icons: '/favicon.ico'
 };
 
 export default function RootLayout({
