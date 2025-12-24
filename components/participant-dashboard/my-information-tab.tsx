@@ -34,7 +34,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { useAuth } from "@/hooks/use-auth";
-import { useUpsertParticipantInfo } from "@/data/participant/upsert-participant-info";
+import { useUpsertParticipantInfo } from "@/data/client/participant/upsert-participant-info";
 import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
 import type { Tables } from "@/types/database.types";
 

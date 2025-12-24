@@ -3,8 +3,8 @@
 import { TripDetails } from "@/components/trip-page/trip-details";
 import { SignupButtons } from "@/components/trip-page/signup-buttons";
 import { TripNavigation } from "@/components/trip-page/trip-navigation";
-import { getVisiblePublishedTrip } from "@/data/trips/get-published-trip";
-import { getAdjacentPublishedTrips } from "@/data/trips/get-adjacent-published-trips";
+import { getVisiblePublishedTrip } from "@/data/server/trips/get-published-trip";
+import { getAdjacentPublishedTrips } from "@/data/server/trips/get-adjacent-published-trips";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/utils/date-time";
 

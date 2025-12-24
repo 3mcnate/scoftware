@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProfileById } from "@/data/profiles/get-profile-by-id";
+import { useProfileById } from "@/data/client/profiles/get-profile-by-id";
 import { useAuth } from "@/hooks/use-auth";
 import { getInitials } from "@/utils/names";
 import { createClient } from "@/utils/supabase/browser";

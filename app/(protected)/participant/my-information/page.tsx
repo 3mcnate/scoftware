@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
-import { useParticipantInfo } from "@/data/participant/get-participant-info";
+import { useParticipantInfo } from "@/data/client/participant/get-participant-info";
 import {
   MyInformationTab,
   MyInformationTabSkeleton,

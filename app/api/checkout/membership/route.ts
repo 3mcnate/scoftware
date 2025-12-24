@@ -1,5 +1,5 @@
-import { getMembershipPrice } from "@/data/memberships/get-membership-price";
-import { getActiveUserMembership } from "@/data/memberships/get-user-membership";
+import { getMembershipPrice } from "@/data/server/memberships/get-membership-price";
+import { getActiveUserMembership } from "@/data/server/memberships/get-user-membership";
 import { createHostUrl } from "@/utils/host-url";
 import { createStripeClient } from "@/utils/stripe";
 import { createServerClient } from "@/utils/supabase/server";

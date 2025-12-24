@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, ChevronRight } from "lucide-react";
-import { useParticipantInfo } from "@/data/participant/get-participant-info";
+import { useParticipantInfo } from "@/data/client/participant/get-participant-info";
 import { useAuth } from "@/hooks/use-auth";
 
 interface ParticipantInfoRequiredAlertProps {

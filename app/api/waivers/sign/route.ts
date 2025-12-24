@@ -6,12 +6,12 @@ import {
 } from "@/utils/supabase/server";
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
-import { getTripWaiver } from "@/data/waivers/get-trip-waiver";
+import { getTripWaiver } from "@/data/server/waivers/get-trip-waiver";
 import {
 	getTicketByUserAndTrip,
 	updateTicketWaiverFilepath,
-} from "@/data/waivers/update-ticket-waiver";
-import { createWaiverEvent } from "@/data/waivers/create-waiver-event";
+} from "@/data/server/waivers/update-ticket-waiver";
+import { createWaiverEvent } from "@/data/server/waivers/create-waiver-event";
 import { isAdult } from "@/utils/date-time";
 import { generateWaiverHTML } from "@/utils/tiptap";
 import { JSONContent } from "@tiptap/core";
@@ -19,9 +19,9 @@ import {
 	ACKNOWLEDGE_AND_ACCEPT_TEXT,
 	ELECTRONIC_SIGNATURE_CONSENT_TEXT,
 } from "@/components/waiver/waiver-checkbox-text";
-import { getProfileName } from "@/data/profiles/get-profile";
+import { getProfileName } from "@/data/server/profiles/get-profile";
 import { sanitizeObjectName } from "@/utils/storage";
-import { getPublishedTrip } from "@/data/trips/get-published-trip";
+import { getPublishedTrip } from "@/data/server/trips/get-published-trip";
 
 const signWaiverSchema = z.object({
 	fullLegalName: z.string().min(1, "Full legal name is required"),

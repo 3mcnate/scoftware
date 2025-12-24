@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createStripeClient } from "@/utils/stripe";
-import { handleCheckoutSessionCompleted } from "../../../../data/stripe/checkout-session-completed";
+import { handleCheckoutSessionCompleted } from "../../../../data/server/stripe/checkout-session-completed";
 
 const stripe = createStripeClient();
 

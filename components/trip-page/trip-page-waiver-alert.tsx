@@ -3,7 +3,7 @@
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, ChevronRight } from "lucide-react";
-import { useUserTickets } from "@/data/participant/get-user-tickets";
+import { useUserTickets } from "@/data/client/participant/get-user-tickets";
 import { useAuth } from "@/hooks/use-auth";
 import Link from "next/link";
 

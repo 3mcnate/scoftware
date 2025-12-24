@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/breadcrumb";
 import type { JSONContent } from "@tiptap/core";
 import { WaiverSignatureForm } from "../../../../../../components/waiver/waiver-signature-form";
-import { getTripWaiverByTripAndType } from "@/data/waivers/get-trip-waiver";
+import { getTripWaiverByTripAndType } from "@/data/server/waivers/get-trip-waiver";
 import { createServerClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import { generateWaiverHTML } from "@/utils/tiptap";
-import { getTicketByUserAndTrip } from "@/data/waivers/update-ticket-waiver";
-import { getPublishedTrip } from "@/data/trips/get-published-trip";
-import { createWaiverEvent } from "@/data/waivers/create-waiver-event";
+import { getTicketByUserAndTrip } from "@/data/server/waivers/update-ticket-waiver";
+import { getPublishedTrip } from "@/data/server/trips/get-published-trip";
+import { createWaiverEvent } from "@/data/server/waivers/create-waiver-event";
 import { getUserIP } from "@/utils/logging";
 import { headers } from "next/headers";
 

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { useBuyMembership } from "@/data/memberships/buy-membership";
+import { useBuyMembership } from "@/data/client/memberships/buy-membership";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 

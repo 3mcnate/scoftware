@@ -1,5 +1,5 @@
 import { TripsList } from "@/components/trips-list/trips-list";
-import { getPastPublishedTrips } from "@/data/trips/get-past-published-trips";
+import { getPastPublishedTrips } from "@/data/server/trips/get-past-published-trips";
 import { formatDate, formatTime } from "@/utils/date-time";
 import {
   Pagination,
