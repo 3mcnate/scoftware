@@ -24,7 +24,6 @@ export async function POST(request: NextRequest) {
 	}
 
 	const { claims: { sub: userId, email } } = claimsData;
-	console.log("claimsData.claims", claimsData.claims);
 	const { length } = requestData.data;
 
 	// check if user already has active membership

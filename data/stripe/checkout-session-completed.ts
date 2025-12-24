@@ -19,9 +19,11 @@ export async function handleCheckoutSessionCompleted(
 		case "membership":
 			await handleMembershipCheckout(session);
 			break;
+
 		case "trip_ticket":
 			// TODO: Implement trip ticket purchase handling
 			console.log(`Trip ticket purchase: ${session.id}`);
+			
 			break;
 		default:
 			console.warn(`Unknown product_type: ${productType}`);
