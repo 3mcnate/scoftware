@@ -1,5 +1,6 @@
 import { getMembershipPrice } from "@/data/memberships/get-membership-price";
 import { getActiveUserMembership } from "@/data/memberships/get-user-membership";
+import { createHostUrl } from "@/utils/host-url";
 import { createStripeClient } from "@/utils/stripe";
 import { createServerClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
@@ -22,7 +23,8 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json({ error: "Bad request" }, { status: 400 });
 	}
 
-	const { claims: { id: userId, email } } = claimsData;
+	const { claims: { sub: userId, email } } = claimsData;
+	console.log("claimsData.claims", claimsData.claims);
 	const { length } = requestData.data;
 
 	// check if user already has active membership
@@ -41,11 +43,17 @@ export async function POST(request: NextRequest) {
 		);
 	}
 
-	const host = request.headers.get("Host");
+	const host = request.headers.get("host");
+	if (!host) {
+		return NextResponse.json(
+			{ error: "Host not found" },
+			{ status: 400 },
+		);
+	}
 
 	const stripe = createStripeClient();
 	const session = await stripe.checkout.sessions.create({
-		success_url: `${host}/participant/membership?success=true`,
+		success_url: `${createHostUrl(host)}/participant/membership?success=true`,
 		line_items: [
 			{
 				price: price.stripe_price_id,
@@ -54,6 +62,7 @@ export async function POST(request: NextRequest) {
 		],
 		mode: "payment",
 		customer_email: email,
+		client_reference_id: userId,
 		metadata: {
 			type: "membership",
 			length,
@@ -66,5 +75,5 @@ export async function POST(request: NextRequest) {
 		});
 	}
 
-	return NextResponse.redirect(session.url);
+	return NextResponse.json({ url: session.url });
 }
