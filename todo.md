@@ -36,7 +36,7 @@
 - driver waiver - done
 
 12/23/25
-- memberships - use stripe metadata for reconciliation
+- memberships - use stripe metadata for reconciliation - done!
 - chore: squash supabase migrations
 - chore: create client/server folder structure under data/ - done
 
