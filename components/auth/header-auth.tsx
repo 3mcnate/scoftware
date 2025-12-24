@@ -79,23 +79,17 @@ function HeaderAuthProfile({ userId }: { userId: string }) {
     }
   };
 
-	const avatarUrl = getAvatarUrl(profile.avatar_path ?? "");
+  const avatarUrl = getAvatarUrl(profile.avatar_path ?? "");
 
   return (
     <DropdownMenu onOpenChange={() => setArrowDown(!arrowDown)}>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center gap-2 hover:cursor-pointer hover:opacity-80 transition-all">
           <Avatar className="h-10 w-10 border border-border">
-            {profile.avatar_path ? (
-              <AvatarImage src={avatarUrl} alt="User" />
-            ) : (
-              <>
-                <AvatarImage src={avatarUrl ?? ""} alt="User" />
-                <AvatarFallback>
-                  {getInitials(profile.first_name, profile.last_name)}
-                </AvatarFallback>
-              </>
-            )}
+            <AvatarImage src={avatarUrl ?? ""} alt="User" />
+            <AvatarFallback>
+              {getInitials(profile.first_name, profile.last_name)}
+            </AvatarFallback>
           </Avatar>
           {arrowDown ? (
             <ChevronDown className="size-5" />

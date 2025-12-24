@@ -30,7 +30,11 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfileById } from "@/data/client/profiles/get-profile-by-id";
 import { useUpdateProfile } from "@/data/client/profiles/update-profile";
-import { uploadAvatar, removeAvatar as deleteAvatar, getAvatarPath, getAvatarUrl } from "@/data/client/storage/avatars";
+import {
+  uploadAvatar,
+  deleteAvatar,
+  getAvatarUrl,
+} from "@/data/client/storage/avatars";
 import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
 import { getInitialsFullname } from "@/utils/names";
 
@@ -63,13 +67,25 @@ export function SettingsTab() {
     const file = e.target.files?.[0];
     if (!file || !userId) return;
 
+		if (file.size > 5000000) {
+			toast.error("File too large (limit 5 MB)")
+			return;
+		}
+
     setIsUploading(true);
     try {
-      await uploadAvatar(userId, file);
+
+			const oldPath = profile?.avatar_path;
+
+      const path = await uploadAvatar(userId, file);
       await updateProfile({
         id: userId,
-        avatar_path: getAvatarPath(userId),
+        avatar_path: path,
       });
+
+			if (oldPath) {
+				await deleteAvatar(oldPath)
+			}
 
       toast.success("Profile picture updated");
     } catch (err) {
@@ -89,8 +105,10 @@ export function SettingsTab() {
 
     setIsUploading(true);
     try {
-      await deleteAvatar(userId);
-      await updateProfile({ id: userId, avatar_path: null });
+      await Promise.all([
+        deleteAvatar(profile?.avatar_path ?? ""),
+        updateProfile({ id: userId, avatar_path: null }),
+      ]);
       toast.success("Profile picture removed");
     } catch {
       toast.error("Failed to remove profile picture");
@@ -118,8 +136,6 @@ export function SettingsTab() {
   const onSubmit = async (data: ProfileFormData) => {
     if (!userId) return;
 
-		console.log("userId", userId)
-
     try {
       const result = await updateProfile({
         id: userId,
@@ -128,7 +144,7 @@ export function SettingsTab() {
         phone: data.phone,
       });
 
-			console.log(result)
+      console.log(result);
 
       toast.success("Profile updated successfully");
       reset(data);
@@ -179,7 +195,9 @@ export function SettingsTab() {
             <div className="flex items-center gap-6">
               <div className="relative">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={getAvatarUrl(profile?.avatar_path ?? "") ?? undefined} />
+                  <AvatarImage
+                    src={getAvatarUrl(profile?.avatar_path ?? "") ?? undefined}
+                  />
                   <AvatarFallback className="bg-secondary text-secondary-foreground text-2xl">
                     {getInitialsFullname(fullName)}
                   </AvatarFallback>

@@ -1,34 +1,26 @@
+import { sanitizeObjectName } from "@/utils/storage";
 import { createClient } from "@/utils/supabase/browser";
 
-const AVATARS_BUCKET = "avatars";
-
-export function getAvatarPath(userId: string) {
-	return `${userId}`;
+export function getAvatarPath(userId: string, fileName: string) {
+	fileName = sanitizeObjectName(fileName)
+	return `${userId}/${fileName}`;
 }
 
 export async function uploadAvatar(userId: string, file: File) {
 	const client = createClient();
-	const path = getAvatarPath(userId);
+	const path = getAvatarPath(userId, file.name);
 
-	const { data, error } = await client.storage
-		.from(AVATARS_BUCKET)
+	const { error } = await client.storage
+		.from("avatars")
 		.upload(path, file, { upsert: true });
 
 	if (error) throw error;
-
-	const {
-		data: { publicUrl },
-	} = client.storage.from(AVATARS_BUCKET).getPublicUrl(data.path);
-
-	return publicUrl;
+	return path
 }
 
-export async function removeAvatar(userId: string) {
+export async function deleteAvatar(path: string) {
 	const client = createClient();
-	const path = getAvatarPath(userId);
-
-	const { error } = await client.storage.from(AVATARS_BUCKET).remove([path]);
-
+	const { error } = await client.storage.from("avatars").remove([path]);
 	if (error) throw error;
 }	
 

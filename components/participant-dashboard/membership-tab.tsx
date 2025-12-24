@@ -69,8 +69,6 @@ export function MembershipTab() {
   );
   const hasActiveMembership = !!activeMembership;
 
-  console.log("memberships", memberships);
-
   return (
     <div className="space-y-8">
       {hasActiveMembership ? (
@@ -107,7 +105,7 @@ function ActiveMembershipCard({ membership }: { membership: Membership }) {
             <div>
               <CardTitle>Active Membership</CardTitle>
               <CardDescription>
-                {lengthLabel}, {periodLabel}
+                {periodLabel} ({lengthLabel})
               </CardDescription>
             </div>
           </div>
@@ -119,10 +117,10 @@ function ActiveMembershipCard({ membership }: { membership: Membership }) {
           <Calendar className="h-4 w-4" />
           <span>Expires {formatDateWithWeekday(membership.expires_at)}</span>
         </div>
-        <p className="text-sm text-muted-foreground">
+        {/* <p className="text-sm text-muted-foreground">
           You have access to priority trip sign-ups, member pricing, exclusive
           events, and gear rentals.
-        </p>
+        </p> */}
       </CardContent>
     </Card>
   );
