@@ -238,7 +238,7 @@ function TripCard({
               Action Required
             </Badge>
           )}
-          {isRefunded && <Badge className="bg-blue-300">Refunded</Badge>}
+          {isRefunded && <Badge className="bg-blue-400 hover:bg-blue-400/80 transition-all">Refunded</Badge>}
         </div>
         {isDriver && (
           <Alert className="py-2">
