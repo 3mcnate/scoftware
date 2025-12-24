@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { usersInAuth, profiles, trips, published_trips, tickets, waiver_templates, trip_waivers, waiver_events } from "./schema";
+import { usersInAuth, profiles, trips, published_trips, tickets, waiver_templates, trip_waivers, waiver_events, memberships } from "./schema";
 
 export const profilesRelations = relations(profiles, ({one, many}) => ({
 	usersInAuth: one(usersInAuth, {
@@ -8,6 +8,7 @@ export const profilesRelations = relations(profiles, ({one, many}) => ({
 	}),
 	tickets: many(tickets),
 	waiver_events: many(waiver_events),
+	memberships: many(memberships),
 }));
 
 export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
@@ -67,5 +68,12 @@ export const waiver_eventsRelations = relations(waiver_events, ({one}) => ({
 	trip_waiver: one(trip_waivers, {
 		fields: [waiver_events.waiver_id],
 		references: [trip_waivers.id]
+	}),
+}));
+
+export const membershipsRelations = relations(memberships, ({one}) => ({
+	profile: one(profiles, {
+		fields: [memberships.user_id],
+		references: [profiles.id]
 	}),
 }));

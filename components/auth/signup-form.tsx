@@ -88,11 +88,11 @@ export function SignupForm({
       const { error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
-				phone: data.phone,
         options: {
           data: {
             first_name: data.firstName,
             last_name: data.lastName,
+						phone: data.phone,
           },
         },
       });

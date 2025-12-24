@@ -1,4 +1,4 @@
-import { pgTable, pgSchema, uniqueIndex, index, check, uuid, varchar, timestamp, jsonb, boolean, text, smallint, foreignKey, pgPolicy, unique, integer, numeric, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, pgPolicy, uuid, text, pgSchema, uniqueIndex, index, check, varchar, timestamp, jsonb, boolean, smallint, unique, integer, numeric, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const auth = pgSchema("auth");
@@ -24,6 +24,21 @@ export const waitlist_status = pgEnum("waitlist_status", ['waiting', 'notificati
 export const waiver_event = pgEnum("waiver_event", ['user_opened', 'user_signed'])
 
 export const refresh_tokens_id_seqInAuth = auth.sequence("refresh_tokens_id_seq", {  startWith: "1", increment: "1", minValue: "1", maxValue: "9223372036854775807", cache: "1", cycle: false })
+
+export const profiles = pgTable("profiles", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	first_name: text().notNull(),
+	last_name: text().notNull(),
+	avatar: text(),
+	phone: text().default('').notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.id],
+			foreignColumns: [usersInAuth.id],
+			name: "profiles_id_fkey"
+		}).onUpdate("cascade").onDelete("cascade"),
+	pgPolicy("Allow user to select own profile", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))` }),
+]);
 
 export const usersInAuth = auth.table("users", {
 	instance_id: uuid(),
@@ -74,52 +89,13 @@ export const usersInAuth = auth.table("users", {
 	check("users_email_change_confirm_status_check", sql`(email_change_confirm_status >= 0) AND (email_change_confirm_status <= 2)`),
 ]);
 
-export const profiles = pgTable("profiles", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	first_name: text().notNull(),
-	last_name: text().notNull(),
-	avatar: text(),
-}, (table) => [
-	foreignKey({
-			columns: [table.id],
-			foreignColumns: [usersInAuth.id],
-			name: "profiles_id_fkey"
-		}).onUpdate("cascade").onDelete("cascade"),
-	pgPolicy("Allow user to select own profile", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))` }),
-]);
-
-export const memberships = pgTable("memberships", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	user_id: uuid().notNull(),
+export const membership_prices = pgTable("membership_prices", {
+	length: membership_length().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	expires_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	stripe_payment_id: text().notNull(),
-	length: membership_length().notNull(),
-	cancelled: boolean().default(false).notNull(),
-	receipt_url: text().notNull(),
+	stripe_price_id: text().notNull(),
+	unit_amount: integer().notNull(),
 }, (table) => [
-	unique("memberships_stripe_payment_id_key").on(table.stripe_payment_id),
-]);
-
-export const trips = pgTable("trips", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	name: text().notNull(),
-	description: text(),
-	picture: text(),
-	driver_spots: integer().notNull(),
-	participant_spots: integer().notNull(),
-	ends_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	starts_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	gear_questions: text().array(),
-	signup_status: trip_signup_status().default('open').notNull(),
-	what_to_bring: text(),
-	access_code: text(),
-}, (table) => [
-	check("ends_after_start", sql`starts_at < ends_at`),
-	check("trips_driver_spots_check", sql`driver_spots >= 0`),
-	check("trips_participant_spots_check", sql`participant_spots >= 0`),
+	unique("membership_prices_stripe_price_id_key").on(table.stripe_price_id),
 ]);
 
 export const published_trips = pgTable("published_trips", {
@@ -148,8 +124,8 @@ export const published_trips = pgTable("published_trips", {
 			foreignColumns: [trips.id],
 			name: "published_trips_id_fkey"
 		}),
-	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"], using: sql`has_trip_ticket(( SELECT auth.uid() AS uid), id)` }),
-	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"] }),
+	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"], using: sql`visible` }),
+	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
 export const tickets = pgTable("tickets", {
@@ -207,14 +183,26 @@ export const trip_waivers = pgTable("trip_waivers", {
 		}),
 ]);
 
-export const waiver_templates = pgTable("waiver_templates", {
+export const trips = pgTable("trips", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	content: jsonb().notNull(),
-	active: boolean().default(false).notNull(),
-	title: text().notNull(),
-	type: participant_type().default('participant').notNull(),
-});
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	name: text().notNull(),
+	description: text(),
+	picture: text(),
+	driver_spots: integer().notNull(),
+	participant_spots: integer().notNull(),
+	ends_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	starts_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	gear_questions: text().array(),
+	signup_status: trip_signup_status().default('open').notNull(),
+	what_to_bring: text(),
+	access_code: text(),
+}, (table) => [
+	check("ends_after_start", sql`starts_at < ends_at`),
+	check("trips_driver_spots_check", sql`driver_spots >= 0`),
+	check("trips_participant_spots_check", sql`participant_spots >= 0`),
+]);
 
 export const waiver_events = pgTable("waiver_events", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
@@ -244,11 +232,30 @@ export const waiver_events = pgTable("waiver_events", {
 		}),
 ]);
 
-export const membership_prices = pgTable("membership_prices", {
-	length: membership_length().primaryKey().notNull(),
+export const waiver_templates = pgTable("waiver_templates", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	stripe_price_id: text().notNull(),
-	unit_amount: integer().notNull(),
+	content: jsonb().notNull(),
+	active: boolean().default(false).notNull(),
+	title: text().notNull(),
+	type: participant_type().default('participant').notNull(),
+});
+
+export const memberships = pgTable("memberships", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	user_id: uuid().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	expires_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	stripe_payment_id: text().notNull(),
+	length: membership_length().notNull(),
+	cancelled: boolean().default(false).notNull(),
+	receipt_url: text().notNull(),
 }, (table) => [
-	unique("membership_prices_stripe_price_id_key").on(table.stripe_price_id),
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "memberships_user_id_fkey"
+		}),
+	unique("memberships_stripe_payment_id_key").on(table.stripe_payment_id),
+	pgPolicy("Allow users to view their memberships", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(user_id = ( SELECT auth.uid() AS uid))` }),
 ]);

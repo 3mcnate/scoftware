@@ -29,7 +29,11 @@ import {
   ExternalLink,
   CreditCard,
 } from "lucide-react";
-import { formatDate, formatDateWithWeekday, getMembershipExpirationDate } from "@/utils/date-time";
+import {
+  formatDate,
+  formatDateWithWeekday,
+  getMembershipExpirationDate,
+} from "@/utils/date-time";
 
 type Membership = NonNullable<
   ReturnType<typeof useUserMemberships>["data"]
@@ -65,7 +69,7 @@ export function MembershipTab() {
   );
   const hasActiveMembership = !!activeMembership;
 
-	console.log("memberships", memberships)
+  console.log("memberships", memberships);
 
   return (
     <div className="space-y-8">
@@ -189,19 +193,24 @@ function BecomeMemberCard({
           <ul className="grid gap-2 text-sm grid-cols-1">
             <li className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              Priority trip sign-ups
+              Priority trip sign-ups!
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              Lower cost trips
+              Lower cost trips!
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              Member-only events
+              Monthly member-only events and opportunities
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              Gear rentals access
+              Exclusive access to gear rentals for your own trips (participants
+              get gear for SCO trips already)
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-primary" />
+              The coolest people you’ll ever meet
             </li>
           </ul>
         </div>
@@ -226,7 +235,7 @@ function BecomeMemberCard({
               variant="outline"
               onClick={() => onBuyMembership("semester")}
               disabled={isPending}
-							className="w-full"
+              className="w-full"
             >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {semesterOffer.label} ({semesterOffer.price})
@@ -313,8 +322,12 @@ function MembershipHistoryTable({
                       new Date(membership.expires_at)
                     )}
                   </TableCell>
-                  <TableCell>{formatDateWithWeekday(membership.created_at)}</TableCell>
-                  <TableCell>{formatDateWithWeekday(membership.expires_at)}</TableCell>
+                  <TableCell>
+                    {formatDateWithWeekday(membership.created_at)}
+                  </TableCell>
+                  <TableCell>
+                    {formatDateWithWeekday(membership.expires_at)}
+                  </TableCell>
                   <TableCell>
                     <MembershipStatusBadge status={status} />
                   </TableCell>

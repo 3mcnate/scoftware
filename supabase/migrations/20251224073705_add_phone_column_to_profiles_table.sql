@@ -1,7 +1,13 @@
-create or replace function handle_new_user()
-returns trigger
-security definer
-as $$
+alter table "public"."profiles" add column "phone" text not null default ''::text;
+
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
 declare
 
 fname text;
@@ -56,9 +62,7 @@ begin
 
 	return new;
 end;
-$$ language plpgsql
-set search_path = '';
+$function$
+;
 
-revoke execute on function handle_new_user from public;
-revoke execute on function handle_new_user from authenticated;
-revoke execute on function handle_new_user from anon;
+

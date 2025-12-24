@@ -28,7 +28,6 @@ import {
 } from "@/components/ui/field";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useAuth } from "@/hooks/use-auth";
-import { createClient } from "@/utils/supabase/browser";
 import { useProfileById } from "@/data/client/profiles/get-profile-by-id";
 import { useUpdateProfile } from "@/data/client/profiles/update-profile";
 import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
@@ -51,29 +50,28 @@ export function SettingsTab() {
   const auth = useAuth();
   const userId = auth.status === "authenticated" ? auth.user.id : "";
   const email = auth.status === "authenticated" ? auth.user.email : "";
-  const phone = auth.status === "authenticated" ? '+' + auth.user.phone : "";
 
-	console.log("user", auth.status === "authenticated" ? auth.user : "")
+  console.log("user", auth.status === "authenticated" ? auth.user : "");
 
   const { data: profile, isLoading } = useProfileById(userId);
-  const { mutateAsync: updateProfile, isPending: isSaving } = useUpdateProfile();
+  const { mutateAsync: updateProfile, isPending: isSaving } =
+    useUpdateProfile();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     control,
     handleSubmit,
-    formState: { isDirty, dirtyFields },
+    formState: { isDirty },
     reset,
   } = useForm<ProfileFormData>({
     resolver: standardSchemaResolver(ProfileSchema),
     values: {
       first_name: profile?.first_name ?? "",
       last_name: profile?.last_name ?? "",
-      phone: phone ?? "",
+      phone: profile?.phone ?? "",
     },
   });
-
 
   useUnsavedChangesPrompt(isDirty);
 
@@ -81,26 +79,13 @@ export function SettingsTab() {
     if (!userId) return;
 
     try {
-      const promises: Promise<unknown>[] = [];
+      await updateProfile({
+        id: userId,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone,
+      });
 
-      if (dirtyFields.first_name || dirtyFields.last_name) {
-        promises.push(
-          updateProfile({
-            id: userId,
-            first_name: data.first_name,
-            last_name: data.last_name,
-          })
-        );
-      }
-
-      if (dirtyFields.phone) {
-        const supabase = createClient();
-        promises.push(
-          supabase.auth.updateUser({ phone: data.phone || "" })
-        );
-      }
-
-      await Promise.all(promises);
       toast.success("Profile updated successfully");
       reset(data);
     } catch (err) {
@@ -114,9 +99,7 @@ export function SettingsTab() {
     return <SettingsTabSkeleton />;
   }
 
-  const fullName = profile
-    ? `${profile.first_name} ${profile.last_name}`
-    : "";
+  const fullName = profile ? `${profile.first_name} ${profile.last_name}` : "";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -268,7 +251,8 @@ export function SettingsTab() {
                         disabled={isSaving}
                       />
                       <FieldDescription>
-                        Guides will use this number to communicate with you about trips
+                        Guides will use this number to communicate with you
+                        about trips
                       </FieldDescription>
                       <FieldError errors={error ? [error] : undefined} />
                     </>
@@ -290,12 +274,7 @@ export function SettingsTab() {
           <CardContent>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input
-                id="email"
-                type="email"
-                value={email ?? ""}
-                disabled
-              />
+              <Input id="email" type="email" value={email ?? ""} disabled />
             </Field>
           </CardContent>
         </Card>

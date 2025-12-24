@@ -310,7 +310,15 @@ export type Database = {
           stripe_payment_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "memberships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       participant_comments: {
         Row: {
@@ -421,18 +429,21 @@ export type Database = {
           first_name: string
           id: string
           last_name: string
+          phone: string
         }
         Insert: {
           avatar?: string | null
           first_name: string
           id?: string
           last_name: string
+          phone?: string
         }
         Update: {
           avatar?: string | null
           first_name?: string
           id?: string
           last_name?: string
+          phone?: string
         }
         Relationships: []
       }
