@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { z } from "zod/v4";
@@ -30,6 +30,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfileById } from "@/data/client/profiles/get-profile-by-id";
 import { useUpdateProfile } from "@/data/client/profiles/update-profile";
+import { uploadAvatar, removeAvatar as deleteAvatar, getAvatarPath, getAvatarUrl } from "@/data/client/storage/avatars";
 import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
 import { getInitialsFullname } from "@/utils/names";
 
@@ -54,8 +55,49 @@ export function SettingsTab() {
   const { data: profile, isLoading } = useProfileById(userId);
   const { mutateAsync: updateProfile, isPending: isSaving } =
     useUpdateProfile();
+  const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !userId) return;
+
+    setIsUploading(true);
+    try {
+      await uploadAvatar(userId, file);
+      await updateProfile({
+        id: userId,
+        avatar_path: getAvatarPath(userId),
+      });
+
+      toast.success("Profile picture updated");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to upload image"
+      );
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!userId) return;
+
+    setIsUploading(true);
+    try {
+      await deleteAvatar(userId);
+      await updateProfile({ id: userId, avatar_path: null });
+      toast.success("Profile picture removed");
+    } catch {
+      toast.error("Failed to remove profile picture");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const {
     control,
@@ -137,7 +179,7 @@ export function SettingsTab() {
             <div className="flex items-center gap-6">
               <div className="relative">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={profile?.avatar ?? undefined} />
+                  <AvatarImage src={getAvatarUrl(profile?.avatar_path ?? "") ?? undefined} />
                   <AvatarFallback className="bg-secondary text-secondary-foreground text-2xl">
                     {getInitialsFullname(fullName)}
                   </AvatarFallback>
@@ -145,16 +187,22 @@ export function SettingsTab() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
+                  disabled={isUploading}
+                  className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
-                  <Camera className="h-4 w-4" />
+                  {isUploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
                 </button>
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  disabled
+                  onChange={handleImageUpload}
+                  disabled={isUploading}
                 />
               </div>
               <div className="space-y-2">
@@ -164,17 +212,21 @@ export function SettingsTab() {
                     variant="outline"
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
-                    disabled
+                    disabled={isUploading}
                   >
+                    {isUploading && (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    )}
                     Upload New Photo
                   </Button>
-                  {profile?.avatar && (
+                  {profile?.avatar_path && (
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       className="text-destructive hover:text-destructive bg-transparent"
-                      disabled
+                      disabled={isUploading}
+                      onClick={handleRemoveAvatar}
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
                       Remove
@@ -182,7 +234,7 @@ export function SettingsTab() {
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Profile picture upload coming soon
+                  Recommended: Square image, at least 200x200px. Max 5MB.
                 </p>
               </div>
             </div>

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfileById } from "@/data/client/profiles/get-profile-by-id";
+import { getAvatarUrl } from "@/data/client/storage/avatars";
 import { useAuth } from "@/hooks/use-auth";
 import { getInitials } from "@/utils/names";
 import { createClient } from "@/utils/supabase/browser";
@@ -78,16 +79,18 @@ function HeaderAuthProfile({ userId }: { userId: string }) {
     }
   };
 
+	const avatarUrl = getAvatarUrl(profile.avatar_path ?? "");
+
   return (
     <DropdownMenu onOpenChange={() => setArrowDown(!arrowDown)}>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center gap-2 hover:cursor-pointer hover:opacity-80 transition-all">
           <Avatar className="h-10 w-10 border border-border">
-            {profile.avatar ? (
-              <AvatarImage src={profile.avatar} alt="User" />
+            {profile.avatar_path ? (
+              <AvatarImage src={avatarUrl} alt="User" />
             ) : (
               <>
-                <AvatarImage src={profile.avatar ?? ""} alt="User" />
+                <AvatarImage src={avatarUrl ?? ""} alt="User" />
                 <AvatarFallback>
                   {getInitials(profile.first_name, profile.last_name)}
                 </AvatarFallback>

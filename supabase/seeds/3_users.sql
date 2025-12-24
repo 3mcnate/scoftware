@@ -172,7 +172,7 @@ VALUES
 		null,
 		'2025-12-24 04:48:33.453823+00',
 		'{"provider": "email", "providers": ["email"]}',
-		'{"sub": "285cd349-4aef-406a-b3f6-9f4494570540", "email": "natetbox@gmail.com", "phone": "+16504488862", "last_name": "Boxer", "first_name": "Natetbox", "email_verified": true, "phone_verified": false}',
+		'{"sub": "285cd349-4aef-406a-b3f6-9f4494570540", "email": "natetbox@gmail.com", "phone": "+16504488863", "last_name": "Boxer", "first_name": "Natetbox", "email_verified": true, "phone_verified": false}',
 		null,
 		'2025-12-24 04:46:50.46194+00',
 		'2025-12-24 05:47:12.066975+00',

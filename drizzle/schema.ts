@@ -249,7 +249,7 @@ export const profiles = pgTable("profiles", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	first_name: text().notNull(),
 	last_name: text().notNull(),
-	avatar: text(),
+	avatar_path: text(),
 	phone: text().default('').notNull(),
 }, (table) => [
 	foreignKey({
@@ -257,5 +257,7 @@ export const profiles = pgTable("profiles", {
 			foreignColumns: [usersInAuth.id],
 			name: "profiles_id_fkey"
 		}).onUpdate("cascade").onDelete("cascade"),
-	pgPolicy("Allow user to select own profile", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))` }),
+	unique("profiles_phone_key").on(table.phone),
+	pgPolicy("Allow users to update own profile", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))`, withCheck: sql`(id = ( SELECT auth.uid() AS uid))`  }),
+	pgPolicy("Allow user to select own profile", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);

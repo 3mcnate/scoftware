@@ -4,7 +4,7 @@ import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
 
 const getProfileById = (userId: string, client: TypedSupabaseClient) => {
 	return client.from("profiles").select(
-		"id, first_name, last_name, phone, avatar",
+		"id, first_name, last_name, phone, avatar_path",
 	).eq(
 		"id",
 		userId,
