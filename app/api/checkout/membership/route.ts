@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 		customer_email: email,
 		client_reference_id: userId,
 		metadata: {
-			type: "membership",
+			product_type: "membership",
 			length,
 		},
 	});
