@@ -86,7 +86,7 @@ function HeaderAuthProfile({ userId }: { userId: string }) {
       <DropdownMenuTrigger asChild>
         <div className="flex items-center gap-2 hover:cursor-pointer hover:opacity-80 transition-all">
           <Avatar className="h-10 w-10 border border-border">
-            <AvatarImage src={avatarUrl ?? ""} alt="User" />
+            <AvatarImage src={avatarUrl ?? ""} alt="User" className="object-cover" />
             <AvatarFallback>
               {getInitials(profile.first_name, profile.last_name)}
             </AvatarFallback>

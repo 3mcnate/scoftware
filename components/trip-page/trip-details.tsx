@@ -19,6 +19,7 @@ import { formatDateWithWeekday, formatTime } from "@/utils/date-time";
 import { type InferSelectModel } from "drizzle-orm";
 import { published_trips } from "@/drizzle/schema";
 import { getInitialsFullname } from "@/utils/names";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 type PublishedTrip = InferSelectModel<typeof published_trips>;
 
@@ -53,14 +54,30 @@ export function TripDetails({ trip }: TripDetailsProps) {
   return (
     <div className="space-y-6">
       {/* Hero Image */}
-      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] w-full overflow-hidden rounded-xl">
-        <Image
-          src={trip.picture || "/placeholder.svg"}
-          alt={trip.name}
-          fill
-          className="object-cover"
-        />
-      </div>
+      <Dialog>
+        <DialogTrigger asChild>
+          <div className="relative h-[300px] sm:h-[400px] md:h-[500px] w-full overflow-hidden rounded-xl cursor-zoom-in">
+            <Image
+              src={trip.picture || "/placeholder.svg"}
+              alt={trip.name}
+              fill
+              className="object-cover hover:scale-101 transition-transform duration-200"
+            />
+          </div>
+        </DialogTrigger>
+        <DialogContent className="w-full min-w-[90vw] max-w-[90vw] p-0 border-none shadow-none">
+          <DialogTitle className="hidden">{trip.name} picture</DialogTitle>
+					<div className="relative h-[80vh]">
+            <Image
+              src={trip.picture || "/placeholder.svg"}
+              alt={trip.name}
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Waiver Alert */}
       <TripPageWaiverAlert tripId={trip.id} />
@@ -224,6 +241,7 @@ export function TripDetails({ trip }: TripDetailsProps) {
                   <AvatarImage
                     src={guide.image || "/placeholder.svg"}
                     alt={guide.name}
+										className="object-cover"
                   />
                   <AvatarFallback className="bg-foreground text-primary-foreground font-bold">
 										{getInitialsFullname(guide.name)}

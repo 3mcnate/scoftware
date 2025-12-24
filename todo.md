@@ -41,7 +41,7 @@
 - chore: create client/server folder structure under data/ - done
 
 12/23/25
-- participant settings
+- participant settings - done!
 
 
 Next Up
@@ -51,3 +51,24 @@ Next Up
 - checkout (lets go)
 - waitlists
 - add "you must sign in or create an account to sign up for a trip alert"
+- allergy select component
+
+small things
+- fix truncation for trip details
+
+
+guide basics
+- guide info
+- create/edit/publish trips
+- participant management
+- view participants
+
+admin stuff
+- trip cycles
+- budget formulas
+- membership prices
+- waiver templates
+- access control/roles
+
+nice to haves
+- guide stats

@@ -117,7 +117,7 @@ async function generateWaiverPdf(
 		} Pacific Time
 				</div>
 				<div style="margin-top: 24px; font-style: italic; color: #666;">
-					This document was electronically signed and is legally binding. Please save this document for your records.
+					Please save this document for your records.
 				</div>
 			</div>
 		`;

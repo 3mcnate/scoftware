@@ -196,7 +196,7 @@ export function SettingsTab() {
               <div className="relative">
                 <Avatar className="h-24 w-24">
                   <AvatarImage
-                    src={getAvatarUrl(profile?.avatar_path ?? "") ?? undefined}
+                    src={getAvatarUrl(profile?.avatar_path ?? "") ?? undefined} className="object-cover"
                   />
                   <AvatarFallback className="bg-secondary text-secondary-foreground text-2xl">
                     {getInitialsFullname(fullName)}

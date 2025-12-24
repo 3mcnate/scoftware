@@ -12,9 +12,10 @@ function getMembershipsByUser(userId: string) {
 			length,
 			cancelled,
 			receipt_url
-	`).eq("user_id", userId);
+	`)
+		.order("expires_at", { ascending: false }).eq("user_id", userId);
 }
 
 export const useUserMemberships = (userId: string) => {
-	return useQuery(getMembershipsByUser(userId))
-}
+	return useQuery(getMembershipsByUser(userId));
+};

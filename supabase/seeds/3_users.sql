@@ -233,3 +233,5 @@ VALUES
 		'spring',
 		'undergrad'
 	);
+
+update public.profiles set avatar_path = "d070655d-974c-45a5-a332-eb1f499e49fd/IMG_4654jpg" where id = 'd070655d-974c-45a5-a332-eb1f499e49fd'
