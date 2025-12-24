@@ -1,52 +1,140 @@
-"use client"
+"use client";
 
-import type React from "react"
+import { useRef } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { z } from "zod/v4";
+import { isValidPhoneNumber } from "react-phone-number-input";
+import { toast } from "sonner";
+import { Save, Loader2, Camera, Trash2 } from "lucide-react";
 
-import { useState, useRef } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, Save, Trash2 } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { useAuth } from "@/hooks/use-auth";
+import { createClient } from "@/utils/supabase/browser";
+import { useProfileById } from "@/data/client/profiles/get-profile-by-id";
+import { useUpdateProfile } from "@/data/client/profiles/update-profile";
+import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
+import { getInitialsFullname } from "@/utils/names";
+
+const ProfileSchema = z.object({
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
+  phone: z
+    .string()
+    .optional()
+    .refine((val) => !val || isValidPhoneNumber(val), {
+      message: "Invalid phone number",
+    }),
+});
+
+type ProfileFormData = z.infer<typeof ProfileSchema>;
 
 export function SettingsTab() {
-  const [isSaving, setIsSaving] = useState(false)
-  const [profileImage, setProfileImage] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const auth = useAuth();
+  const userId = auth.status === "authenticated" ? auth.user.id : "";
+  const email = auth.status === "authenticated" ? auth.user.email : "";
+  const phone = auth.status === "authenticated" ? '+' + auth.user.phone : "";
 
-  const handleSave = () => {
-    setIsSaving(true)
-    setTimeout(() => setIsSaving(false), 1500)
-  }
+	console.log("user", auth.status === "authenticated" ? auth.user : "")
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setProfileImage(reader.result as string)
+  const { data: profile, isLoading } = useProfileById(userId);
+  const { mutateAsync: updateProfile, isPending: isSaving } = useUpdateProfile();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { isDirty, dirtyFields },
+    reset,
+  } = useForm<ProfileFormData>({
+    resolver: standardSchemaResolver(ProfileSchema),
+    values: {
+      first_name: profile?.first_name ?? "",
+      last_name: profile?.last_name ?? "",
+      phone: phone ?? "",
+    },
+  });
+
+
+  useUnsavedChangesPrompt(isDirty);
+
+  const onSubmit = async (data: ProfileFormData) => {
+    if (!userId) return;
+
+    try {
+      const promises: Promise<unknown>[] = [];
+
+      if (dirtyFields.first_name || dirtyFields.last_name) {
+        promises.push(
+          updateProfile({
+            id: userId,
+            first_name: data.first_name,
+            last_name: data.last_name,
+          })
+        );
       }
-      reader.readAsDataURL(file)
+
+      if (dirtyFields.phone) {
+        const supabase = createClient();
+        promises.push(
+          supabase.auth.updateUser({ phone: data.phone || "" })
+        );
+      }
+
+      await Promise.all(promises);
+      toast.success("Profile updated successfully");
+      reset(data);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to update profile"
+      );
     }
+  };
+
+  if (auth.status !== "authenticated" || isLoading) {
+    return <SettingsTabSkeleton />;
   }
 
-  const handleRemoveImage = () => {
-    setProfileImage(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
-  }
+  const fullName = profile
+    ? `${profile.first_name} ${profile.last_name}`
+    : "";
 
   return (
-    <div className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Account Settings</h2>
-          <p className="text-sm text-muted-foreground mt-1">Manage your profile and account preferences</p>
+          <h2 className="text-lg font-semibold text-foreground">
+            Account Settings
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage your profile and account preferences
+          </p>
         </div>
-        <Button onClick={handleSave} disabled={isSaving}>
-          <Save className="h-4 w-4 mr-2" />
+        <Button type="submit" disabled={isSaving || !isDirty}>
+          {isSaving ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4 mr-2" />
+          )}
           {isSaving ? "Saving..." : "Save Changes"}
         </Button>
       </div>
@@ -56,18 +144,21 @@ export function SettingsTab() {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-base">Profile Picture</CardTitle>
-            <CardDescription>Upload a photo to personalize your profile</CardDescription>
+            <CardDescription>
+              Upload a photo to personalize your profile
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-6">
               <div className="relative">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage
-                    src={profileImage || "/placeholder.svg?height=96&width=96&query=professional headshot"}
-                  />
-                  <AvatarFallback className="bg-secondary text-secondary-foreground text-2xl">JD</AvatarFallback>
+                  <AvatarImage src={profile?.avatar ?? undefined} />
+                  <AvatarFallback className="bg-secondary text-secondary-foreground text-2xl">
+                    {getInitialsFullname(fullName)}
+                  </AvatarFallback>
                 </Avatar>
                 <button
+                  type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
                 >
@@ -77,28 +168,37 @@ export function SettingsTab() {
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
-                  onChange={handleImageUpload}
                   className="hidden"
+                  disabled
                 />
               </div>
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled
+                  >
                     Upload New Photo
                   </Button>
-                  {profileImage && (
+                  {profile?.avatar && (
                     <Button
+                      type="button"
                       variant="outline"
                       size="sm"
-                      onClick={handleRemoveImage}
                       className="text-destructive hover:text-destructive bg-transparent"
+                      disabled
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
                       Remove
                     </Button>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">Recommended: Square image, at least 200x200px. Max 5MB.</p>
+                <p className="text-xs text-muted-foreground">
+                  Profile picture upload coming soon
+                </p>
               </div>
             </div>
           </CardContent>
@@ -108,32 +208,74 @@ export function SettingsTab() {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-base">Personal Details</CardTitle>
-            <CardDescription>Update your name and contact information</CardDescription>
+            <CardDescription>
+              Update your name and contact information
+            </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="first-name">First Name</Label>
-                <Input id="first-name" placeholder="John" defaultValue="John" className="bg-input border-border" />
+          <CardContent>
+            <FieldGroup>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel htmlFor="first_name">First Name</FieldLabel>
+                  <Controller
+                    control={control}
+                    name="first_name"
+                    render={({ field, fieldState: { error } }) => (
+                      <>
+                        <Input
+                          {...field}
+                          id="first_name"
+                          placeholder="John"
+                          disabled={isSaving}
+                          aria-invalid={!!error}
+                        />
+                        <FieldError errors={error ? [error] : undefined} />
+                      </>
+                    )}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="last_name">Last Name</FieldLabel>
+                  <Controller
+                    control={control}
+                    name="last_name"
+                    render={({ field, fieldState: { error } }) => (
+                      <>
+                        <Input
+                          {...field}
+                          id="last_name"
+                          placeholder="Doe"
+                          disabled={isSaving}
+                          aria-invalid={!!error}
+                        />
+                        <FieldError errors={error ? [error] : undefined} />
+                      </>
+                    )}
+                  />
+                </Field>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="last-name">Last Name</Label>
-                <Input id="last-name" placeholder="Doe" defaultValue="Doe" className="bg-input border-border" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+1 (555) 000-0000"
-                defaultValue="+1 (555) 123-4567"
-                className="bg-input border-border"
-              />
-              <p className="text-xs text-muted-foreground">
-                This number will be used for trip notifications and emergencies
-              </p>
-            </div>
+              <Field>
+                <FieldLabel htmlFor="phone">Phone Number</FieldLabel>
+                <Controller
+                  control={control}
+                  name="phone"
+                  render={({ field, fieldState: { error } }) => (
+                    <>
+                      <PhoneInput
+                        {...field}
+                        value={field.value ?? ""}
+                        defaultCountry="US"
+                        disabled={isSaving}
+                      />
+                      <FieldDescription>
+                        Guides will use this number to communicate with you about trips
+                      </FieldDescription>
+                      <FieldError errors={error ? [error] : undefined} />
+                    </>
+                  )}
+                />
+              </Field>
+            </FieldGroup>
           </CardContent>
         </Card>
 
@@ -141,44 +283,103 @@ export function SettingsTab() {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-base">Email Address</CardTitle>
-            <CardDescription>Your email is used for login and cannot be changed here</CardDescription>
+            <CardDescription>
+              Contact us if you need to change your email address
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <Field>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
                 type="email"
-                value="john.doe@example.com"
+                value={email ?? ""}
                 disabled
-                className="bg-secondary border-border text-muted-foreground"
               />
-              <p className="text-xs text-muted-foreground">Contact support if you need to change your email address</p>
+            </Field>
+          </CardContent>
+        </Card>
+
+        <div>
+          <Button type="submit" disabled={isSaving || !isDirty}>
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+export function SettingsTabSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <Skeleton className="h-7 w-40" />
+          <Skeleton className="h-4 w-64 mt-2" />
+        </div>
+        <Skeleton className="h-9 w-32" />
+      </div>
+
+      <div className="grid gap-6">
+        {/* Profile Picture Card Skeleton */}
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-56 mt-1" />
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-6">
+              <Skeleton className="h-24 w-24 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-36" />
+                <Skeleton className="h-3 w-48" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Danger Zone */}
-        <Card className="bg-card border-destructive/30">
+        {/* Personal Details Card Skeleton */}
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>
-            <CardDescription>Irreversible and destructive actions</CardDescription>
+            <Skeleton className="h-5 w-36" />
+            <Skeleton className="h-4 w-48 mt-1" />
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-lg border border-border">
-              <div>
-                <p className="text-sm font-medium text-foreground">Delete Account</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Permanently delete your account and all associated data
-                </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-9 w-full" />
               </div>
-              <Button variant="destructive" size="sm">
-                Delete Account
-              </Button>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-9 w-full" />
+              </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Email Card Skeleton */}
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-4 w-64 mt-1" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Skeleton className="h-9 w-32" />
       </div>
     </div>
-  )
+  );
 }

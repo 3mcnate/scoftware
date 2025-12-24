@@ -40,12 +40,14 @@
 - chore: squash supabase migrations
 - chore: create client/server folder structure under data/ - done
 
-Next Up
-- fix truncation for trip details
+12/23/25
 - participant settings
+
+
+Next Up
+- driver info form
+- fix truncation for trip details
 - signup info/logic on trips page
 - checkout (lets go)
-- driver info form
 - waitlists
-- past trips page
 - add "you must sign in or create an account to sign up for a trip alert"
