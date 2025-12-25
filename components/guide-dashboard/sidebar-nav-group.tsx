@@ -1,6 +1,11 @@
 "use client";
 
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
@@ -10,59 +15,94 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { LucideIcon } from "lucide-react";
+import { ChevronRight, LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-interface SideNavItem {
+export type SideNavSubItem = {
   name: string;
   href: string;
   icon?: LucideIcon;
-  sub: SideNavItem[];
-}
+};
+
+export type SideNavItem = {
+  name: string;
+  href?: string;
+  icon?: LucideIcon;
+  sub?: SideNavSubItem[];
+};
 
 type SideNavGroupProps = {
   title?: string;
   items: SideNavItem[];
 };
 
-export function SideNavGroup({ items }: SideNavGroupProps) {
+export function SidebarNavGroup({ items }: SideNavGroupProps) {
   const pathname = usePathname();
 
   return (
     <SidebarGroup>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.name}>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith(item.href)}
-              >
-                <Link href={item.href}>
-                  {item.icon && <item.icon />}
-                  <span>{item.name}</span>
-                </Link>
-              </SidebarMenuButton>
-              {item.sub.length && (
-                <SidebarMenuSub>
-                  {item.sub.map((item) => (
-                    <SidebarMenuSubItem key={item.name}>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={pathname.startsWith(item.href)}
-                      >
-                        <Link href={item.href}>
-                          {item.icon && <item.icon />}
-                          <span>{item.name}</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              )}
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            if (item.sub?.length) {
+              return (
+                <Collapsible
+                  key={item.name}
+                  className="group/collapsible"
+                  asChild
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger>
+                      <SidebarMenuButton>
+                        {item.icon && <item.icon />}
+                        <span>{item.name}</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {item.sub.map((sub) => (
+                          <SidebarMenuSubItem key={sub.name}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={pathname.startsWith(sub.href)}
+                            >
+                              <Link href={sub.href}>
+                                {sub.icon && <sub.icon />}
+                                <span>{sub.name}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              );
+            }
+
+            return (
+              <SidebarMenuItem key={item.name}>
+                <SidebarMenuButton
+                  asChild={!!item.href}
+                  isActive={!!item.href && pathname.startsWith(item.href)}
+                >
+                  {item.href ? (
+                    <Link href={item.href}>
+                      {item.icon && <item.icon />}
+                      <span>{item.name}</span>
+                    </Link>
+                  ) : (
+                    <>
+                      {item.icon && <item.icon />}
+                      <span>{item.name}</span>
+                    </>
+                  )}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
