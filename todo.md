@@ -48,6 +48,27 @@
 - fix middleware route protection, add ?next=path query param to login page - done
 - guide/admin layout
 
+The plan:
+12/26	 guide/admin layout, start on guide trips page
+12/27	 guide trips page - new trip form
+12/28	 guide trips page - trip page
+12/29	 guide trips page - participants
+12/30  guide trips page - participant reports + convenience buttons
+12/31	 guide trips page - budget
+1/1  	 guide trips page - signups
+1/2  	 guide trips page - publish
+1/3  	 amazon SES
+1/4  	 checkout - availability display on trips page
+1/5  	 checkout - core backend functionality
+1/6  	 checkout - touchups and polishing
+1/7  	 driver form
+1/8  	 gear form
+1/9  	 participants list
+1/10 	 guides list
+1/11 	 trip cycles
+1/12 	 trip budgets
+
+
 Next Up
 - driver info form
 - fix truncation for trip details
@@ -66,6 +87,7 @@ chores
 guide basics
 - guide info
 - create/edit/publish trips
+	- Tabs: Participants, Trip Page, Budget, Signups
 - participant management
 - participants list
 - guides list
@@ -73,9 +95,9 @@ guide basics
 admin stuff
 - trip cycles
 - budget formulas
-- membership prices
-- waiver templates
-- access control/roles
+- membership prices - this can wait
+- waiver templates - this can wait
+- access control/roles - this can wait
 
 nice to haves
 - guide stats

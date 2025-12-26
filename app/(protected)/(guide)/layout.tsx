@@ -9,7 +9,7 @@ export default function GuideLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main>{children}</main>
+      <main className="p-12">{children}</main>
     </SidebarProvider>
   );
 }

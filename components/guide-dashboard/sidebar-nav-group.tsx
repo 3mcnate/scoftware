@@ -54,7 +54,7 @@ export function SidebarNavGroup({ items }: SideNavGroupProps) {
                 >
                   <SidebarMenuItem>
                     <CollapsibleTrigger>
-                      <SidebarMenuButton>
+                      <SidebarMenuButton className="flex justify-between w-full">
                         {item.icon && <item.icon />}
                         <span>{item.name}</span>
                         <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
