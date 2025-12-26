@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
@@ -37,11 +38,12 @@ type SideNavGroupProps = {
   items: SideNavItem[];
 };
 
-export function SidebarNavGroup({ items }: SideNavGroupProps) {
+export function SidebarNavGroup({ title, items }: SideNavGroupProps) {
   const pathname = usePathname();
 
   return (
     <SidebarGroup>
+      {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {
@@ -51,10 +53,13 @@ export function SidebarNavGroup({ items }: SideNavGroupProps) {
                   key={item.name}
                   className="group/collapsible"
                   asChild
+                  defaultOpen={item.sub?.some((sub) =>
+                    pathname.startsWith(sub.href)
+                  )}
                 >
                   <SidebarMenuItem>
-                    <CollapsibleTrigger>
-                      <SidebarMenuButton className="flex justify-between w-full">
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={item.name}>
                         {item.icon && <item.icon />}
                         <span>{item.name}</span>
                         <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -87,6 +92,7 @@ export function SidebarNavGroup({ items }: SideNavGroupProps) {
                 <SidebarMenuButton
                   asChild={!!item.href}
                   isActive={!!item.href && pathname.startsWith(item.href)}
+                  tooltip={item.name}
                 >
                   {item.href ? (
                     <Link href={item.href}>

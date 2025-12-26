@@ -1,51 +1,62 @@
-"use client"
+"use client";
 
-import { SidebarNavGroup, SideNavItem } from "@/components/guide-dashboard/sidebar-nav-group";
+import { NavAdmin } from "@/components/guide-dashboard/nav-admin";
+import { NavUser } from "@/components/guide-dashboard/nav-user";
+import { SidebarHeader } from "@/components/guide-dashboard/sidebar-header";
+import {
+  SidebarNavGroup,
+  SideNavItem,
+} from "@/components/guide-dashboard/sidebar-nav-group";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
+  SidebarHeader as SidebarHeaderWrapper,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 import { CircleUser, Map, Users } from "lucide-react";
 
-
 const guideItems: SideNavItem[] = [
-	{
-		name: "Trips",
-		icon: Map,
-		sub: [
-			{
-				name: "My Trips",
-				href: "/guide/my-trips"
-			},
-			{
-				name: "All Trips",
-				href: "/guide/all-trips"
-			}
-		]
-	},
-	{
-		name: "Guides",
-		icon: CircleUser,
-		href: "/guide/guides"
-	},
-	{
-		name: "Participants",
-		icon: Users,
-		href: "/guide/participants"
-	}
-]
-
+  {
+    name: "Trips",
+    icon: Map,
+    sub: [
+      {
+        name: "My Trips",
+        href: "/guide/my-trips",
+      },
+      {
+        name: "All Trips",
+        href: "/guide/all-trips",
+      },
+    ],
+  },
+  {
+    name: "Guides",
+    icon: CircleUser,
+    href: "/guide/guides",
+  },
+  {
+    name: "Participants",
+    icon: Users,
+    href: "/guide/participants",
+  },
+];
 
 export default function AppSidebar() {
   return (
-    <Sidebar>
-      <SidebarHeader></SidebarHeader>
+    <Sidebar collapsible="icon">
+      <SidebarHeaderWrapper>
+        <SidebarHeader />
+      </SidebarHeaderWrapper>
       <SidebarContent>
-				<SidebarNavGroup items={guideItems}/>
-			</SidebarContent>
-      <SidebarFooter></SidebarFooter>
+        <SidebarNavGroup items={guideItems} />
+        <NavAdmin />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
