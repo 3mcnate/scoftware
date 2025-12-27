@@ -234,5 +234,5 @@ VALUES
 		'undergrad'
 	);
 
-update public.profiles set avatar_path = "d070655d-974c-45a5-a332-eb1f499e49fd/IMG_4654jpg" where id = 'd070655d-974c-45a5-a332-eb1f499e49fd'
+update public.profiles set avatar_path = 'd070655d-974c-45a5-a332-eb1f499e49fd/IMG_4654jpg' where id = 'd070655d-974c-45a5-a332-eb1f499e49fd';
 update public.roles set "role" = 'guide'::public.user_role where user_id = '285cd349-4aef-406a-b3f6-9f4494570540';

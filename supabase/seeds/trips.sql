@@ -5,11 +5,11 @@ INSERT INTO
 		"updated_at",
 		"name",
 		"description",
-		"picture",
+		"picture_path",
 		"driver_spots",
 		"participant_spots",
-		"ends_at",
-		"starts_at",
+		"end_date",
+		"start_date",
 		"gear_questions",
 		"signup_status",
 		"what_to_bring",
@@ -27,7 +27,7 @@ VALUES
  We will leave from the USC village at 9am on Saturday for a quick and easy drive to the Whitney Canyon Falls Trailhead. From there, it’ll be a 3-mile round trip hike through the canyon to the waterfall. There will be some light rock scrambling and perhaps a few water crossings. We’ll plan to eat lunch at the waterfall and then frolic our way back to the trailhead. The fun doesn’t stop there—we will then visit the nearby Placerita Canyon Nature Center which has a bird rehab center, an active bee hive, snakes,  live insect specimens, and a variety of other awesome nature exhibits. After delighting in Southern California’s native wildlife, we plan to return home to USC by 5pm feeling grounded and ready for finals. 
 
 ',
-		'https://images.squarespace-cdn.com/content/v1/5b8ee6a5697a987d0c714be9/2b706f9c-e9a0-4abd-96cb-d486e66062c1/Screenshot+2025-11-17+at+10.34.46%E2%80%AFPM.png?format=2500w',
+		'af6192f6-2565-49bf-ab29-9d2e97cb9740/trip-pic-3.webp',
 		'1',
 		'7',
 		'2025-12-07 01:00:00+00',
@@ -64,7 +64,7 @@ INSERT INTO
 		"created_at",
 		"updated_at",
 		"name",
-		"picture",
+		"picture_path",
 		"start_date",
 		"end_date",
 		"meet",
@@ -86,7 +86,7 @@ VALUES
 		'2025-11-26 21:26:06.449599+00',
 		'Falls and Feathers at Whitney Canyon
 ',
-		'/trip-pic-3.webp',
+		'af6192f6-2565-49bf-ab29-9d2e97cb9740/trip-pic-3.webp',
 		'2026-12-06 17:00:00+00',
 		'2026-12-07 01:00:00+00',
 		'Saturday 12/6 at Hecuba in the Village @9AM',
@@ -109,7 +109,7 @@ VALUES
 		'2025-11-26 22:14:23.886146+00',
 		'Bearly Been Backpacking at Bear Creek
 ',
-		'/trip-pic-2.webp',
+		'd8aaea9d-85bf-4dcf-a63d-001e19dea7af/trip-pic-2.webp',
 		'2025-11-22 17:30:00+00',
 		'2025-11-24 01:00:00+00',
 		'Saturday 11/22 in USC Village @ 9:30am',
@@ -171,5 +171,47 @@ The next morning we shall awaken at 8:30 am and start with a brisk breakfast as 
 		'[{"name": "Ryan Long", "email": "ryanwlon@usc.edu"}, {"name": "Piroska Darnyi", "email": "pdarnyi@usc.edu"}]'
 	);
 
-
-INSERT INTO "public"."tickets" ("id", "user_id", "trip_id", "created_at", "updated_at", "cancelled", "refunded", "cancelled_at", "stripe_payment_id", "type", "amount_paid", "stripe_refund_id") VALUES ('92c39690-a280-41f9-b9dd-32d822836e4b', 'd070655d-974c-45a5-a332-eb1f499e49fd', 'af6192f6-2565-49bf-ab29-9d2e97cb9740', '2025-11-27 23:06:52.904179+00', '2025-11-27 23:06:52.904179+00', 'false', 'false', null, 'pi_123', 'member', '80', null), ('a9c1a53c-a02b-4d7b-9c5c-6eb4f5cbecac', 'd070655d-974c-45a5-a332-eb1f499e49fd', 'd8aaea9d-85bf-4dcf-a63d-001e19dea7af', '2025-11-27 23:07:24.028357+00', '2025-11-27 23:07:24.028357+00', 'false', 'false', null, 'pi_456', 'member', '50', null);
+INSERT INTO
+	"public"."tickets" (
+		"id",
+		"user_id",
+		"trip_id",
+		"created_at",
+		"updated_at",
+		"cancelled",
+		"refunded",
+		"cancelled_at",
+		"stripe_payment_id",
+		"type",
+		"amount_paid",
+		"stripe_refund_id"
+	)
+VALUES
+	(
+		'92c39690-a280-41f9-b9dd-32d822836e4b',
+		'd070655d-974c-45a5-a332-eb1f499e49fd',
+		'af6192f6-2565-49bf-ab29-9d2e97cb9740',
+		'2025-11-27 23:06:52.904179+00',
+		'2025-11-27 23:06:52.904179+00',
+		'false',
+		'false',
+		null,
+		'pi_123',
+		'member',
+		'80',
+		null
+	),
+	(
+		'a9c1a53c-a02b-4d7b-9c5c-6eb4f5cbecac',
+		'd070655d-974c-45a5-a332-eb1f499e49fd',
+		'd8aaea9d-85bf-4dcf-a63d-001e19dea7af',
+		'2025-11-27 23:07:24.028357+00',
+		'2025-11-27 23:07:24.028357+00',
+		'false',
+		'false',
+		null,
+		'pi_456',
+		'member',
+		'50',
+		null
+	);

@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, Car } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/browser";
+import { getTripPictureUrl } from "@/utils/storage";
 
 type GuideTripsData = NonNullable<ReturnType<typeof useGuideTrips>["data"]>[number];
 type TripData = NonNullable<GuideTripsData["trips"]>;
@@ -36,12 +36,6 @@ function getInitials(firstName?: string | null, lastName?: string | null): strin
   const first = firstName?.charAt(0)?.toUpperCase() ?? "";
   const last = lastName?.charAt(0)?.toUpperCase() ?? "";
   return first + last || "?";
-}
-
-function getTripPictureUrl(path: string) {
-  const supabase = createClient();
-  const { data } = supabase.storage.from("trip-pictures").getPublicUrl(path);
-  return data.publicUrl;
 }
 
 export function getStatusBadge(signupStatus: string | null, isPast: boolean) {
