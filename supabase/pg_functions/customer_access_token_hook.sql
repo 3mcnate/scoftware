@@ -38,7 +38,9 @@ to supabase_auth_admin;
 
 revoke all
   on table public.roles
-  from authenticated, anon, public;
+  from anon, public;
+
+grant all on table public.roles to authenticated;
 
 create policy "Allow auth admin to read user roles" ON public.roles
 as permissive for select

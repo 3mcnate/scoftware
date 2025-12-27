@@ -1,0 +1,243 @@
+"use client";
+
+import { useGuideTrips } from "@/data/client/trips/get-guide-trips";
+import { getAvatarUrl } from "@/data/client/storage/avatars";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Users, Car } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { createClient } from "@/utils/supabase/browser";
+
+type GuideTripsData = NonNullable<ReturnType<typeof useGuideTrips>["data"]>[number];
+type TripData = NonNullable<GuideTripsData["trips"]>;
+
+type Guide = {
+  user_id: string;
+  profiles: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    avatar_path: string | null;
+  } | null;
+};
+
+function getInitials(firstName?: string | null, lastName?: string | null): string {
+  const first = firstName?.charAt(0)?.toUpperCase() ?? "";
+  const last = lastName?.charAt(0)?.toUpperCase() ?? "";
+  return first + last || "?";
+}
+
+function getTripPictureUrl(path: string) {
+  const supabase = createClient();
+  const { data } = supabase.storage.from("trip-pictures").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+export function getStatusBadge(signupStatus: string | null, isPast: boolean) {
+  if (isPast) {
+    return <Badge variant="secondary">Completed</Badge>;
+  }
+
+  switch (signupStatus) {
+    case "open":
+      return <Badge className="bg-green-500/20 text-green-700">Open</Badge>;
+    case "closed":
+      return <Badge variant="secondary">Closed</Badge>;
+    case "full":
+      return <Badge variant="destructive">Full</Badge>;
+    case "waitlist":
+      return (
+        <Badge className="bg-yellow-500/20 text-yellow-700">Waitlist</Badge>
+      );
+    case "access_code":
+      return (
+        <Badge className="bg-blue-500/20 text-blue-700">Access Code</Badge>
+      );
+    case "select_participants":
+      return (
+        <Badge className="bg-purple-500/20 text-purple-700">
+          Select Participants
+        </Badge>
+      );
+    default:
+      return <Badge variant="outline">{signupStatus}</Badge>;
+  }
+}
+
+function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
+  const guides: Guide[] = trip.trip_guides ?? [];
+  const activeTickets = trip.tickets?.filter((t) => !t.cancelled) ?? [];
+  const participantCount = activeTickets.filter(
+    (t) => t.type === "member" || t.type === "nonmember"
+  ).length;
+  const driverCount = activeTickets.filter((t) => t.type === "driver").length;
+
+  const participantSpots = trip.participant_spots ?? 0;
+  const driverSpots = trip.driver_spots ?? 0;
+
+  const participantPercent =
+    participantSpots > 0
+      ? Math.min((participantCount / participantSpots) * 100, 100)
+      : 0;
+  const driverPercent =
+    driverSpots > 0 ? Math.min((driverCount / driverSpots) * 100, 100) : 0;
+
+  const pictureUrl = trip.picture_path
+    ? getTripPictureUrl(trip.picture_path)
+    : "/placeholder.jpg";
+
+  return (
+    <TableRow className="group cursor-pointer">
+      <TableCell className="w-[120px] p-2">
+        <Link href={`/guide/trip/${trip.id}`}>
+          <div className="relative h-16 w-28 rounded-md overflow-hidden">
+            <Image
+              src={pictureUrl}
+              alt={trip.name}
+              fill
+              className="object-cover group-hover:opacity-80 transition-opacity"
+            />
+          </div>
+        </Link>
+      </TableCell>
+      <TableCell>
+        <Link
+          href={`/guide/trip/${trip.id}`}
+          className="font-medium hover:underline"
+        >
+          {trip.name}
+        </Link>
+      </TableCell>
+      <TableCell>
+        <div className="flex flex-col gap-1">
+          {guides.map((guide) => {
+            const profile = guide.profiles;
+            if (!profile) return null;
+            const fullName = `${profile.first_name} ${profile.last_name}`.trim();
+            return (
+              <div key={guide.user_id} className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                  {profile.avatar_path && (
+                    <AvatarImage
+                      src={getAvatarUrl(profile.avatar_path)}
+                      alt={fullName}
+                    />
+                  )}
+                  <AvatarFallback className="text-xs">
+                    {getInitials(profile.first_name, profile.last_name)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm">{fullName}</span>
+              </div>
+            );
+          })}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex flex-col gap-2 min-w-[140px]">
+          <div className="flex items-center gap-2">
+            <Users className="h-3.5 w-3.5 text-muted-foreground" />
+            <Progress value={participantPercent} className="h-2 flex-1" />
+            <span className="text-xs text-muted-foreground w-12 text-right">
+              {participantCount}/{participantSpots}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Car className="h-3.5 w-3.5 text-muted-foreground" />
+            <Progress value={driverPercent} className="h-2 flex-1" />
+            <span className="text-xs text-muted-foreground w-12 text-right">
+              {driverCount}/{driverSpots}
+            </span>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        {getStatusBadge(trip.signup_status ?? null, !!isPast)}
+      </TableCell>
+    </TableRow>
+  );
+}
+
+export function TripsTableSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-8 w-32" />
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[120px]">Image</TableHead>
+              <TableHead>Trip Name</TableHead>
+              <TableHead>Guides</TableHead>
+              <TableHead>Signups</TableHead>
+              <TableHead>Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[1, 2, 3].map((i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <Skeleton className="h-16 w-28 rounded-md" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-32" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-24" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-8 w-36" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-16" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
+export function TripsTable({
+  trips,
+  isPast,
+}: {
+  trips: TripData[];
+  isPast?: boolean;
+}) {
+  return (
+    <div className="border rounded-lg">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[120px]">Image</TableHead>
+            <TableHead>Trip Name</TableHead>
+            <TableHead>Guides</TableHead>
+            <TableHead>Signups</TableHead>
+            <TableHead>Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {trips.map((trip) => (
+            <TripRow key={trip.id} trip={trip} isPast={isPast} />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+export type { TripData };

@@ -59,7 +59,6 @@ src/
 │   │   ├── hooks/                # UI/page hooks (e.g. useTripForm, useTripEditor)
 │   │   ├── components/           # Trip-specific UI components
 │   │   ├── types.ts
-│   │   └── index.ts			  # barrel export
 │   │
 │   └── users/
 │       ├── hooks/
@@ -71,13 +70,11 @@ src/
 │   │   ├── get-trips.ts           # exports: getTrips(), useTrips()
 │   │   ├── get-trip-by-id.ts      # exports: getTripById(), useTripById()
 │   │   ├── update-trip.ts         # exports: updateTrip(), useUpdateTrip()
-│   │   └── index.ts  			   # barrel export
 │   │
 │   ├── users/
 │   │   ├── get-user.ts
 │   │   ├── get-users.ts
 │   │   ├── update-user.ts
-│	│	└── index.ts  			   # barrel export
 │   │
 │   └── budgets/
 │       ├── get-budgets.ts
@@ -117,8 +114,7 @@ src/
 │	└── supabase.toml       # Supabase project configuration
 │
 └── types/							# global types
-    └── database.types.ts  			# contains all TypeScript types generated from the Supabase database
-
+    └── database.types.ts  			# contains all TypeScript types generated from the Supabase database 
 
 ### Frontend Instructions
 

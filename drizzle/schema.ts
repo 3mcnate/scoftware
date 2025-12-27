@@ -88,7 +88,7 @@ export const published_trips = pgTable("published_trips", {
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	name: text().notNull(),
-	picture: text().notNull(),
+	picture_path: text().notNull(),
 	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	meet: text().notNull(),
@@ -140,6 +140,11 @@ export const tickets = pgTable("tickets", {
 			foreignColumns: [profiles.id],
 			name: "tickets_user_id_fkey"
 		}),
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "tickets_trip_id_fkey1"
+		}),
 	unique("tickets_unique_trip_participant").on(table.user_id, table.trip_id),
 	unique("tickets_stripe_checkout_session_id_key").on(table.stripe_payment_id),
 	unique("tickets_stripe_refund_id_key").on(table.stripe_refund_id),
@@ -174,17 +179,17 @@ export const trips = pgTable("trips", {
 	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	name: text().notNull(),
 	description: text(),
-	picture: text(),
+	picture_path: text(),
 	driver_spots: integer().notNull(),
 	participant_spots: integer().notNull(),
-	ends_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	starts_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	gear_questions: text().array(),
 	signup_status: trip_signup_status().default('open').notNull(),
 	what_to_bring: text(),
 	access_code: text(),
 }, (table) => [
-	check("ends_after_start", sql`starts_at < ends_at`),
+	check("ends_after_start", sql`start_date < end_date`),
 	check("trips_driver_spots_check", sql`driver_spots >= 0`),
 	check("trips_participant_spots_check", sql`participant_spots >= 0`),
 ]);
@@ -249,8 +254,8 @@ export const profiles = pgTable("profiles", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	first_name: text().notNull(),
 	last_name: text().notNull(),
-	avatar_path: text(),
 	phone: text().default('').notNull(),
+	avatar_path: text(),
 }, (table) => [
 	foreignKey({
 			columns: [table.id],

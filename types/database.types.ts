@@ -460,7 +460,7 @@ export type Database = {
           meet: string
           name: string
           native_land: string
-          picture: string
+          picture_path: string
           recommended_prior_experience: string
           return: string
           start_date: string
@@ -481,7 +481,7 @@ export type Database = {
           meet: string
           name: string
           native_land: string
-          picture: string
+          picture_path: string
           recommended_prior_experience: string
           return: string
           start_date: string
@@ -502,7 +502,7 @@ export type Database = {
           meet?: string
           name?: string
           native_land?: string
-          picture?: string
+          picture_path?: string
           recommended_prior_experience?: string
           return?: string
           start_date?: string
@@ -605,6 +605,13 @@ export type Database = {
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "published_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_trip_id_fkey1"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
             referencedColumns: ["id"]
           },
           {
@@ -947,14 +954,14 @@ export type Database = {
           created_at: string
           description: string | null
           driver_spots: number
-          ends_at: string
+          end_date: string
           gear_questions: string[] | null
           id: string
           name: string
           participant_spots: number
-          picture: string | null
+          picture_path: string | null
           signup_status: Database["public"]["Enums"]["trip_signup_status"]
-          starts_at: string
+          start_date: string
           updated_at: string
           what_to_bring: string | null
         }
@@ -963,14 +970,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           driver_spots: number
-          ends_at: string
+          end_date: string
           gear_questions?: string[] | null
           id?: string
           name: string
           participant_spots: number
-          picture?: string | null
+          picture_path?: string | null
           signup_status?: Database["public"]["Enums"]["trip_signup_status"]
-          starts_at: string
+          start_date: string
           updated_at?: string
           what_to_bring?: string | null
         }
@@ -979,14 +986,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           driver_spots?: number
-          ends_at?: string
+          end_date?: string
           gear_questions?: string[] | null
           id?: string
           name?: string
           participant_spots?: number
-          picture?: string | null
+          picture_path?: string | null
           signup_status?: Database["public"]["Enums"]["trip_signup_status"]
-          starts_at?: string
+          start_date?: string
           updated_at?: string
           what_to_bring?: string | null
         }

@@ -11,6 +11,7 @@ export const published_tripsRelations = relations(published_trips, ({one, many})
 
 export const tripsRelations = relations(trips, ({many}) => ({
 	published_trips: many(published_trips),
+	tickets: many(tickets),
 	trip_waivers: many(trip_waivers),
 	waiver_events: many(waiver_events),
 }));
@@ -23,6 +24,10 @@ export const ticketsRelations = relations(tickets, ({one}) => ({
 	profile: one(profiles, {
 		fields: [tickets.user_id],
 		references: [profiles.id]
+	}),
+	trip: one(trips, {
+		fields: [tickets.trip_id],
+		references: [trips.id]
 	}),
 }));
 
