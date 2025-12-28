@@ -1,4 +1,4 @@
-import { TripsList } from "@/components/trips-list/trips-list";
+import { TripsList } from "@/components/public-trips-list/trips-list";
 import { getUpcomingPublishedTrips } from "@/data/server/trips/get-upcoming-published-trips";
 import { formatDateWithWeekday, formatTime } from "@/utils/date-time";
 import { Button } from "@/components/ui/button";

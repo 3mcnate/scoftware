@@ -19,5 +19,5 @@ export default async function DashboardRedirect() {
 	if (role === 'participant')
 		redirect('/participant/trips');
 	else 
-		redirect('/guide/trips');
+		redirect('/guide/my-trips');
 }

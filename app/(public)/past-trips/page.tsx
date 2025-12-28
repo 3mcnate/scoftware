@@ -1,4 +1,4 @@
-import { TripsList } from "@/components/trips-list/trips-list";
+import { TripsList } from "@/components/public-trips-list/trips-list";
 import { getPastPublishedTrips } from "@/data/server/trips/get-past-published-trips";
 import { formatDateWithWeekday, formatTime } from "@/utils/date-time";
 import {
@@ -34,7 +34,7 @@ export default async function PastTripsPage({ searchParams }: PastTripsPageProps
 
   const pastTrips = pastTripsData.map((trip) => ({
     id: trip.id,
-    picture: trip.picture,
+    picture_path: trip.picture_path,
     title: trip.name,
     startDate: formatDateWithWeekday(trip.start_date),
     startTime: formatTime(trip.start_date),

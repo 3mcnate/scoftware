@@ -18,8 +18,11 @@ import { Users, Car } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { getTripPictureUrl } from "@/utils/storage";
+import { formatDate } from "@/utils/date-time";
 
-type GuideTripsData = NonNullable<ReturnType<typeof useGuideTrips>["data"]>[number];
+type GuideTripsData = NonNullable<
+  ReturnType<typeof useGuideTrips>["data"]
+>[number];
 type TripData = NonNullable<GuideTripsData["trips"]>;
 
 type Guide = {
@@ -32,7 +35,10 @@ type Guide = {
   } | null;
 };
 
-function getInitials(firstName?: string | null, lastName?: string | null): string {
+function getInitials(
+  firstName?: string | null,
+  lastName?: string | null
+): string {
   const first = firstName?.charAt(0)?.toUpperCase() ?? "";
   const last = lastName?.charAt(0)?.toUpperCase() ?? "";
   return first + last || "?";
@@ -77,8 +83,8 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
   ).length;
   const driverCount = activeTickets.filter((t) => t.type === "driver").length;
 
-  const participantSpots = trip.participant_spots ?? 0;
-  const driverSpots = trip.driver_spots ?? 0;
+  const participantSpots = trip.participant_spots;
+  const driverSpots = trip.driver_spots;
 
   const participantPercent =
     participantSpots > 0
@@ -87,25 +93,25 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
   const driverPercent =
     driverSpots > 0 ? Math.min((driverCount / driverSpots) * 100, 100) : 0;
 
-  const pictureUrl = trip.picture_path
-    ? getTripPictureUrl(trip.picture_path)
-    : "/placeholder.jpg";
-
   return (
     <TableRow className="group cursor-pointer">
       <TableCell className="w-[120px] p-2">
         <Link href={`/guide/trip/${trip.id}`}>
-          <div className="relative h-16 w-28 rounded-md overflow-hidden">
-            <Image
-              src={pictureUrl}
-              alt={trip.name}
-              fill
-              className="object-cover group-hover:opacity-80 transition-opacity"
-            />
-          </div>
+          {trip.picture_path ? (
+            <div className="relative h-16 w-28 rounded-md overflow-hidden">
+              <Image
+                src={getTripPictureUrl(trip.picture_path)}
+                alt={trip.name}
+                fill
+                className="object-cover group-hover:opacity-80 transition-opacity"
+              />
+            </div>
+          ) : (
+            <div className="relative h-16 w-28 rounded-md overflow-hidden bg-sidebar group-hover:opacity-80"></div>
+          )}
         </Link>
       </TableCell>
-      <TableCell>
+      <TableCell className="max-w-[300px]">
         <Link
           href={`/guide/trip/${trip.id}`}
           className="font-medium hover:underline"
@@ -114,11 +120,23 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
         </Link>
       </TableCell>
       <TableCell>
+        <div className="flex flex-col text-sm">
+          <span>{formatDate(trip.start_date)}</span>
+          {new Date(trip.end_date).toLocaleDateString() !==
+            new Date(trip.start_date).toLocaleDateString() && (
+            <span className="text-muted-foreground text-xs">
+              to {formatDate(trip.end_date)}
+            </span>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
         <div className="flex flex-col gap-1">
           {guides.map((guide) => {
             const profile = guide.profiles;
             if (!profile) return null;
-            const fullName = `${profile.first_name} ${profile.last_name}`.trim();
+            const fullName =
+              `${profile.first_name} ${profile.last_name}`.trim();
             return (
               <div key={guide.user_id} className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
@@ -143,20 +161,22 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
           <div className="flex items-center gap-2">
             <Users className="h-3.5 w-3.5 text-muted-foreground" />
             <Progress value={participantPercent} className="h-2 flex-1" />
-            <span className="text-xs text-muted-foreground w-12 text-right">
+            <span className="text-xs text-muted-foreground w-12">
               {participantCount}/{participantSpots}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <Car className="h-3.5 w-3.5 text-muted-foreground" />
-            <Progress value={driverPercent} className="h-2 flex-1" />
-            <span className="text-xs text-muted-foreground w-12 text-right">
-              {driverCount}/{driverSpots}
-            </span>
-          </div>
+          {driverSpots > 0 && (
+            <div className="flex items-center gap-2">
+              <Car className="h-3.5 w-3.5 text-muted-foreground" />
+              <Progress value={driverPercent} className="h-2 flex-1" />
+              <span className="text-xs text-muted-foreground w-12">
+                {driverCount}/{driverSpots}
+              </span>
+            </div>
+          )}
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="min-w-[100px]">
         {getStatusBadge(trip.signup_status ?? null, !!isPast)}
       </TableCell>
     </TableRow>
@@ -173,6 +193,7 @@ export function TripsTableSkeleton() {
             <TableRow>
               <TableHead className="w-[120px]">Image</TableHead>
               <TableHead>Trip Name</TableHead>
+              <TableHead>Dates</TableHead>
               <TableHead>Guides</TableHead>
               <TableHead>Signups</TableHead>
               <TableHead>Status</TableHead>
@@ -186,6 +207,9 @@ export function TripsTableSkeleton() {
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-32" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-24" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-6 w-24" />
@@ -219,6 +243,7 @@ export function TripsTable({
           <TableRow>
             <TableHead className="w-[120px]">Image</TableHead>
             <TableHead>Trip Name</TableHead>
+            <TableHead>Dates</TableHead>
             <TableHead>Guides</TableHead>
             <TableHead>Signups</TableHead>
             <TableHead>Status</TableHead>

@@ -83,36 +83,6 @@ export const membership_prices = pgTable("membership_prices", {
 	unique("membership_prices_stripe_price_id_key").on(table.stripe_price_id),
 ]);
 
-export const published_trips = pgTable("published_trips", {
-	id: uuid().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	name: text().notNull(),
-	picture_path: text().notNull(),
-	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	meet: text().notNull(),
-	return: text().notNull(),
-	activity: text().notNull(),
-	difficulty: text().notNull(),
-	trail: text().notNull(),
-	recommended_prior_experience: text().notNull(),
-	location: text().notNull(),
-	native_land: text().notNull(),
-	description: text().notNull(),
-	what_to_bring: text().array().notNull(),
-	guides: jsonb().notNull(),
-	visible: boolean().default(true).notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.id],
-			foreignColumns: [trips.id],
-			name: "published_trips_id_fkey"
-		}),
-	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"], using: sql`visible` }),
-	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"] }),
-]);
-
 export const tickets = pgTable("tickets", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	user_id: uuid().notNull(),
@@ -148,7 +118,7 @@ export const tickets = pgTable("tickets", {
 	unique("tickets_unique_trip_participant").on(table.user_id, table.trip_id),
 	unique("tickets_stripe_checkout_session_id_key").on(table.stripe_payment_id),
 	unique("tickets_stripe_refund_id_key").on(table.stripe_refund_id),
-	pgPolicy("Participants can select their own tickets", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(user_id = ( SELECT auth.uid() AS uid))` }),
+	pgPolicy("Guides, participants can select their own tickets", { as: "permissive", for: "select", to: ["authenticated"], using: sql`((user_id = ( SELECT auth.uid() AS uid)) OR authorize('guide'::user_role))` }),
 ]);
 
 export const trip_waivers = pgTable("trip_waivers", {
@@ -171,27 +141,6 @@ export const trip_waivers = pgTable("trip_waivers", {
 			foreignColumns: [trips.id],
 			name: "trip_waivers_trip_id_fkey"
 		}),
-]);
-
-export const trips = pgTable("trips", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	name: text().notNull(),
-	description: text(),
-	picture_path: text(),
-	driver_spots: integer().notNull(),
-	participant_spots: integer().notNull(),
-	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	gear_questions: text().array(),
-	signup_status: trip_signup_status().default('open').notNull(),
-	what_to_bring: text(),
-	access_code: text(),
-}, (table) => [
-	check("ends_after_start", sql`start_date < end_date`),
-	check("trips_driver_spots_check", sql`driver_spots >= 0`),
-	check("trips_participant_spots_check", sql`participant_spots >= 0`),
 ]);
 
 export const waiver_events = pgTable("waiver_events", {
@@ -265,4 +214,56 @@ export const profiles = pgTable("profiles", {
 	unique("profiles_phone_key").on(table.phone),
 	pgPolicy("Allow users to update own profile", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))`, withCheck: sql`(id = ( SELECT auth.uid() AS uid))`  }),
 	pgPolicy("Allow user to select own profile", { as: "permissive", for: "select", to: ["authenticated"] }),
+]);
+
+export const published_trips = pgTable("published_trips", {
+	id: uuid().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	name: text().notNull(),
+	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	meet: text().notNull(),
+	return: text().notNull(),
+	activity: text().notNull(),
+	difficulty: text().notNull(),
+	trail: text().notNull(),
+	recommended_prior_experience: text().notNull(),
+	location: text().notNull(),
+	native_land: text().notNull(),
+	description: text().notNull(),
+	what_to_bring: text().array().notNull(),
+	guides: jsonb().notNull(),
+	visible: boolean().default(true).notNull(),
+	picture_path: text().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.id],
+			foreignColumns: [trips.id],
+			name: "published_trips_id_fkey"
+		}),
+	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"], using: sql`visible` }),
+	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"] }),
+]);
+
+export const trips = pgTable("trips", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	name: text().notNull(),
+	description: text(),
+	driver_spots: integer().notNull(),
+	participant_spots: integer().notNull(),
+	gear_questions: text().array(),
+	signup_status: trip_signup_status().default('open').notNull(),
+	what_to_bring: text(),
+	access_code: text(),
+	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	picture_path: text(),
+	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+}, (table) => [
+	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
+	check("trips_driver_spots_check", sql`driver_spots >= 0`),
+	check("trips_participant_spots_check", sql`participant_spots >= 0`),
+	check("ends_after_start", sql`start_date < end_date`),
 ]);

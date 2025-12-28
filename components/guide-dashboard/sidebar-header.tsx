@@ -31,7 +31,7 @@ export function SidebarHeader() {
                 <Image src="/logo.png" height={32} width={32} alt="Logo" />
               </div>
             ) : (
-              <Link href="/guide">
+              <Link href="/">
                 <div className="flex items-center justify-center">
                   <Image src="/logo.png" height={40} width={80} alt="Logo" />
                 </div>
