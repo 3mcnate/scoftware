@@ -15,7 +15,7 @@ const tabs: { value: TabValue; label: string; icon: React.ElementType; href: str
   { value: "settings", label: "Settings", icon: Settings, href: "/participant/settings" },
 ]
 
-export function DashboardTabs() {
+export function ParticipantDashboardTabs() {
   const pathname = usePathname()
 
   return (

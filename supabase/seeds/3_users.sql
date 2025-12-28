@@ -192,6 +192,83 @@ VALUES
 	);
 
 INSERT INTO
+	"auth"."users" (
+		"instance_id",
+		"id",
+		"aud",
+		"role",
+		"email",
+		"encrypted_password",
+		"email_confirmed_at",
+		"invited_at",
+		"confirmation_token",
+		"confirmation_sent_at",
+		"recovery_token",
+		"recovery_sent_at",
+		"email_change_token_new",
+		"email_change",
+		"email_change_sent_at",
+		"last_sign_in_at",
+		"raw_app_meta_data",
+		"raw_user_meta_data",
+		"is_super_admin",
+		"created_at",
+		"updated_at",
+		"phone",
+		"phone_confirmed_at",
+		"phone_change",
+		"phone_change_token",
+		"phone_change_sent_at",
+		"confirmed_at",
+		"email_change_token_current",
+		"email_change_confirm_status",
+		"banned_until",
+		"reauthentication_token",
+		"reauthentication_sent_at",
+		"is_sso_user",
+		"deleted_at",
+		"is_anonymous"
+	)
+VALUES
+	(
+		'00000000-0000-0000-0000-000000000000',
+		'e4bd6ce7-690e-4470-b085-6632299515a8',
+		'authenticated',
+		'authenticated',
+		'talltreetech@gmail.com',
+		'$2a$10$sYMSEE3FkzkCKtR8LTweEebRG2J9BYANpWSUnD4cQleMbT/gKVMoO',
+		'2025-12-28 22:09:02.829357+00',
+		null,
+		'',
+		null,
+		'',
+		null,
+		'',
+		'',
+		null,
+		null,
+		'{"provider": "email", "providers": ["email"]}',
+		'{"email_verified": true}',
+		null,
+		'2025-12-28 22:09:02.821259+00',
+		'2025-12-28 22:09:02.829976+00',
+		null,
+		null,
+		'',
+		'',
+		null,
+		'2025-12-28 22:09:02.829357+00',
+		'',
+		'0',
+		null,
+		'',
+		null,
+		'false',
+		null,
+		'false'
+	);
+
+INSERT INTO
 	"public"."participant_info" (
 		"created_at",
 		"updated_at",
@@ -234,5 +311,16 @@ VALUES
 		'undergrad'
 	);
 
-update public.profiles set avatar_path = 'd070655d-974c-45a5-a332-eb1f499e49fd/IMG_4654jpg' where id = 'd070655d-974c-45a5-a332-eb1f499e49fd';
-update public.roles set "role" = 'guide'::public.user_role where user_id = '285cd349-4aef-406a-b3f6-9f4494570540';
+update
+	public.profiles
+set
+	avatar_path = 'd070655d-974c-45a5-a332-eb1f499e49fd/IMG_4654jpg'
+where
+	id = 'd070655d-974c-45a5-a332-eb1f499e49fd';
+
+update
+	public.roles
+set
+	"role" = 'guide' :: public.user_role
+where
+	user_id = '285cd349-4aef-406a-b3f6-9f4494570540';

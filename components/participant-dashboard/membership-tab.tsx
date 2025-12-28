@@ -211,6 +211,7 @@ function BecomeMemberCard({
               The coolest people you’ll ever meet
             </li>
           </ul>
+					<p className="text-sm font-medium">Note: memberships do NOT renew automatically!</p>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row">
