@@ -20,6 +20,7 @@ import { type InferSelectModel } from "drizzle-orm";
 import { published_trips } from "@/drizzle/schema";
 import { getInitialsFullname } from "@/utils/names";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { getTripPictureUrl } from "@/utils/storage";
 
 type PublishedTrip = InferSelectModel<typeof published_trips>;
 
@@ -58,7 +59,7 @@ export function TripDetails({ trip }: TripDetailsProps) {
         <DialogTrigger asChild>
           <div className="relative h-[300px] sm:h-[400px] md:h-[500px] w-full overflow-hidden rounded-xl cursor-zoom-in">
             <Image
-              src={trip.picture || "/placeholder.svg"}
+              src={getTripPictureUrl(trip.picture_path) || "/placeholder.svg"}
               alt={trip.name}
               fill
               className="object-cover hover:scale-101 transition-transform duration-200"
@@ -69,7 +70,7 @@ export function TripDetails({ trip }: TripDetailsProps) {
           <DialogTitle className="hidden">{trip.name} picture</DialogTitle>
 					<div className="relative h-[80vh]">
             <Image
-              src={trip.picture || "/placeholder.svg"}
+              src={getTripPictureUrl(trip.picture_path) || "/placeholder.svg"}
               alt={trip.name}
               fill
               className="object-contain"

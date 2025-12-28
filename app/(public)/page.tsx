@@ -10,7 +10,7 @@ export default async function TripsPage() {
 
   const currentTrips = upcomingTrips.map((trip) => ({
     id: trip.id,
-    picture: trip.picture,
+    picture_path: trip.picture_path,
     title: trip.name,
     startDate: formatDateWithWeekday(trip.start_date),
     startTime: formatTime(trip.start_date),

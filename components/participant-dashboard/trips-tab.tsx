@@ -47,6 +47,7 @@ import {
 import { createClient } from "@/utils/supabase/browser";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { getTripPictureUrl } from "@/utils/storage";
 
 type TicketWithTrip = NonNullable<
   ReturnType<typeof useUserTickets>["data"]
@@ -206,7 +207,7 @@ function TripCard({
         className="relative h-65 w-full md:w-auto"
       >
         <Image
-          src={trip.picture}
+          src={getTripPictureUrl(trip.picture_path)}
           alt={trip.name}
           className="size-full object-cover hover:opacity-80 transition-all"
           fill

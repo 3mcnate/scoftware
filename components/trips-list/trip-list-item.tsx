@@ -9,10 +9,11 @@ import {
 } from "@/components/ui/item";
 import { Compass, MapPin, TrendingUp, User } from "lucide-react";
 import Image from "next/image";
+import { getTripPictureUrl } from "@/utils/storage";
 
 interface Trip {
   id: string;
-  picture: string;
+  picture_path: string;
   title: string;
   startDate: string;
   startTime: string;
@@ -40,7 +41,7 @@ export function TripListItem({ trip }: TripListItemProps) {
       >
         <ItemMedia variant="image" className="aspect-12/9 relative h-60 w-full md:w-auto">
           <Image
-            src={trip.picture}
+            src={getTripPictureUrl(trip.picture_path)}
             alt={trip.title}
             className="size-full object-cover"
             fill
