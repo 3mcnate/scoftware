@@ -20,6 +20,26 @@ import Link from "next/link";
 import { getTripPictureUrl } from "@/utils/storage";
 import { formatDate } from "@/utils/date-time";
 import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { EllipsisVertical } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useDeleteTrip } from "@/data/client/trips/use-delete-trip";
+import { useState } from "react";
+import { toast } from "sonner";
 
 type GuideTripsData = NonNullable<
   ReturnType<typeof useGuideTrips>["data"]
@@ -78,6 +98,10 @@ export function getStatusBadge(signupStatus: string | null, isPast: boolean) {
 
 function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
   const router = useRouter();
+  const auth = useAuth();
+  const deleteTrip = useDeleteTrip();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
   const guides: Guide[] = trip.trip_guides ?? [];
   const activeTickets = trip.tickets?.filter((t) => !t.cancelled) ?? [];
   const participantCount = activeTickets.filter(
@@ -94,6 +118,25 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
       : 0;
   const driverPercent =
     driverSpots > 0 ? Math.min((driverCount / driverSpots) * 100, 100) : 0;
+
+  const hasTickets = (trip.tickets?.length ?? 0) > 0;
+  const isGuide =
+    auth.status === "authenticated" &&
+    trip.trip_guides?.some((g) => g.user_id === auth.user.id);
+  const isAdmin =
+    auth.status === "authenticated" && auth.claims.app_role === "admin";
+  const canDelete = (isAdmin || isGuide) && !hasTickets;
+
+  const handleDelete = async () => {
+    try {
+      await deleteTrip.mutateAsync({ id: trip.id });
+      toast.success("Trip deleted successfully");
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      toast.error("Failed to delete trip");
+      console.error(error);
+    }
+  };
 
   return (
     <TableRow
@@ -183,8 +226,52 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
           )}
         </div>
       </TableCell>
-      <TableCell className="min-w-[100px]">
+      <TableCell>
         {getStatusBadge(trip.signup_status ?? null, !!isPast)}
+      </TableCell>
+      <TableCell onClick={(e) => e.stopPropagation()}>
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <EllipsisVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                disabled={!canDelete}
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                Delete Trip
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Are you sure?</DialogTitle>
+              <DialogDescription>
+                This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={deleteTrip.isPending}
+              >
+                {deleteTrip.isPending ? "Deleting..." : "Delete"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </TableCell>
     </TableRow>
   );
@@ -204,6 +291,7 @@ export function TripsTableSkeleton() {
               <TableHead>Guides</TableHead>
               <TableHead>Signups</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -226,6 +314,9 @@ export function TripsTableSkeleton() {
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-6 w-16" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-8 w-8 rounded-full" />
                 </TableCell>
               </TableRow>
             ))}
@@ -254,6 +345,7 @@ export function TripsTable({
             <TableHead>Guides</TableHead>
             <TableHead>Signups</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead className="w-[50px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

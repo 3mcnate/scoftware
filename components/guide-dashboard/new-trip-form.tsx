@@ -31,7 +31,7 @@ import {
   MultiSelectValue,
 } from "@/components/ui/multi-select";
 import { useAuth } from "@/hooks/use-auth";
-import { useCreateTrip } from "@/features/trips/hooks/use-create-trip";
+import { useCreateTrip } from "@/data/client/trips/use-create-trip";
 import { useRouter } from "next/navigation";
 import { useGuideTrips } from "@/data/client/trips/get-guide-trips";
 
