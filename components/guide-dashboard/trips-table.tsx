@@ -100,7 +100,7 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
       className="group cursor-pointer"
       onClick={() => router.push(`/guide/trip/${trip.id}`)}
     >
-      <TableCell className="w-[120px] p-2">
+      <TableCell className="w-[120px] p-2.5">
         <Link href={`/guide/trip/${trip.id}`}>
           {trip.picture_path ? (
             <div className="relative h-16 w-28 rounded-md overflow-hidden">
@@ -112,7 +112,7 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
               />
             </div>
           ) : (
-            <div className="flex h-16 w-28 rounded-md overflow-hidden bg-sidebar group-hover:opacity-80">
+            <div className="flex h-16 w-28 rounded-md overflow-hidden bg-muted group-hover:opacity-80">
               <TentTree className="m-auto size-5 text-muted-foreground" />
             </div>
           )}
@@ -198,7 +198,7 @@ export function TripsTableSkeleton() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[120px]">Image</TableHead>
+              <TableHead className="w-[120px]"></TableHead>
               <TableHead>Trip Name</TableHead>
               <TableHead>Dates</TableHead>
               <TableHead>Guides</TableHead>
@@ -248,7 +248,7 @@ export function TripsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[120px]">Image</TableHead>
+            <TableHead className="w-[120px]"></TableHead>
             <TableHead>Trip Name</TableHead>
             <TableHead>Dates</TableHead>
             <TableHead>Guides</TableHead>

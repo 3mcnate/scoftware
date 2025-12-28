@@ -48,9 +48,15 @@
 - fix middleware route protection, add ?next=path query param to login page - done
 - guide/admin layout
 
+12/26/25
+- guide/admin layout, start on guide trips page - done
+
+12/27/25
+- guide trips page - new trip form - done
+
 The plan:
 12/26	 guide/admin layout, start on guide trips page
-12/27	 guide trips page - new trip form
+12/27	 guide trips page - new trip form  	<--
 12/28	 guide trips page - trip page
 12/29	 guide trips page - participants
 12/30  guide trips page - participant reports + convenience buttons
