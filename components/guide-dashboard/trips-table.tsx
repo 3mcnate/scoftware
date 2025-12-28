@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, Car } from "lucide-react";
+import { Users, Car, TentTree } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { getTripPictureUrl } from "@/utils/storage";
@@ -94,7 +94,7 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
     driverSpots > 0 ? Math.min((driverCount / driverSpots) * 100, 100) : 0;
 
   return (
-    <TableRow className="group cursor-pointer">
+    <TableRow className="group">
       <TableCell className="w-[120px] p-2">
         <Link href={`/guide/trip/${trip.id}`}>
           {trip.picture_path ? (
@@ -107,7 +107,9 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
               />
             </div>
           ) : (
-            <div className="relative h-16 w-28 rounded-md overflow-hidden bg-sidebar group-hover:opacity-80"></div>
+            <div className="flex h-16 w-28 rounded-md overflow-hidden bg-sidebar group-hover:opacity-80">
+							<TentTree className="m-auto size-5 text-muted-foreground"/>
+						</div>
           )}
         </Link>
       </TableCell>

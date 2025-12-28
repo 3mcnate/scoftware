@@ -53,9 +53,7 @@ export function SidebarNavGroup({ title, items }: SideNavGroupProps) {
                   key={item.name}
                   className="group/collapsible"
                   asChild
-                  defaultOpen={item.sub?.some((sub) =>
-                    pathname.startsWith(sub.href)
-                  )}
+                  defaultOpen={true}
                 >
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>

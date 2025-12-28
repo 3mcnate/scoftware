@@ -1,4 +1,4 @@
-import { pgTable, pgSchema, uniqueIndex, index, check, uuid, varchar, timestamp, jsonb, boolean, text, smallint, unique, integer, foreignKey, pgPolicy, numeric, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, pgSchema, uniqueIndex, index, check, uuid, varchar, timestamp, jsonb, boolean, text, smallint, unique, integer, foreignKey, pgPolicy, numeric, primaryKey, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const auth = pgSchema("auth");
@@ -213,7 +213,7 @@ export const profiles = pgTable("profiles", {
 		}).onUpdate("cascade").onDelete("cascade"),
 	unique("profiles_phone_key").on(table.phone),
 	pgPolicy("Allow users to update own profile", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))`, withCheck: sql`(id = ( SELECT auth.uid() AS uid))`  }),
-	pgPolicy("Allow user to select own profile", { as: "permissive", for: "select", to: ["authenticated"] }),
+	pgPolicy("Allow guides, user to select own profile", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
 export const published_trips = pgTable("published_trips", {
@@ -242,8 +242,8 @@ export const published_trips = pgTable("published_trips", {
 			foreignColumns: [trips.id],
 			name: "published_trips_id_fkey"
 		}),
-	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"], using: sql`visible` }),
-	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"] }),
+	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"], using: sql`has_trip_ticket(( SELECT auth.uid() AS uid), id)` }),
+	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
 export const trips = pgTable("trips", {
@@ -266,4 +266,22 @@ export const trips = pgTable("trips", {
 	check("trips_driver_spots_check", sql`driver_spots >= 0`),
 	check("trips_participant_spots_check", sql`participant_spots >= 0`),
 	check("ends_after_start", sql`start_date < end_date`),
+]);
+
+export const trip_guides = pgTable("trip_guides", {
+	user_id: uuid().defaultRandom().notNull(),
+	trip_id: uuid().defaultRandom().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "trip_guides_trip_id_fkey"
+		}).onUpdate("cascade").onDelete("cascade"),
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "trip_guides_user_id_fkey"
+		}).onUpdate("cascade").onDelete("cascade"),
+	primaryKey({ columns: [table.user_id, table.trip_id], name: "trip_guides_pkey"}),
+	pgPolicy("Allow guides to select trip guides", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
 ]);

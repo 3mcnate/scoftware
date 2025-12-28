@@ -37,6 +37,7 @@ const getGuideTrips = (guideId: string, client: TypedSupabaseClient) => {
 		`
 		)
 		.eq('user_id', guideId)
+		.order('trips(start_date)', { ascending: true })
 };
 
 export const useGuideTrips = (guideId: string) => {

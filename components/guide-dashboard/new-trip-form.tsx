@@ -1,9 +1,10 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { z } from "zod/v4";
 import { toast } from "sonner";
+import { differenceInCalendarDays } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,15 +30,19 @@ import {
   MultiSelectTrigger,
   MultiSelectValue,
 } from "@/components/ui/multi-select";
+import { useAuth } from "@/hooks/use-auth";
+import { useCreateTrip } from "@/features/trips/hooks/use-create-trip";
+import { useRouter } from "next/navigation";
+import { useGuideTrips } from "@/data/client/trips/get-guide-trips";
 
 const NewTripSchema = z
   .object({
     name: z.string().min(1, "Trip name is required"),
-    start_date: z.string().min(1, "Start date is required"),
+    start_date: z.string().min(1, "Start date is required").refine(start_date => new Date(start_date) >= new Date(), "Start date must be in the future"),
     end_date: z.string().min(1, "End date is required"),
     participant_spots: z.coerce.number().min(0, "Must be 0 or more"),
     driver_spots: z.coerce.number().min(0, "Must be 0 or more"),
-    guides: z.array(z.string()).min(1, "At least one guide is required"),
+    guides: z.array(z.uuidv4()).min(1, "At least one guide is required"),
   })
   .refine((data) => new Date(data.end_date) >= new Date(data.start_date), {
     message: "End date must be after start date",
@@ -48,6 +53,11 @@ type NewTripFormData = z.infer<typeof NewTripSchema>;
 
 export default function NewTripForm() {
   const { data: guidesData, isLoading: isLoadingGuides } = useGuides();
+  const auth = useAuth();
+  const userId = auth.status === "authenticated" ? auth.user.id : "unknown";
+  const createTrip = useCreateTrip();
+	const { refetch: refetchGuideTrips } = useGuideTrips(userId);
+  const router = useRouter();
 
   const {
     control,
@@ -65,12 +75,45 @@ export default function NewTripForm() {
     },
   });
 
+  const watchedValues = useWatch({
+    control,
+    name: [
+      "participant_spots",
+      "driver_spots",
+      "guides",
+      "start_date",
+      "end_date",
+    ],
+  });
+
+  const participantSpots = Number(watchedValues[0]) || 0;
+  const driverSpots = Number(watchedValues[1]) || 0;
+  const selectedGuides = watchedValues[2] || [];
+  const startDate = watchedValues[3];
+  const endDate = watchedValues[4];
+
+  const totalParticipants = participantSpots + driverSpots;
+  const totalGuides = selectedGuides.length + 1;
+
+  let durationLabel = "-";
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const nights = differenceInCalendarDays(end, start);
+
+    if (nights === 0) {
+      durationLabel = "Day Trip";
+    } else {
+      durationLabel = `${nights} night${nights === 1 ? "" : "s"}`;
+    }
+  }
+
   const onSubmit = async (data: NewTripFormData) => {
     try {
-      // TODO: Implement trip creation logic
-      console.log("Form data:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      const result = await createTrip.mutateAsync(data);
+			await refetchGuideTrips();
       toast.success("Trip created successfully!");
+      router.push(`/guide/trip/${result.tripId}`);
     } catch (error) {
       toast.error("Failed to create trip");
       console.error(error);
@@ -83,9 +126,7 @@ export default function NewTripForm() {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Create New Trip</CardTitle>
-        <CardDescription>
-          This can be changed later
-        </CardDescription>
+        <CardDescription>Everything here can be changed later</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -100,7 +141,7 @@ export default function NewTripForm() {
                     <Input
                       {...field}
                       id="name"
-                      placeholder="e.g. Joshua Tree Camping"
+                      placeholder="e.g. Marry Your Cousin in Alabama Hills"
                       aria-invalid={!!error}
                     />
                     <FieldError errors={error ? [error] : undefined} />
@@ -143,9 +184,9 @@ export default function NewTripForm() {
                         aria-invalid={!!error}
                       />
                       <FieldError errors={error ? [error] : undefined} />
-											<FieldDescription>
-												End time can be approximate
-											</FieldDescription>
+                      <FieldDescription>
+                        End time can be approximate
+                      </FieldDescription>
                     </>
                   )}
                 />
@@ -216,9 +257,9 @@ export default function NewTripForm() {
                             Loading guides...
                           </div>
                         ) : (
-                          guides.map((guide) => {
-                            if (!guide.profiles) return null;
-                            return (
+                          guides
+                            .filter((guide) => guide.user_id !== userId)
+                            .map((guide) => (
                               <MultiSelectItem
                                 key={guide.user_id}
                                 value={guide.user_id}
@@ -226,8 +267,7 @@ export default function NewTripForm() {
                                 {guide.profiles.first_name}{" "}
                                 {guide.profiles.last_name}
                               </MultiSelectItem>
-                            );
-                          })
+                            ))
                         )}
                       </MultiSelectContent>
                     </MultiSelect>
@@ -240,7 +280,26 @@ export default function NewTripForm() {
               />
             </Field>
 
-            <div className="pt-4">
+            <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground space-y-1">
+              <div className="flex justify-between">
+                <span>Total People:</span>
+                <span className="font-medium text-foreground">
+                  {totalParticipants + totalGuides} ({totalParticipants}{" "}
+                  participants, {totalGuides} guides)
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Duration:</span>
+                <span className="font-medium text-foreground">
+                  {durationLabel}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <Button type="button" className="w-full" variant={"outline"} onClick={() => router.back()}>
+                Cancel
+              </Button>
               <Button type="submit" disabled={isSubmitting} className="w-full">
                 {isSubmitting ? (
                   <>

@@ -41,8 +41,8 @@ export default function MyTripsPage() {
     .map((gt) => gt.trips)
     .filter((t): t is TripData => t !== null);
 
-  const upcomingTrips = allTrips.filter((t) => new Date(t.start_date) >= now);
-  const pastTrips = allTrips.filter((t) => new Date(t.start_date) < now);
+  const upcomingTrips = allTrips.filter((t) => new Date(t.end_date) >= now);
+  const pastTrips = allTrips.filter((t) => new Date(t.end_date) < now);
 
   return (
     <div className="space-y-8">
