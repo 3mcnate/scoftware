@@ -19,6 +19,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTripPictureUrl } from "@/utils/storage";
 import { formatDate } from "@/utils/date-time";
+import { useRouter } from "next/navigation";
 
 type GuideTripsData = NonNullable<
   ReturnType<typeof useGuideTrips>["data"]
@@ -76,6 +77,7 @@ export function getStatusBadge(signupStatus: string | null, isPast: boolean) {
 }
 
 function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
+  const router = useRouter();
   const guides: Guide[] = trip.trip_guides ?? [];
   const activeTickets = trip.tickets?.filter((t) => !t.cancelled) ?? [];
   const participantCount = activeTickets.filter(
@@ -94,7 +96,10 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
     driverSpots > 0 ? Math.min((driverCount / driverSpots) * 100, 100) : 0;
 
   return (
-    <TableRow className="group">
+    <TableRow
+      className="group cursor-pointer"
+      onClick={() => router.push(`/guide/trip/${trip.id}`)}
+    >
       <TableCell className="w-[120px] p-2">
         <Link href={`/guide/trip/${trip.id}`}>
           {trip.picture_path ? (
@@ -108,8 +113,8 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
             </div>
           ) : (
             <div className="flex h-16 w-28 rounded-md overflow-hidden bg-sidebar group-hover:opacity-80">
-							<TentTree className="m-auto size-5 text-muted-foreground"/>
-						</div>
+              <TentTree className="m-auto size-5 text-muted-foreground" />
+            </div>
           )}
         </Link>
       </TableCell>
