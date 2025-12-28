@@ -126,7 +126,7 @@ export default function NewTripForm() {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Create New Trip</CardTitle>
-        <CardDescription>Everything here can be changed later</CardDescription>
+        <CardDescription>Enter your trip details</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -273,7 +273,7 @@ export default function NewTripForm() {
                     </MultiSelect>
                     <FieldError errors={error ? [error] : undefined} />
                     <FieldDescription>
-                      Invite other guides to the trip.
+                      Add your co guide(s).
                     </FieldDescription>
                   </>
                 )}
