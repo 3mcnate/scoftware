@@ -4,7 +4,6 @@ import { useGuideTrips } from "@/data/client/trips/get-guide-trips";
 import { useAuth } from "@/hooks/use-auth";
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -42,9 +41,7 @@ export default function MyTripsPage() {
     .map((gt) => gt.trips)
     .filter((t): t is TripData => t !== null);
 
-  const upcomingTrips = allTrips.filter(
-    (t) => new Date(t.start_date) >= now
-  );
+  const upcomingTrips = allTrips.filter((t) => new Date(t.start_date) >= now);
   const pastTrips = allTrips.filter((t) => new Date(t.start_date) < now);
 
   return (
@@ -69,17 +66,9 @@ export default function MyTripsPage() {
               </EmptyMedia>
               <EmptyTitle>No Upcoming Trips</EmptyTitle>
               <EmptyDescription>
-                You don&apos;t have any upcoming trips assigned to you.
+                Click Create Trip to make a new one.
               </EmptyDescription>
             </EmptyHeader>
-            <EmptyContent>
-              <Button asChild>
-                <Link href="/guide/trip/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Trip
-                </Link>
-              </Button>
-            </EmptyContent>
           </Empty>
         ) : (
           <TripsTable trips={upcomingTrips} />

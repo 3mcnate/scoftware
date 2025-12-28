@@ -1,4 +1,4 @@
-import AppSidebar from "@/components/guide-dashboard/app-sidebar";
+import AppSidebar from "@/components/guide-dashboard/sidebar/app-sidebar";
 import {
   SidebarInset,
   SidebarProvider,

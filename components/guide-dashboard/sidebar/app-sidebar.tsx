@@ -1,12 +1,12 @@
 "use client";
 
-import { NavAdmin } from "@/components/guide-dashboard/nav-admin";
-import { NavUser } from "@/components/guide-dashboard/nav-user";
-import { SidebarHeader } from "@/components/guide-dashboard/sidebar-header";
+import { NavAdmin } from "@/components/guide-dashboard/sidebar/nav-admin";
+import { NavUser } from "@/components/guide-dashboard/sidebar/nav-user";
+import { SidebarHeader } from "@/components/guide-dashboard/sidebar/sidebar-header";
 import {
   SidebarNavGroup,
   SideNavItem,
-} from "@/components/guide-dashboard/sidebar-nav-group";
+} from "@/components/guide-dashboard/sidebar/sidebar-nav-group";
 import {
   Sidebar,
   SidebarContent,
