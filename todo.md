@@ -54,9 +54,14 @@
 12/27/25
 - guide trips page - new trip form - done
 
+12/28/25
+
+
+
+
 The plan:
 12/26	 guide/admin layout, start on guide trips page
-12/27	 guide trips page - new trip form  	<--
+12/27	 guide trips page - new trip form  
 12/28	 guide trips page - trip page
 12/29	 guide trips page - participants
 12/30  guide trips page - participant reports + convenience buttons
@@ -93,7 +98,7 @@ chores
 guide basics
 - guide info
 - create/edit/publish trips
-	- Tabs: Participants, Trip Page, Budget, Signups
+	- Tabs: Signups, Trip Page, Budget, Settings
 - participant management
 - participants list
 - guides list

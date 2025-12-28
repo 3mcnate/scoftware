@@ -285,7 +285,7 @@ export function TripsTableSkeleton() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[120px]"></TableHead>
+              <TableHead className="w-[120px]">Picture</TableHead>
               <TableHead>Trip Name</TableHead>
               <TableHead>Dates</TableHead>
               <TableHead>Guides</TableHead>
@@ -339,7 +339,7 @@ export function TripsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[120px]"></TableHead>
+            <TableHead className="w-[120px]">Picture</TableHead>
             <TableHead>Trip Name</TableHead>
             <TableHead>Dates</TableHead>
             <TableHead>Guides</TableHead>
