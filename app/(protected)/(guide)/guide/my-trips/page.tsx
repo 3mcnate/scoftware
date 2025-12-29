@@ -45,7 +45,7 @@ export default function MyTripsPage() {
   const pastTrips = allTrips.filter((t) => new Date(t.end_date) < now);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pt-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">My Trips</h1>
         <Button asChild>

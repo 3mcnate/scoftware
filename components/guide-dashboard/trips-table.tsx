@@ -252,7 +252,7 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
             <DialogHeader>
               <DialogTitle>Are you sure?</DialogTitle>
               <DialogDescription>
-                This action cannot be undone.
+                This can&apos;t be undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

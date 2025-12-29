@@ -44,3 +44,14 @@ export const useGuideTrips = (guideId: string) => {
 	const client = createClient();
 	return useQuery(getGuideTrips(guideId, client));
 };
+
+const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
+	return client
+		.from('trips')
+		.select(
+			`
+			
+			
+			`)
+		.eq('id', tripId);
+}

@@ -26,7 +26,7 @@ export function TripTabs() {
   const tripId = params.tripId as string;
 
   return (
-    <nav className="flex gap-1 border-b">
+    <nav className="flex gap-1">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const href = `/guide/trip/${tripId}/${tab.segment}`;
