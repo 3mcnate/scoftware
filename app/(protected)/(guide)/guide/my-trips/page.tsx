@@ -48,9 +48,9 @@ export default function MyTripsPage() {
     <div className="space-y-8 pt-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">My Trips</h1>
-        <Button asChild>
+        <Button asChild size={'sm'}>
           <Link href="/guide/trip/new">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4" />
             Create Trip
           </Link>
         </Button>
