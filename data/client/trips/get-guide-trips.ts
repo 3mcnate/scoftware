@@ -50,8 +50,42 @@ const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
 		.from('trips')
 		.select(
 			`
-			
-			
+			id,
+			created_at,
+			updated_at,
+			name,
+			description,
+			driver_spots,
+			participant_spots,
+			gear_questions,
+			signup_status,
+			what_to_bring,
+			access_code,
+			end_date,
+			picture_path,
+			start_date,
+			meet,
+			return,
+			activity,
+			difficulty,
+			trail,
+			prior_experience,
+			location,
+			native_land,
+			car_mpgs,
+			total_miles,
+			breakfasts,
+			lunches,
+			dinners,
+			snacks,
+			other_costs,
+			budget_confirmed
 			`)
-		.eq('id', tripId);
+		.eq('id', tripId)
+		.single();
 }
+
+export const useTrip = (tripId: string) => {
+	const client = createClient();
+	return useQuery(getAllTripInfo(tripId, client));
+};

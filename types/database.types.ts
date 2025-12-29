@@ -623,62 +623,6 @@ export type Database = {
           },
         ]
       }
-      trip_budgets: {
-        Row: {
-          breakfasts: number
-          car_mpgs: number[]
-          car_rental_price: number
-          created_at: string
-          dinners: number
-          lunches: number
-          other: Json | null
-          parking_cost: number
-          permit_cost: number
-          snacks: number
-          total_miles: number
-          trip_id: string
-          updated_at: string
-        }
-        Insert: {
-          breakfasts?: number
-          car_mpgs?: number[]
-          car_rental_price?: number
-          created_at?: string
-          dinners?: number
-          lunches?: number
-          other?: Json | null
-          parking_cost?: number
-          permit_cost?: number
-          snacks?: number
-          total_miles?: number
-          trip_id: string
-          updated_at?: string
-        }
-        Update: {
-          breakfasts?: number
-          car_mpgs?: number[]
-          car_rental_price?: number
-          created_at?: string
-          dinners?: number
-          lunches?: number
-          other?: Json | null
-          parking_cost?: number
-          permit_cost?: number
-          snacks?: number
-          total_miles?: number
-          trip_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trip_budgets_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: true
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       trip_checkout_sessions: {
         Row: {
           created_at: string
@@ -775,56 +719,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      trip_details: {
-        Row: {
-          activity: string
-          created_at: string
-          difficulty: string
-          location: string
-          meet: string
-          native_land: string
-          prior_experience: string
-          return: string
-          trail: string
-          trip_id: string
-          updated_at: string
-        }
-        Insert: {
-          activity: string
-          created_at?: string
-          difficulty: string
-          location: string
-          meet: string
-          native_land: string
-          prior_experience: string
-          return: string
-          trail: string
-          trip_id?: string
-          updated_at?: string
-        }
-        Update: {
-          activity?: string
-          created_at?: string
-          difficulty?: string
-          location?: string
-          meet?: string
-          native_land?: string
-          prior_experience?: string
-          return?: string
-          trail?: string
-          trip_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trip_details_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: true
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       trip_guides: {
         Row: {
@@ -951,49 +845,97 @@ export type Database = {
       trips: {
         Row: {
           access_code: string | null
+          activity: string | null
+          breakfasts: number | null
+          budget_confirmed: boolean
+          car_mpgs: number[] | null
           created_at: string
           description: string | null
+          difficulty: string | null
+          dinners: number | null
           driver_spots: number
           end_date: string
           gear_questions: string[] | null
           id: string
+          location: string | null
+          lunches: number | null
+          meet: string | null
           name: string
+          native_land: string | null
+          other_costs: Json | null
           participant_spots: number
           picture_path: string | null
+          prior_experience: string | null
+          return: string | null
           signup_status: Database["public"]["Enums"]["trip_signup_status"]
+          snacks: number | null
           start_date: string
+          total_miles: number | null
+          trail: string | null
           updated_at: string
           what_to_bring: string | null
         }
         Insert: {
           access_code?: string | null
+          activity?: string | null
+          breakfasts?: number | null
+          budget_confirmed?: boolean
+          car_mpgs?: number[] | null
           created_at?: string
           description?: string | null
+          difficulty?: string | null
+          dinners?: number | null
           driver_spots: number
           end_date: string
           gear_questions?: string[] | null
           id?: string
+          location?: string | null
+          lunches?: number | null
+          meet?: string | null
           name: string
+          native_land?: string | null
+          other_costs?: Json | null
           participant_spots: number
           picture_path?: string | null
+          prior_experience?: string | null
+          return?: string | null
           signup_status?: Database["public"]["Enums"]["trip_signup_status"]
+          snacks?: number | null
           start_date: string
+          total_miles?: number | null
+          trail?: string | null
           updated_at?: string
           what_to_bring?: string | null
         }
         Update: {
           access_code?: string | null
+          activity?: string | null
+          breakfasts?: number | null
+          budget_confirmed?: boolean
+          car_mpgs?: number[] | null
           created_at?: string
           description?: string | null
+          difficulty?: string | null
+          dinners?: number | null
           driver_spots?: number
           end_date?: string
           gear_questions?: string[] | null
           id?: string
+          location?: string | null
+          lunches?: number | null
+          meet?: string | null
           name?: string
+          native_land?: string | null
+          other_costs?: Json | null
           participant_spots?: number
           picture_path?: string | null
+          prior_experience?: string | null
+          return?: string | null
           signup_status?: Database["public"]["Enums"]["trip_signup_status"]
+          snacks?: number | null
           start_date?: string
+          total_miles?: number | null
+          trail?: string | null
           updated_at?: string
           what_to_bring?: string | null
         }
@@ -1155,6 +1097,14 @@ export type Database = {
       }
       has_trip_ticket: {
         Args: { trip: string; user: string }
+        Returns: boolean
+      }
+      is_trip_guide: {
+        Args: { u1: string; u2: string }
+        Returns: boolean
+      }
+      trip_has_tickets: {
+        Args: { t_id: string }
         Returns: boolean
       }
     }

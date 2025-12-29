@@ -63,7 +63,7 @@ The plan:
 12/26	 guide/admin layout, start on guide trips page
 12/27	 guide trips page - new trip form  
 12/28	 guide trips page - trip page
-12/29	 guide trips page - participants
+12/29	 guide trips page - signups
 12/30  guide trips page - participant reports + convenience buttons
 12/31	 guide trips page - budget
 1/1  	 guide trips page - signups
