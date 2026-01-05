@@ -426,6 +426,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_path: string | null
+          email: string
           first_name: string
           id: string
           last_name: string
@@ -433,6 +434,7 @@ export type Database = {
         }
         Insert: {
           avatar_path?: string | null
+          email: string
           first_name: string
           id?: string
           last_name: string
@@ -440,6 +442,7 @@ export type Database = {
         }
         Update: {
           avatar_path?: string | null
+          email?: string
           first_name?: string
           id?: string
           last_name?: string

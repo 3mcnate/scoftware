@@ -219,7 +219,6 @@ INSERT INTO
 		"phone_change",
 		"phone_change_token",
 		"phone_change_sent_at",
-		"confirmed_at",
 		"email_change_token_current",
 		"email_change_confirm_status",
 		"banned_until",
@@ -257,7 +256,6 @@ VALUES
 		'',
 		'',
 		null,
-		'2025-12-28 22:09:02.829357+00',
 		'',
 		'0',
 		null,
@@ -324,3 +322,10 @@ set
 	"role" = 'guide' :: public.user_role
 where
 	user_id = '285cd349-4aef-406a-b3f6-9f4494570540';
+
+update
+	public.roles
+set
+	"role" = 'admin' :: public.user_role
+where
+	user_id = 'd070655d-974c-45a5-a332-eb1f499e49fd';

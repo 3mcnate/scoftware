@@ -199,23 +199,6 @@ export const memberships = pgTable("memberships", {
 	pgPolicy("Allow users to view their memberships", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(user_id = ( SELECT auth.uid() AS uid))` }),
 ]);
 
-export const profiles = pgTable("profiles", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	first_name: text().notNull(),
-	last_name: text().notNull(),
-	phone: text().default('').notNull(),
-	avatar_path: text(),
-}, (table) => [
-	foreignKey({
-			columns: [table.id],
-			foreignColumns: [usersInAuth.id],
-			name: "profiles_id_fkey"
-		}).onUpdate("cascade").onDelete("cascade"),
-	unique("profiles_phone_key").on(table.phone),
-	pgPolicy("Allow users to update own profile", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))`, withCheck: sql`(id = ( SELECT auth.uid() AS uid))`  }),
-	pgPolicy("Allow guides, user to select own profile", { as: "permissive", for: "select", to: ["authenticated"] }),
-]);
-
 export const published_trips = pgTable("published_trips", {
 	id: uuid().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -242,8 +225,26 @@ export const published_trips = pgTable("published_trips", {
 			foreignColumns: [trips.id],
 			name: "published_trips_id_fkey"
 		}),
-	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"], using: sql`has_trip_ticket(( SELECT auth.uid() AS uid), id)` }),
-	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"] }),
+	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"], using: sql`visible` }),
+	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"] }),
+]);
+
+export const profiles = pgTable("profiles", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	first_name: text().notNull(),
+	last_name: text().notNull(),
+	phone: text().default('').notNull(),
+	avatar_path: text(),
+	email: text().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.id],
+			foreignColumns: [usersInAuth.id],
+			name: "profiles_id_fkey"
+		}).onUpdate("cascade").onDelete("cascade"),
+	unique("profiles_phone_key").on(table.phone),
+	pgPolicy("Allow guides, user to select own profile", { as: "permissive", for: "select", to: ["authenticated"], using: sql`((id = ( SELECT auth.uid() AS uid)) OR authorize('guide'::user_role))` }),
+	pgPolicy("Allow users to update own profile", { as: "permissive", for: "update", to: ["authenticated"] }),
 ]);
 
 export const trips = pgTable("trips", {
@@ -261,28 +262,34 @@ export const trips = pgTable("trips", {
 	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	picture_path: text(),
 	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	meet: text(),
-	return: text(),
 	activity: text(),
-	difficulty: text(),
-	trail: text(),
-	prior_experience: text(),
-	location: text(),
-	native_land: text(),
-	car_mpgs: numeric().array(),
-	total_miles: integer(),
 	breakfasts: smallint(),
-	lunches: smallint(),
-	dinners: smallint(),
-	snacks: smallint(),
-	other_costs: jsonb(),
 	budget_confirmed: boolean().default(false).notNull(),
+	car_mpgs: numeric().array(),
+	difficulty: text(),
+	dinners: smallint(),
+	location: text(),
+	lunches: smallint(),
+	meet: text(),
+	native_land: text(),
+	other_costs: jsonb(),
+	prior_experience: text(),
+	return: text(),
+	snacks: smallint(),
+	total_miles: integer(),
+	trail: text(),
 }, (table) => [
 	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
 	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"] }),
 	check("trips_driver_spots_check", sql`driver_spots >= 0`),
 	check("trips_participant_spots_check", sql`participant_spots >= 0`),
 	check("ends_after_start", sql`start_date < end_date`),
+	check("trips_breakfasts_check", sql`breakfasts >= 0`),
+	check("trips_car_mpgs_check", sql`(0)::numeric <= ALL (car_mpgs)`),
+	check("trips_dinners_check", sql`dinners >= 0`),
+	check("trips_lunches_check", sql`lunches >= 0`),
+	check("trips_snacks_check", sql`snacks >= 0`),
+	check("trips_total_miles_check", sql`total_miles >= 0`),
 ]);
 
 export const trip_guides = pgTable("trip_guides", {
