@@ -29,6 +29,7 @@ import { createClient } from "@/utils/supabase/browser"
 import { getInitials } from "@/utils/names"
 import { getAvatarUrl } from "@/data/client/storage/avatars"
 import { toast } from "sonner"
+import { useTrip } from "@/data/client/trips/get-guide-trips"
 
 const waitlist = [
   {
@@ -52,7 +53,8 @@ const waitlist = [
 export default function SignupsPage() {
   const params = useParams()
   const tripId = params.tripId as string
-  const { data: tickets, isLoading } = useTripTickets(tripId)
+  const { data: tickets, isLoading: isTicketsLoading } = useTripTickets(tripId)
+	const { data: trip, isLoading: isTripLoading } = useTrip(tripId);
   const { mutateAsync: updateTicket } = useUpdateTicket()
 
   const openWaiver = async (path: string) => {
@@ -90,9 +92,13 @@ export default function SignupsPage() {
     toast.error("Not implemented yet " + ticketId)
   }
 
-  if (isLoading) {
+  if (isTicketsLoading || isTripLoading) {
     return <div className="p-8 text-center text-muted-foreground">Loading participants...</div>
   }
+
+	if (!trip) {
+		return <div className="p-8 text-center">Could not load trip</div>
+	}
 
   const activeParticipantsCount = tickets?.filter(t => !t.cancelled).length || 0
 
@@ -104,7 +110,7 @@ export default function SignupsPage() {
           <div>
             <CardTitle>Participants</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              {activeParticipantsCount} of 15 spots filled
+              {activeParticipantsCount} of {trip.driver_spots + trip.participant_spots}
             </p>
           </div>
           <Button variant="outline" className="bg-transparent">
@@ -163,14 +169,13 @@ export default function SignupsPage() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                       {/* Email not directly in profile */}
-                       <span className="text-xs">-</span>
+                    <TableCell className="text-sm">
+											{user.email}
                     </TableCell>
-                    <TableCell className="text-muted-foreground whitespace-nowrap text-sm">
+                    <TableCell className="whitespace-nowrap text-sm">
                       {user?.phone || "-"}
                     </TableCell>
-                    <TableCell className="text-muted-foreground whitespace-nowrap text-xs">
+                    <TableCell className="whitespace-nowrap text-sm">
                       {format(new Date(ticket.created_at), "MMM d, yyyy h:mm a")}
                     </TableCell>
                     <TableCell>

@@ -214,3 +214,23 @@ VALUES
 		'50',
 		null
 	);
+
+INSERT INTO
+	"public"."trip_guides" ("user_id", "trip_id")
+VALUES
+	(
+		'285cd349-4aef-406a-b3f6-9f4494570540',
+		'af6192f6-2565-49bf-ab29-9d2e97cb9740'
+	),
+	(
+		'285cd349-4aef-406a-b3f6-9f4494570540',
+		'd8aaea9d-85bf-4dcf-a63d-001e19dea7af'
+	),
+	(
+		'd070655d-974c-45a5-a332-eb1f499e49fd',
+		'af6192f6-2565-49bf-ab29-9d2e97cb9740'
+	),
+	(
+		'd070655d-974c-45a5-a332-eb1f499e49fd',
+		'd8aaea9d-85bf-4dcf-a63d-001e19dea7af'
+	);
