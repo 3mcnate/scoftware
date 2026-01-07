@@ -1,8 +1,8 @@
 "use server";
 
-import { TripDetails } from "@/components/trip-page/trip-details";
-import { SignupButtons } from "@/components/trip-page/signup-buttons";
-import { TripNavigation } from "@/components/trip-page/trip-navigation";
+import { TripDetails } from "@/components/public-trip-page/trip-details";
+import { SignupButtons } from "@/components/public-trip-page/signup-buttons";
+import { TripNavigation } from "@/components/public-trip-page/trip-navigation";
 import { getVisiblePublishedTrip } from "@/data/server/trips/get-published-trip";
 import { getAdjacentPublishedTrips } from "@/data/server/trips/get-adjacent-published-trips";
 import { notFound } from "next/navigation";

@@ -949,8 +949,7 @@ export type Database = {
           created_at: string
           id: string
           notification_sent_at: string | null
-          open_until: string | null
-          status: Database["public"]["Enums"]["waitlist_status"]
+          spot_expires_at: string | null
           trip_id: string
           updated_at: string | null
           user_id: string
@@ -959,8 +958,7 @@ export type Database = {
           created_at?: string
           id?: string
           notification_sent_at?: string | null
-          open_until?: string | null
-          status?: Database["public"]["Enums"]["waitlist_status"]
+          spot_expires_at?: string | null
           trip_id?: string
           updated_at?: string | null
           user_id: string
@@ -969,8 +967,7 @@ export type Database = {
           created_at?: string
           id?: string
           notification_sent_at?: string | null
-          open_until?: string | null
-          status?: Database["public"]["Enums"]["waitlist_status"]
+          spot_expires_at?: string | null
           trip_id?: string
           updated_at?: string | null
           user_id?: string

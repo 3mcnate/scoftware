@@ -11,9 +11,9 @@ import {
   Clock,
   TentTree,
 } from "lucide-react";
-import { DifficultyModal } from "@/components/trip-page/difficulty-modal";
-import { TripDetailItem } from "@/components/trip-page/trip-detail-item";
-import { TripPageWaiverAlert } from "@/components/trip-page/trip-page-waiver-alert";
+import { DifficultyModal } from "@/components/public-trip-page/difficulty-modal";
+import { TripDetailItem } from "@/components/public-trip-page/trip-detail-item";
+import { TripPageWaiverAlert } from "@/components/public-trip-page/trip-page-waiver-alert";
 import Image from "next/image";
 import { formatDateWithWeekday, formatTime } from "@/utils/date-time";
 import { type InferSelectModel } from "drizzle-orm";
