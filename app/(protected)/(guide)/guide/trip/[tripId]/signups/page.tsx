@@ -178,11 +178,11 @@ const SignupsPage = () => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm">{user.email}</TableCell>
-                    <TableCell className="whitespace-nowrap text-sm">
+                    <TableCell className="text-sm text-muted-foreground">{user.email}</TableCell>
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {user?.phone || "-"}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-sm">
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {format(
                         new Date(ticket.created_at),
                         "MMM d, yyyy h:mm a"
@@ -292,14 +292,6 @@ const SignupsPage = () => {
                           >
                             <RefreshCcw className="mr-2 h-4 w-4" />
                             Refund Ticket
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              window.location.href = `mailto:?subject=Trip Info&body=Hi ${user?.first_name},`;
-                            }}
-                          >
-                            <Mail className="mr-2 h-4 w-4" />
-                            Email Participant
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

@@ -354,10 +354,10 @@ export type Database = {
       }
       participant_info: {
         Row: {
-          allergies: string
+          allergies: string | null
           created_at: string
           degree_path: Database["public"]["Enums"]["degree_path_type"]
-          dietary_restrictions: string
+          dietary_restrictions: string[] | null
           emergency_contact_name: string
           emergency_contact_phone_number: string
           emergency_contact_relationship: string
@@ -367,17 +367,17 @@ export type Database = {
           health_insurance_group_number: string
           health_insurance_member_id: string
           health_insurance_provider: string
-          medical_history: string
-          medications: string
+          medical_history: string | null
+          medications: string | null
           updated_at: string
           usc_id: string
           user_id: string
         }
         Insert: {
-          allergies: string
+          allergies?: string | null
           created_at?: string
           degree_path: Database["public"]["Enums"]["degree_path_type"]
-          dietary_restrictions: string
+          dietary_restrictions?: string[] | null
           emergency_contact_name: string
           emergency_contact_phone_number: string
           emergency_contact_relationship: string
@@ -387,17 +387,17 @@ export type Database = {
           health_insurance_group_number: string
           health_insurance_member_id: string
           health_insurance_provider: string
-          medical_history: string
-          medications: string
+          medical_history?: string | null
+          medications?: string | null
           updated_at?: string
           usc_id: string
           user_id: string
         }
         Update: {
-          allergies?: string
+          allergies?: string | null
           created_at?: string
           degree_path?: Database["public"]["Enums"]["degree_path_type"]
-          dietary_restrictions?: string
+          dietary_restrictions?: string[] | null
           emergency_contact_name?: string
           emergency_contact_phone_number?: string
           emergency_contact_relationship?: string
@@ -407,8 +407,8 @@ export type Database = {
           health_insurance_group_number?: string
           health_insurance_member_id?: string
           health_insurance_provider?: string
-          medical_history?: string
-          medications?: string
+          medical_history?: string | null
+          medications?: string | null
           updated_at?: string
           usc_id?: string
           user_id?: string

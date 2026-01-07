@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -40,41 +41,81 @@ import type { Tables } from "@/types/database.types";
 
 const currentYear = new Date().getFullYear();
 
-const ParticipantInfoSchema = z.object({
-  usc_id: z.coerce
-    .string()
-    .regex(/^\d{10}$/, "USC ID must be a 10-digit number"),
-  degree_path: z.enum(["undergrad", "graduate", "pdp"], {
-    error: "Please select a degree path",
-  }),
-  graduation_season: z.enum(["spring", "fall"], {
-    error: "Please select a graduation season",
-  }),
-  graduation_year: z
-    .string()
-    .regex(/^\d{4}$/, "Graduation year must be a valid year")
-    .refine(
-      (year) => Number(year) >= currentYear && Number(year) <= currentYear + 10,
-      `Year must be between ${currentYear} and ${currentYear + 10}`
-    ),
-  emergency_contact_name: z
-    .string()
-    .min(1, "Emergency contact name is required"),
-  emergency_contact_phone_number: z
-    .string()
-    .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
-  emergency_contact_relationship: z.string().min(1, "Relationship is required"),
-  health_insurance_provider: z
-    .string()
-    .min(1, "Insurance provider is required"),
-  health_insurance_member_id: z.string().min(1, "Member ID is required"),
-  health_insurance_group_number: z.string().min(1, "Group number is required"),
-  health_insurance_bin_number: z.string().min(1, "BIN number is required"),
-  allergies: z.string().min(1, "Allergies is required"),
-  medications: z.string().min(1, "Medications is required"),
-  medical_history: z.string().min(1, "Medical history is required"),
-  dietary_restrictions: z.string().min(1, "Dietary Restrictions is required"),
-});
+const DIETARY_RESTRICTIONS = [
+  "Vegetarian",
+  "Vegan",
+  "Gluten-free",
+  "Dairy-free",
+  "Nut-free",
+  "Kosher",
+  "Halal",
+  "Pescatarian",
+] as const;
+
+const ParticipantInfoSchema = z
+  .object({
+    usc_id: z.coerce
+      .string()
+      .regex(/^\d{10}$/, "USC ID must be a 10-digit number"),
+    degree_path: z.enum(["undergrad", "graduate", "pdp"], {
+      error: "Please select a degree path",
+    }),
+    graduation_season: z.enum(["spring", "fall"], {
+      error: "Please select a graduation season",
+    }),
+    graduation_year: z
+      .string()
+      .regex(/^\d{4}$/, "Graduation year must be a valid year")
+      .refine(
+        (year) => Number(year) >= currentYear && Number(year) <= currentYear + 10,
+        `Year must be between ${currentYear} and ${currentYear + 10}`
+      ),
+    emergency_contact_name: z
+      .string()
+      .min(1, "Emergency contact name is required"),
+    emergency_contact_phone_number: z
+      .string()
+      .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
+    emergency_contact_relationship: z.string().min(1, "Relationship is required"),
+    health_insurance_provider: z
+      .string()
+      .min(1, "Insurance provider is required"),
+    health_insurance_member_id: z.string().min(1, "Member ID is required"),
+    health_insurance_group_number: z.string().min(1, "Group number is required"),
+    health_insurance_bin_number: z.string().min(1, "BIN number is required"),
+    allergies: z.string(),
+    no_allergies: z.boolean(),
+    medications: z.string(),
+    no_medications: z.boolean(),
+    medical_history: z.string(),
+    no_medical_history: z.boolean(),
+    dietary_restrictions: z.array(z.string()),
+    has_other_dietary_restriction: z.boolean(),
+    dietary_restrictions_other: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.no_allergies && !data.allergies) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please describe your allergies or check 'I have none'",
+        path: ["allergies"],
+      });
+    }
+    if (!data.no_medications && !data.medications) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please list your medications or check 'I have none'",
+        path: ["medications"],
+      });
+    }
+    if (!data.no_medical_history && !data.medical_history) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please describe your medical history or check 'I have none'",
+        path: ["medical_history"],
+      });
+    }
+  });
 
 type ParticipantInfoFormData = z.infer<typeof ParticipantInfoSchema>;
 type ParticipantInfo = Tables<"participant_info">;
@@ -94,6 +135,7 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
     handleSubmit,
     formState: { isDirty },
     reset,
+    watch,
   } = useForm<ParticipantInfoFormData>({
     resolver: standardSchemaResolver(ParticipantInfoSchema),
     defaultValues: {
@@ -113,11 +155,21 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
       health_insurance_bin_number:
         initialData?.health_insurance_bin_number ?? "",
       allergies: initialData?.allergies ?? "",
+      no_allergies: false,
       medications: initialData?.medications ?? "",
+      no_medications: false,
       medical_history: initialData?.medical_history ?? "",
-      dietary_restrictions: initialData?.dietary_restrictions ?? "",
+      no_medical_history: false,
+      dietary_restrictions: initialData?.dietary_restrictions?.filter(r => DIETARY_RESTRICTIONS.includes(r as typeof DIETARY_RESTRICTIONS[number])) ?? [],
+      has_other_dietary_restriction: !!initialData?.dietary_restrictions?.find(r => !DIETARY_RESTRICTIONS.includes(r as typeof DIETARY_RESTRICTIONS[number])),
+      dietary_restrictions_other: initialData?.dietary_restrictions?.find(r => !DIETARY_RESTRICTIONS.includes(r as typeof DIETARY_RESTRICTIONS[number])) ?? "",
     },
   });
+
+  const noAllergies = watch("no_allergies");
+  const hasOtherDietaryRestriction = watch("has_other_dietary_restriction");
+  const noMedications = watch("no_medications");
+  const noMedicalHistory = watch("no_medical_history");
 
   useUnsavedChangesPrompt(isDirty);
 
@@ -125,10 +177,19 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
     if (!userId) return;
 
     try {
+      const { no_allergies, no_medications, no_medical_history, has_other_dietary_restriction, dietary_restrictions_other, ...rest } = data;
+      const combinedDietaryRestrictions = [
+        ...data.dietary_restrictions,
+        ...(has_other_dietary_restriction && dietary_restrictions_other.trim() ? [dietary_restrictions_other.trim()] : []),
+      ];
       await upsertInfo([
         {
           user_id: userId,
-          ...data,
+          ...rest,
+          dietary_restrictions: combinedDietaryRestrictions,
+          allergies: no_allergies ? null : data.allergies,
+          medications: no_medications ? null : data.medications,
+          medical_history: no_medical_history ? null : data.medical_history,
           graduation_year: Number(data.graduation_year),
         },
       ]);
@@ -499,14 +560,31 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
                         placeholder="List any food, medication, or environmental allergies..."
                         className="resize-none"
                         rows={3}
-                        disabled={isSaving}
+                        disabled={isSaving || noAllergies}
                         aria-invalid={!!error}
                       />
-                      <FieldDescription>
-                        Type &quot;none&quot; or &quot;N/A&quot; if none
-                      </FieldDescription>
                       <FieldError errors={error ? [error] : undefined} />
                     </>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="no_allergies"
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Checkbox
+                        id="no_allergies"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSaving}
+                      />
+                      <label
+                        htmlFor="no_allergies"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        I have none
+                      </label>
+                    </div>
                   )}
                 />
               </Field>
@@ -526,14 +604,31 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
                         placeholder="List any medications you are currently taking..."
                         className="resize-none"
                         rows={3}
-                        disabled={isSaving}
+                        disabled={isSaving || noMedications}
                         aria-invalid={!!error}
                       />
-                      <FieldDescription>
-                        Type &quot;none&quot; or &quot;N/A&quot; if none
-                      </FieldDescription>
                       <FieldError errors={error ? [error] : undefined} />
                     </>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="no_medications"
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Checkbox
+                        id="no_medications"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSaving}
+                      />
+                      <label
+                        htmlFor="no_medications"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        I have none
+                      </label>
+                    </div>
                   )}
                 />
               </Field>
@@ -554,43 +649,104 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
                         placeholder="List any chronic conditions, past surgeries, or health concerns..."
                         className="resize-none"
                         rows={3}
-                        disabled={isSaving}
+                        disabled={isSaving || noMedicalHistory}
                         aria-invalid={!!error}
                       />
-                      <FieldDescription>
-                        Type &quot;none&quot; or &quot;N/A&quot; if none
-                      </FieldDescription>
                       <FieldError errors={error ? [error] : undefined} />
                     </>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="no_medical_history"
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Checkbox
+                        id="no_medical_history"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSaving}
+                      />
+                      <label
+                        htmlFor="no_medical_history"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        I have none
+                      </label>
+                    </div>
                   )}
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="dietary_restrictions">
-                  Dietary Restrictions
-                </FieldLabel>
+                <FieldLabel>Dietary Restrictions</FieldLabel>
+                <FieldDescription className="mb-3">
+                  Select any that apply, or add your own below
+                </FieldDescription>
                 <Controller
                   control={control}
                   name="dietary_restrictions"
-                  render={({ field, fieldState: { error } }) => (
-                    <>
-                      <Textarea
-                        {...field}
-                        id="dietary_restrictions"
-                        placeholder="List any dietary restrictions or preferences..."
-                        className="resize-none"
-                        rows={2}
-                        disabled={isSaving}
-                        aria-invalid={!!error}
-                      />
-                      <FieldDescription>
-                        Type &quot;none&quot; or &quot;N/A&quot; if none
-                      </FieldDescription>
-                      <FieldError errors={error ? [error] : undefined} />
-                    </>
+                  render={({ field }) => (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {DIETARY_RESTRICTIONS.map((restriction) => (
+                        <div key={restriction} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`dietary_${restriction}`}
+                            checked={field.value?.includes(restriction)}
+                            onCheckedChange={(checked) => {
+                              const newValue = checked
+                                ? [...(field.value || []), restriction]
+                                : field.value?.filter((r) => r !== restriction) || [];
+                              field.onChange(newValue);
+                            }}
+                            disabled={isSaving}
+                          />
+                          <label
+                            htmlFor={`dietary_${restriction}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {restriction}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 />
               </Field>
+              <div className="flex items-center gap-3">
+                <Controller
+                  control={control}
+                  name="has_other_dietary_restriction"
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="has_other_dietary_restriction"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSaving}
+                      />
+                      <label
+                        htmlFor="has_other_dietary_restriction"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Other
+                      </label>
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="dietary_restrictions_other"
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="dietary_restrictions_other"
+                      placeholder="e.g., low sodium, no shellfish..."
+                      disabled={isSaving || !hasOtherDietaryRestriction}
+                      className="flex-1"
+                    />
+                  )}
+                />
+              </div>
             </FieldGroup>
           </CardContent>
         </Card>

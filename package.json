@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "gentypes": "supabase gen types typescript --local > types/database.types.ts && drizzle-kit pull && sed -i \"\" \"s/.default(')/.default('')/g\" '/Users/nateboxer/code/scoftware/drizzle/schema.ts'",
-    "sbrestart": "supabase stop && supabase start"
+    "sbrestart": "supabase stop && supabase start",
+		"save": "supabase db diff -f save && pnpm run gentypes"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
