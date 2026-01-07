@@ -121,7 +121,7 @@ const ParticipantInfoSchema = z
         path: ["medical_history"],
       });
     }
-		
+
     // Dietary restrictions: must have at least one selection OR check "no dietary restrictions"
     const hasStandardRestrictions =
       data.dietary_restrictions && data.dietary_restrictions.length > 0;
@@ -191,11 +191,11 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
       health_insurance_bin_number:
         initialData?.health_insurance_bin_number ?? "",
       allergies: initialData?.allergies ?? "",
-      no_allergies: initialData?.allergies === "",
+      no_allergies: initialData ? initialData.allergies === "" : false,
       medications: initialData?.medications ?? "",
-      no_medications: initialData?.medications === "",
+      no_medications: initialData ? initialData.medications === "" : false,
       medical_history: initialData?.medical_history ?? "",
-      no_medical_history: initialData?.medical_history === "",
+      no_medical_history: initialData ? initialData.medical_history === "" : false,
       dietary_restrictions:
         initialData?.dietary_restrictions?.filter((r) =>
           DIETARY_RESTRICTIONS.includes(
@@ -215,6 +215,9 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
               r as (typeof DIETARY_RESTRICTIONS)[number]
             )
         ) ?? "",
+      no_dietary_restrictions: initialData
+        ? initialData.dietary_restrictions?.length === 0
+        : false,
     },
   });
 
