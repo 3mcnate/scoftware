@@ -88,36 +88,66 @@ const ParticipantInfoSchema = z
       .string()
       .min(1, "Group number is required"),
     health_insurance_bin_number: z.string().min(1, "BIN number is required"),
-    allergies: z.string(),
-    no_allergies: z.boolean(),
-    medications: z.string(),
-    no_medications: z.boolean(),
-    medical_history: z.string(),
-    no_medical_history: z.boolean(),
-    dietary_restrictions: z.array(z.string()),
-    has_other_dietary_restriction: z.boolean(),
-    dietary_restrictions_other: z.string(),
+    allergies: z.string().optional(),
+    no_allergies: z.boolean().optional(),
+    medications: z.string().optional(),
+    no_medications: z.boolean().optional(),
+    medical_history: z.string().optional(),
+    no_medical_history: z.boolean().optional(),
+    dietary_restrictions: z.array(z.string()).optional(),
+    has_other_dietary_restriction: z.boolean().optional(),
+    dietary_restrictions_other: z.string().optional(),
+    no_dietary_restrictions: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
     if (!data.no_allergies && !data.allergies) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Please describe your allergies or check 'I have none'",
         path: ["allergies"],
       });
     }
     if (!data.no_medications && !data.medications) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Please list your medications or check 'I have none'",
         path: ["medications"],
       });
     }
     if (!data.no_medical_history && !data.medical_history) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Please describe your medical history or check 'I have none'",
         path: ["medical_history"],
+      });
+    }
+		
+    // Dietary restrictions: must have at least one selection OR check "no dietary restrictions"
+    const hasStandardRestrictions =
+      data.dietary_restrictions && data.dietary_restrictions.length > 0;
+    const hasOtherRestriction =
+      data.has_other_dietary_restriction &&
+      data.dietary_restrictions_other?.trim();
+    const hasAnyRestriction = hasStandardRestrictions || hasOtherRestriction;
+
+    if (!data.no_dietary_restrictions && !hasAnyRestriction) {
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "Please select any dietary restrictions or check 'I don't have any dietary restrictions'",
+        path: ["no_dietary_restrictions"],
+      });
+    }
+
+    // If "other" is checked, must provide a value
+    if (
+      data.has_other_dietary_restriction &&
+      !data.dietary_restrictions_other?.trim()
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Please specify your other dietary restriction",
+        path: ["dietary_restrictions_other"],
       });
     }
   });
@@ -141,6 +171,7 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
     formState: { isDirty },
     reset,
     watch,
+    setValue,
   } = useForm<ParticipantInfoFormData>({
     resolver: standardSchemaResolver(ParticipantInfoSchema),
     defaultValues: {
@@ -160,11 +191,11 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
       health_insurance_bin_number:
         initialData?.health_insurance_bin_number ?? "",
       allergies: initialData?.allergies ?? "",
-      no_allergies: false,
+      no_allergies: initialData?.allergies === "",
       medications: initialData?.medications ?? "",
-      no_medications: false,
+      no_medications: initialData?.medications === "",
       medical_history: initialData?.medical_history ?? "",
-      no_medical_history: false,
+      no_medical_history: initialData?.medical_history === "",
       dietary_restrictions:
         initialData?.dietary_restrictions?.filter((r) =>
           DIETARY_RESTRICTIONS.includes(
@@ -187,10 +218,12 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const noAllergies = watch("no_allergies");
   const hasOtherDietaryRestriction = watch("has_other_dietary_restriction");
   const noMedications = watch("no_medications");
   const noMedicalHistory = watch("no_medical_history");
+  const noDietaryRestrictions = watch("no_dietary_restrictions");
 
   useUnsavedChangesPrompt(isDirty);
 
@@ -202,24 +235,30 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
         no_allergies,
         no_medications,
         no_medical_history,
+        dietary_restrictions,
         has_other_dietary_restriction,
         dietary_restrictions_other,
+        no_dietary_restrictions,
         ...rest
       } = data;
+
       const combinedDietaryRestrictions = [
-        ...data.dietary_restrictions,
-        ...(has_other_dietary_restriction && dietary_restrictions_other.trim()
-          ? [dietary_restrictions_other.trim()]
+        ...(dietary_restrictions && !no_dietary_restrictions
+          ? dietary_restrictions
           : []),
       ];
+      if (has_other_dietary_restriction && dietary_restrictions_other) {
+        combinedDietaryRestrictions.push(dietary_restrictions_other);
+      }
+
       await upsertInfo([
         {
           user_id: userId,
           ...rest,
           dietary_restrictions: combinedDietaryRestrictions,
-          allergies: no_allergies ? null : data.allergies,
-          medications: no_medications ? null : data.medications,
-          medical_history: no_medical_history ? null : data.medical_history,
+          allergies: no_allergies ? "" : data.allergies ?? "",
+          medications: no_medications ? "" : data.medications ?? "",
+          medical_history: no_medical_history ? "" : data.medical_history ?? "",
           graduation_year: Number(data.graduation_year),
         },
       ]);
@@ -606,14 +645,17 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
                       <Checkbox
                         id="no_allergies"
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          if (checked) setValue("allergies", "");
+                        }}
                         disabled={isSaving}
                       />
                       <label
                         htmlFor="no_allergies"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        I have none
+                        I don&apos;t have any allergies
                       </label>
                     </div>
                   )}
@@ -650,14 +692,17 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
                       <Checkbox
                         id="no_medications"
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          if (checked) setValue("medications", "");
+                        }}
                         disabled={isSaving}
                       />
                       <label
                         htmlFor="no_medications"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        I have none
+                        I don&apos;t have any medications
                       </label>
                     </div>
                   )}
@@ -695,14 +740,17 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
                       <Checkbox
                         id="no_medical_history"
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          if (checked) setValue("medical_history", "");
+                        }}
                         disabled={isSaving}
                       />
                       <label
                         htmlFor="no_medical_history"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        I have none
+                        I don&apos;t have any pertinent medical history
                       </label>
                     </div>
                   )}
@@ -711,40 +759,42 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
               <Field>
                 <FieldLabel>Dietary Restrictions</FieldLabel>
                 <FieldDescription className="mb-2">
-                  Select any that apply, or add your own below
+                  Select any that apply
                 </FieldDescription>
                 <Controller
                   control={control}
                   name="dietary_restrictions"
                   render={({ field }) => (
-                    <div className="grid grid-cols-2 gap-3">
-                      {DIETARY_RESTRICTIONS.map((restriction) => (
-                        <div
-                          key={restriction}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            id={`dietary_${restriction}`}
-                            checked={field.value?.includes(restriction)}
-                            onCheckedChange={(checked) => {
-                              const newValue = checked
-                                ? [...(field.value || []), restriction]
-                                : field.value?.filter(
-                                    (r) => r !== restriction
-                                  ) || [];
-                              field.onChange(newValue);
-                            }}
-                            disabled={isSaving}
-                          />
-                          <label
-                            htmlFor={`dietary_${restriction}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    <>
+                      <div className="grid grid-cols-2 gap-3">
+                        {DIETARY_RESTRICTIONS.map((restriction) => (
+                          <div
+                            key={restriction}
+                            className="flex items-center space-x-2"
                           >
-                            {restriction}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
+                            <Checkbox
+                              id={`dietary_${restriction}`}
+                              checked={field.value?.includes(restriction)}
+                              onCheckedChange={(checked) => {
+                                const newValue = checked
+                                  ? [...(field.value || []), restriction]
+                                  : field.value?.filter(
+                                      (r) => r !== restriction
+                                    ) || [];
+                                field.onChange(newValue);
+                              }}
+                              disabled={isSaving || noDietaryRestrictions}
+                            />
+                            <label
+                              htmlFor={`dietary_${restriction}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {restriction}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   )}
                 />
                 <div className="flex items-center gap-3">
@@ -756,8 +806,12 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
                         <Checkbox
                           id="has_other_dietary_restriction"
                           checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isSaving}
+                          onCheckedChange={(checked) => {
+                            field.onChange(checked);
+                            if (!checked)
+                              setValue("dietary_restrictions_other", "");
+                          }}
+                          disabled={isSaving || noDietaryRestrictions}
                         />
                         <label
                           htmlFor="has_other_dietary_restriction"
@@ -771,16 +825,50 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
                   <Controller
                     control={control}
                     name="dietary_restrictions_other"
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        id="dietary_restrictions_other"
-                        disabled={isSaving || !hasOtherDietaryRestriction}
-                        className="flex-1"
-                      />
+                    render={({ field, fieldState: { error } }) => (
+                      <div className="flex-1 space-y-1">
+                        <Input
+                          {...field}
+                          id="dietary_restrictions_other"
+                          disabled={isSaving || !hasOtherDietaryRestriction}
+                          placeholder="Other dietary restriction..."
+                          aria-invalid={!!error}
+                        />
+                        <FieldError errors={error ? [error] : undefined} />
+                      </div>
                     )}
                   />
                 </div>
+                <Controller
+                  control={control}
+                  name="no_dietary_restrictions"
+                  render={({ field, fieldState: { error } }) => (
+                    <>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Checkbox
+                          id="no_dietary_restrictions"
+                          checked={field.value}
+                          onCheckedChange={(checked) => {
+                            field.onChange(checked);
+                            if (checked) {
+                              setValue("dietary_restrictions", []);
+                              setValue("has_other_dietary_restriction", false);
+                              setValue("dietary_restrictions_other", "");
+                            }
+                          }}
+                          disabled={isSaving}
+                        />
+                        <label
+                          htmlFor="no_dietary_restrictions"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          I don&apos;t have any dietary restrictions
+                        </label>
+                      </div>
+                      <FieldError errors={error ? [error] : undefined} />
+                    </>
+                  )}
+                />
               </Field>
             </FieldGroup>
           </CardContent>
