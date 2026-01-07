@@ -14,8 +14,15 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
+  Item,
+  ItemContent,
+  ItemGroup,
+  ItemMedia,
+  ItemSeparator,
+  ItemTitle,
+} from "@/components/ui/item";
+import {
   Download,
-  Mail,
   CheckCircle,
   AlertCircle,
   MoreHorizontal,
@@ -47,7 +54,8 @@ const SignupsPage = () => {
   const params = useParams();
   const tripId = params.tripId as string;
   const { data: tickets, isLoading: isTicketsLoading } = useTripTickets(tripId);
-  const { data: waitlist, isLoading: isWaitlistLoading } = useTripWaitlist(tripId);
+  const { data: waitlist, isLoading: isWaitlistLoading } =
+    useTripWaitlist(tripId);
   const { data: trip, isLoading: isTripLoading } = useTrip(tripId);
   const { mutateAsync: updateTicket } = useUpdateTicket();
 
@@ -98,8 +106,21 @@ const SignupsPage = () => {
     return <div className="p-8 text-center">Could not load trip</div>;
   }
 
+  const activeDriversCount =
+    tickets?.filter((t) => !t.cancelled && t.type === "driver").length || 0;
+
   const activeParticipantsCount =
-    tickets?.filter((t) => !t.cancelled).length || 0;
+    tickets?.filter((t) => !t.cancelled && t.type !== "driver").length || 0;
+
+  const participantsWithMedicalInfo = tickets?.filter(
+    (t) =>
+      !t.cancelled &&
+      t.user.participant_info &&
+      (t.user.participant_info.dietary_restrictions.length > 0 ||
+        t.user.participant_info.allergies !== "" ||
+        t.user.participant_info.medical_history !== "" ||
+        t.user.participant_info.medications !== "")
+  );
 
   return (
     <div className="space-y-8">
@@ -108,6 +129,14 @@ const SignupsPage = () => {
         <div className="flex flex-row items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">Participants</h2>
+            <p className="text-sm text-muted-foreground">
+              {trip.driver_spots ? (
+                <span>
+                  {activeDriversCount}/{trip.driver_spots} drivers,{" "}
+                </span>
+              ) : null}
+              {activeParticipantsCount}/{trip.participant_spots} participants
+            </p>
           </div>
           <Button variant="outline" className="bg-transparent">
             <Download className="h-4 w-4 mr-2" />
@@ -178,7 +207,9 @@ const SignupsPage = () => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{user.email}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {user.email}
+                    </TableCell>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {user?.phone || "-"}
                     </TableCell>
@@ -311,13 +342,119 @@ const SignupsPage = () => {
         </div>
       </div>
 
-      {/* Waitlist Section */}
+      {/* Dietary Restrictions & Allergies Section */}
       <div className="flex flex-col gap-4">
         <div>
-          <h2 className="text-lg font-semibold">Waitlist</h2>
+					<div className="flex gap-2 items-center">
+          <h2 className="text-lg font-semibold">Medical Info</h2>
+					<Badge variant={'secondary'}>{participantsWithMedicalInfo?.length}</Badge>
+
+					</div>
           <p className="text-sm text-muted-foreground">
-            {waitlist?.length || 0} people on the waitlist
+            Participants that have no dietary restrictions, allergies,
+            medications, or medical history aren&apos;t listed
           </p>
+        </div>
+        <div className="rounded-md border">
+          {participantsWithMedicalInfo &&
+          participantsWithMedicalInfo.length > 0 ? (
+            <ItemGroup>
+              {participantsWithMedicalInfo.map((ticket, index) => {
+                const user = ticket.user;
+                const info = user?.participant_info;
+                return (
+                  <div key={ticket.id}>
+                    <Item>
+                      <ItemMedia>
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={
+                              user?.avatar_path
+                                ? getAvatarUrl(user.avatar_path)
+                                : undefined
+                            }
+                            alt={user?.first_name}
+                          />
+                          <AvatarFallback>
+                            {getInitials(user?.first_name, user?.last_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </ItemMedia>
+                      <ItemContent className="gap-2">
+                        <ItemTitle>
+                          {user?.first_name} {user?.last_name}
+                        </ItemTitle>
+                        <div className="flex flex-col gap-2">
+                          {info?.dietary_restrictions &&
+                            info.dietary_restrictions.length > 0 && (
+                              <div className="flex items-center gap-2 flex-wrap text-muted-foreground">
+                                {/* <Utensils className="h-3.5 w-3.5 text-muted-foreground shrink-0" /> */}
+                                Dietary Restrictions:
+                                <div className="flex gap-1 flex-wrap">
+                                  {info.dietary_restrictions.map(
+                                    (restriction) => (
+                                      <Badge
+                                        key={restriction}
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
+                                        {restriction}
+                                      </Badge>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          {info?.allergies && info.allergies !== "" && (
+                            <p className="text-sm text-foreground">
+                              <span className="text-muted-foreground">
+                                Allergies:{" "}
+                              </span>
+                              {info.allergies}
+                            </p>
+                          )}
+                          {info?.medical_history &&
+                            info.medical_history !== "" && (
+                              <div className="text-muted-foreground text-sm">
+                                Medical History:
+                                <span className="text-foreground">
+                                  {" "}
+                                  {info.medical_history}
+                                </span>
+                              </div>
+                            )}
+                          {info?.medications && info.medications !== "" && (
+                            <div className="text-muted-foreground text-sm">
+                              Medications:
+                              <span className="text-foreground">
+                                {" "}
+                                {info.medications}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </ItemContent>
+                    </Item>
+                    {index !== participantsWithMedicalInfo.length - 1 && (
+                      <ItemSeparator />
+                    )}
+                  </div>
+                );
+              })}
+            </ItemGroup>
+          ) : (
+            <div className="p-8 text-center text-muted-foreground">
+              No participants with dietary restrictions or allergies.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Waitlist Section */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold">Waitlist</h2>
+					 <Badge variant={'secondary'}>{waitlist?.length}</Badge>
         </div>
         <div className="rounded-md border">
           <Table>
@@ -334,10 +471,14 @@ const SignupsPage = () => {
             <TableBody>
               {waitlist?.map((signup, index) => {
                 const user = signup.user;
-                const spotExpiresAt = signup.spot_expires_at ? new Date(signup.spot_expires_at) : null;
-                const notificationSentAt = signup.notification_sent_at ? new Date(signup.notification_sent_at) : null;
+                const spotExpiresAt = signup.spot_expires_at
+                  ? new Date(signup.spot_expires_at)
+                  : null;
+                const notificationSentAt = signup.notification_sent_at
+                  ? new Date(signup.notification_sent_at)
+                  : null;
                 const now = new Date();
-                
+
                 let status: "waiting" | "open" | "expired" = "waiting";
                 if (spotExpiresAt) {
                   status = spotExpiresAt > now ? "open" : "expired";
@@ -372,27 +513,33 @@ const SignupsPage = () => {
                       {user?.email}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {format(new Date(signup.created_at), "MMM d, yyyy h:mm a")}
+                      {format(
+                        new Date(signup.created_at),
+                        "MMM d, yyyy h:mm a"
+                      )}
                     </TableCell>
                     <TableCell>
                       {status === "waiting" && (
                         <Badge variant="secondary">Waiting</Badge>
                       )}
-                      
+
                       {status === "open" && spotExpiresAt && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center gap-2">
-                              <Badge className="bg-primary">
-                                Signup Open
-                              </Badge>
+                              <Badge className="bg-primary">Signup Open</Badge>
                               <span className="text-xs text-muted-foreground whitespace-nowrap">
                                 Expires {format(spotExpiresAt, "MMM d, h:mm a")}
                               </span>
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Email sent: {notificationSentAt ? format(notificationSentAt, "MMM d, h:mm a") : "Unknown"}</p>
+                            <p>
+                              Email sent:{" "}
+                              {notificationSentAt
+                                ? format(notificationSentAt, "MMM d, h:mm a")
+                                : "Unknown"}
+                            </p>
                           </TooltipContent>
                         </Tooltip>
                       )}
@@ -404,8 +551,16 @@ const SignupsPage = () => {
                           </TooltipTrigger>
                           <TooltipContent>
                             <div className="flex flex-col gap-1 text-xs">
-                              <p>Email sent: {notificationSentAt ? format(notificationSentAt, "MMM d, h:mm a") : "Unknown"}</p>
-                              <p>Expired at: {format(spotExpiresAt, "MMM d, h:mm a")}</p>
+                              <p>
+                                Email sent:{" "}
+                                {notificationSentAt
+                                  ? format(notificationSentAt, "MMM d, h:mm a")
+                                  : "Unknown"}
+                              </p>
+                              <p>
+                                Expired at:{" "}
+                                {format(spotExpiresAt, "MMM d, h:mm a")}
+                              </p>
                             </div>
                           </TooltipContent>
                         </Tooltip>
@@ -414,31 +569,37 @@ const SignupsPage = () => {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         {(status === "waiting" || status === "expired") && (
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             className="h-8"
-                            onClick={() => toast.info("Send link not implemented")}
+                            onClick={() =>
+                              toast.info("Send link not implemented")
+                            }
                           >
                             Send signup link
                           </Button>
                         )}
-                        
+
                         {status === "open" && (
                           <>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() => toast.info("Cancel spot not implemented")}
+                              onClick={() =>
+                                toast.info("Cancel spot not implemented")
+                              }
                             >
                               Revoke spot
                             </Button>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               className="h-8"
-                              onClick={() => toast.info("Resend link not implemented")}
+                              onClick={() =>
+                                toast.info("Resend link not implemented")
+                              }
                             >
                               Resend link
                             </Button>
@@ -447,10 +608,10 @@ const SignupsPage = () => {
                       </div>
                     </TableCell>
                   </TableRow>
-                )
+                );
               })}
               {waitlist?.length === 0 && (
-                 <TableRow>
+                <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
                     No one on the waitlist yet.
                   </TableCell>
@@ -462,7 +623,6 @@ const SignupsPage = () => {
       </div>
     </div>
   );
-}
-
+};
 
 export default SignupsPage;

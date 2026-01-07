@@ -27,7 +27,13 @@ const getTripTickets = (tripId: string, client: TypedSupabaseClient) => {
 				last_name,
 				email,
 				phone,
-				avatar_path
+				avatar_path,
+        participant_info (
+          allergies,
+          dietary_restrictions,
+          medications,
+          medical_history
+        )
 			)
     `)
     .eq("trip_id", tripId)

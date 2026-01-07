@@ -103,21 +103,21 @@ const ParticipantInfoSchema = z
     if (!data.no_allergies && !data.allergies) {
       ctx.addIssue({
         code: "custom",
-        message: "Please describe your allergies or check 'I have none'",
+        message: "Please describe your allergies or check 'I don't have any allergies'",
         path: ["allergies"],
       });
     }
     if (!data.no_medications && !data.medications) {
       ctx.addIssue({
         code: "custom",
-        message: "Please list your medications or check 'I have none'",
+        message: "Please list your medications or check 'I don't have any medications'",
         path: ["medications"],
       });
     }
     if (!data.no_medical_history && !data.medical_history) {
       ctx.addIssue({
         code: "custom",
-        message: "Please describe your medical history or check 'I have none'",
+        message: "Please describe your medical history or check 'I don't have any pertinent medical history'",
         path: ["medical_history"],
       });
     }

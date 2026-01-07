@@ -949,6 +949,7 @@ export type Database = {
           created_at: string
           id: string
           notification_sent_at: string | null
+          sign_up_success: boolean
           spot_expires_at: string | null
           trip_id: string
           updated_at: string | null
@@ -958,6 +959,7 @@ export type Database = {
           created_at?: string
           id?: string
           notification_sent_at?: string | null
+          sign_up_success?: boolean
           spot_expires_at?: string | null
           trip_id?: string
           updated_at?: string | null
@@ -967,6 +969,7 @@ export type Database = {
           created_at?: string
           id?: string
           notification_sent_at?: string | null
+          sign_up_success?: boolean
           spot_expires_at?: string | null
           trip_id?: string
           updated_at?: string | null
