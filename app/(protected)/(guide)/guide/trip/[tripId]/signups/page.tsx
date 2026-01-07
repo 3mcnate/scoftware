@@ -28,10 +28,14 @@ import {
   MoreHorizontal,
   XCircle,
   RefreshCcw,
+	Phone,
+	Mail,
+	Clipboard,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -49,6 +53,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ButtonGroup } from "@/components/ui/button-group";
 
 const SignupsPage = () => {
   const params = useParams();
@@ -92,6 +97,34 @@ const SignupsPage = () => {
 
   const handleRefund = async (ticketId: string) => {
     toast.error("Not implemented yet " + ticketId);
+  };
+
+  const copyPhoneNumbers = () => {
+    const phones = tickets
+      ?.filter((t) => !t.cancelled && t.user?.phone)
+      .map((t) => t.user.phone)
+      .join(", ");
+    
+    if (phones) {
+      navigator.clipboard.writeText(phones);
+      toast.success("Phone numbers copied to clipboard");
+    } else {
+      toast.error("No phone numbers to copy");
+    }
+  };
+
+  const copyEmailAddresses = () => {
+    const emails = tickets
+      ?.filter((t) => !t.cancelled && t.user?.email)
+      .map((t) => t.user.email)
+      .join(", ");
+    
+    if (emails) {
+      navigator.clipboard.writeText(emails);
+      toast.success("Email addresses copied to clipboard");
+    } else {
+      toast.error("No email addresses to copy");
+    }
   };
 
   if (isTicketsLoading || isTripLoading || isWaitlistLoading) {
@@ -138,10 +171,30 @@ const SignupsPage = () => {
               {activeParticipantsCount}/{trip.participant_spots} participants
             </p>
           </div>
-          <Button variant="outline" className="bg-transparent">
-            <Download className="h-4 w-4 mr-2" />
-            Download Trip Report
-          </Button>
+          <ButtonGroup>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={"outline"} size="sm">
+                 <Clipboard /> Copy contact info
+                </Button>
+              </DropdownMenuTrigger>
+							<DropdownMenuContent align="start">
+								<DropdownMenuGroup>
+									<DropdownMenuItem onClick={copyPhoneNumbers}>
+										<Phone /> Copy phone numbers
+									</DropdownMenuItem>
+									<DropdownMenuItem onClick={copyEmailAddresses}>
+										<Mail /> Copy email addresses
+									</DropdownMenuItem>
+								</DropdownMenuGroup>
+							</DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button variant="outline" className="bg-transparent" size={"sm"}>
+              <Download className="h-4 w-4" />
+              Download Trip Report
+            </Button>
+          </ButtonGroup>
         </div>
         <div className="rounded-md border">
           <Table>
@@ -345,11 +398,12 @@ const SignupsPage = () => {
       {/* Dietary Restrictions & Allergies Section */}
       <div className="flex flex-col gap-4">
         <div>
-					<div className="flex gap-2 items-center">
-          <h2 className="text-lg font-semibold">Medical Info</h2>
-					<Badge variant={'secondary'}>{participantsWithMedicalInfo?.length}</Badge>
-
-					</div>
+          <div className="flex gap-2 items-center">
+            <h2 className="text-lg font-semibold">Medical Info</h2>
+            <Badge variant={"secondary"}>
+              {participantsWithMedicalInfo?.length}
+            </Badge>
+          </div>
           <p className="text-sm text-muted-foreground">
             Participants that have no dietary restrictions, allergies,
             medications, or medical history aren&apos;t listed
@@ -454,7 +508,7 @@ const SignupsPage = () => {
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">Waitlist</h2>
-					 <Badge variant={'secondary'}>{waitlist?.length}</Badge>
+          <Badge variant={"secondary"}>{waitlist?.length}</Badge>
         </div>
         <div className="rounded-md border">
           <Table>
