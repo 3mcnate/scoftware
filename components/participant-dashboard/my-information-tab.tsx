@@ -44,9 +44,9 @@ const currentYear = new Date().getFullYear();
 const DIETARY_RESTRICTIONS = [
   "Vegetarian",
   "Vegan",
-  "Gluten-free",
-  "Dairy-free",
-  "Nut-free",
+  "Gluten free",
+  "Dairy free",
+  "Nut free",
   "Kosher",
   "Halal",
   "Pescatarian",
@@ -67,7 +67,8 @@ const ParticipantInfoSchema = z
       .string()
       .regex(/^\d{4}$/, "Graduation year must be a valid year")
       .refine(
-        (year) => Number(year) >= currentYear && Number(year) <= currentYear + 10,
+        (year) =>
+          Number(year) >= currentYear && Number(year) <= currentYear + 10,
         `Year must be between ${currentYear} and ${currentYear + 10}`
       ),
     emergency_contact_name: z
@@ -76,12 +77,16 @@ const ParticipantInfoSchema = z
     emergency_contact_phone_number: z
       .string()
       .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
-    emergency_contact_relationship: z.string().min(1, "Relationship is required"),
+    emergency_contact_relationship: z
+      .string()
+      .min(1, "Relationship is required"),
     health_insurance_provider: z
       .string()
       .min(1, "Insurance provider is required"),
     health_insurance_member_id: z.string().min(1, "Member ID is required"),
-    health_insurance_group_number: z.string().min(1, "Group number is required"),
+    health_insurance_group_number: z
+      .string()
+      .min(1, "Group number is required"),
     health_insurance_bin_number: z.string().min(1, "BIN number is required"),
     allergies: z.string(),
     no_allergies: z.boolean(),
@@ -160,9 +165,25 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
       no_medications: false,
       medical_history: initialData?.medical_history ?? "",
       no_medical_history: false,
-      dietary_restrictions: initialData?.dietary_restrictions?.filter(r => DIETARY_RESTRICTIONS.includes(r as typeof DIETARY_RESTRICTIONS[number])) ?? [],
-      has_other_dietary_restriction: !!initialData?.dietary_restrictions?.find(r => !DIETARY_RESTRICTIONS.includes(r as typeof DIETARY_RESTRICTIONS[number])),
-      dietary_restrictions_other: initialData?.dietary_restrictions?.find(r => !DIETARY_RESTRICTIONS.includes(r as typeof DIETARY_RESTRICTIONS[number])) ?? "",
+      dietary_restrictions:
+        initialData?.dietary_restrictions?.filter((r) =>
+          DIETARY_RESTRICTIONS.includes(
+            r as (typeof DIETARY_RESTRICTIONS)[number]
+          )
+        ) ?? [],
+      has_other_dietary_restriction: !!initialData?.dietary_restrictions?.find(
+        (r) =>
+          !DIETARY_RESTRICTIONS.includes(
+            r as (typeof DIETARY_RESTRICTIONS)[number]
+          )
+      ),
+      dietary_restrictions_other:
+        initialData?.dietary_restrictions?.find(
+          (r) =>
+            !DIETARY_RESTRICTIONS.includes(
+              r as (typeof DIETARY_RESTRICTIONS)[number]
+            )
+        ) ?? "",
     },
   });
 
@@ -177,10 +198,19 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
     if (!userId) return;
 
     try {
-      const { no_allergies, no_medications, no_medical_history, has_other_dietary_restriction, dietary_restrictions_other, ...rest } = data;
+      const {
+        no_allergies,
+        no_medications,
+        no_medical_history,
+        has_other_dietary_restriction,
+        dietary_restrictions_other,
+        ...rest
+      } = data;
       const combinedDietaryRestrictions = [
         ...data.dietary_restrictions,
-        ...(has_other_dietary_restriction && dietary_restrictions_other.trim() ? [dietary_restrictions_other.trim()] : []),
+        ...(has_other_dietary_restriction && dietary_restrictions_other.trim()
+          ? [dietary_restrictions_other.trim()]
+          : []),
       ];
       await upsertInfo([
         {
@@ -210,7 +240,8 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
             Personal Information
           </h2>
           <p className="text-sm mt-1">
-            This information helps us keep you safe! It will be shared with your guides before every trip, so you only have to enter it once :)
+            This information helps us keep you safe! It will be shared with your
+            guides before every trip, so you only have to enter it once :)
           </p>
         </div>
         <Button type="submit" disabled={isSaving || !isDirty}>
@@ -679,23 +710,28 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
               </Field>
               <Field>
                 <FieldLabel>Dietary Restrictions</FieldLabel>
-                <FieldDescription className="mb-3">
+                <FieldDescription className="mb-2">
                   Select any that apply, or add your own below
                 </FieldDescription>
                 <Controller
                   control={control}
                   name="dietary_restrictions"
                   render={({ field }) => (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       {DIETARY_RESTRICTIONS.map((restriction) => (
-                        <div key={restriction} className="flex items-center space-x-2">
+                        <div
+                          key={restriction}
+                          className="flex items-center space-x-2"
+                        >
                           <Checkbox
                             id={`dietary_${restriction}`}
                             checked={field.value?.includes(restriction)}
                             onCheckedChange={(checked) => {
                               const newValue = checked
                                 ? [...(field.value || []), restriction]
-                                : field.value?.filter((r) => r !== restriction) || [];
+                                : field.value?.filter(
+                                    (r) => r !== restriction
+                                  ) || [];
                               field.onChange(newValue);
                             }}
                             disabled={isSaving}
@@ -711,42 +747,41 @@ export function MyInformationTab({ initialData }: MyInformationTabProps) {
                     </div>
                   )}
                 />
-              </Field>
-              <div className="flex items-center gap-3">
-                <Controller
-                  control={control}
-                  name="has_other_dietary_restriction"
-                  render={({ field }) => (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="has_other_dietary_restriction"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isSaving}
+                <div className="flex items-center gap-3">
+                  <Controller
+                    control={control}
+                    name="has_other_dietary_restriction"
+                    render={({ field }) => (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="has_other_dietary_restriction"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isSaving}
+                        />
+                        <label
+                          htmlFor="has_other_dietary_restriction"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          Other
+                        </label>
+                      </div>
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="dietary_restrictions_other"
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        id="dietary_restrictions_other"
+                        disabled={isSaving || !hasOtherDietaryRestriction}
+                        className="flex-1"
                       />
-                      <label
-                        htmlFor="has_other_dietary_restriction"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Other
-                      </label>
-                    </div>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="dietary_restrictions_other"
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="dietary_restrictions_other"
-                      placeholder="e.g., low sodium, no shellfish..."
-                      disabled={isSaving || !hasOtherDietaryRestriction}
-                      className="flex-1"
-                    />
-                  )}
-                />
-              </div>
+                    )}
+                  />
+                </div>
+              </Field>
             </FieldGroup>
           </CardContent>
         </Card>
