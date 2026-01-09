@@ -557,6 +557,7 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           driver_waiver_filepath: string | null
+          driver_waiver_signed_at: string | null
           id: string
           receipt_url: string
           refunded: boolean
@@ -567,6 +568,7 @@ export type Database = {
           updated_at: string
           user_id: string
           waiver_filepath: string | null
+          waiver_signed_at: string | null
         }
         Insert: {
           amount_paid: number
@@ -574,6 +576,7 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           driver_waiver_filepath?: string | null
+          driver_waiver_signed_at?: string | null
           id?: string
           receipt_url?: string
           refunded?: boolean
@@ -584,6 +587,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           waiver_filepath?: string | null
+          waiver_signed_at?: string | null
         }
         Update: {
           amount_paid?: number
@@ -591,6 +595,7 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           driver_waiver_filepath?: string | null
+          driver_waiver_signed_at?: string | null
           id?: string
           receipt_url?: string
           refunded?: boolean
@@ -601,6 +606,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           waiver_filepath?: string | null
+          waiver_signed_at?: string | null
         }
         Relationships: [
           {

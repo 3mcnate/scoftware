@@ -99,6 +99,8 @@ export const tickets = pgTable("tickets", {
 	receipt_url: text().default('https://www.stripe.com').notNull(),
 	driver_waiver_filepath: text(),
 	waiver_filepath: text(),
+	waiver_signed_at: timestamp({ withTimezone: true, mode: 'string' }),
+	driver_waiver_signed_at: timestamp({ withTimezone: true, mode: 'string' }),
 }, (table) => [
 	foreignKey({
 			columns: [table.trip_id],

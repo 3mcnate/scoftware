@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -54,10 +55,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ButtonGroup } from "@/components/ui/button-group";
+import { TicketInfoSheet } from "@/components/guide-dashboard/trip-view/ticket-info-sheet";
+import { type TripTicket } from "@/data/client/tickets/get-trip-tickets";
+import { formatPhoneNumber } from "react-phone-number-input";
 
 const SignupsPage = () => {
   const params = useParams();
   const tripId = params.tripId as string;
+  const [selectedTicket, setSelectedTicket] = useState<TripTicket | null>(
+    null
+  );
   const { data: tickets, isLoading: isTicketsLoading } = useTripTickets(tripId);
   const { data: waitlist, isLoading: isWaitlistLoading } =
     useTripWaitlist(tripId);
@@ -221,7 +228,10 @@ const SignupsPage = () => {
                     className={ticket.cancelled ? "bg-muted/30" : ""}
                   >
                     <TableCell>
-                      <div className="flex items-center gap-3">
+                      <button
+                        className="flex items-center gap-2 text-left hover:opacity-80 transition-opacity cursor-pointer group"
+                        onClick={() => setSelectedTicket(ticket)}
+                      >
                         <Avatar className="h-8 w-8">
                           <AvatarImage
                             src={
@@ -231,12 +241,12 @@ const SignupsPage = () => {
                             }
                             alt={user?.first_name}
                           />
-                          <AvatarFallback>
+                          <AvatarFallback className="text-xs">
                             {getInitials(user?.first_name, user?.last_name)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
-                          <span className="font-medium">
+                          <span className="font-medium underline-offset-4 group-hover:underline">
                             {user?.first_name} {user?.last_name}
                           </span>
                           <div className="flex gap-1 mt-1">
@@ -258,13 +268,13 @@ const SignupsPage = () => {
                             )}
                           </div>
                         </div>
-                      </div>
+                      </button>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {user.email}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-                      {user?.phone || "-"}
+                      {user?.phone ? formatPhoneNumber(user.phone) : "-"}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {format(
@@ -497,8 +507,8 @@ const SignupsPage = () => {
               })}
             </ItemGroup>
           ) : (
-            <div className="p-8 text-center text-muted-foreground">
-              No participants with dietary restrictions or allergies.
+            <div className="p-8 text-center text-muted-foreground text-sm">
+              No participants with medical info.
             </div>
           )}
         </div>
@@ -675,6 +685,21 @@ const SignupsPage = () => {
           </Table>
         </div>
       </div>
+
+      {/* Ticket Info Sheet */}
+      <TicketInfoSheet
+        ticket={selectedTicket}
+        open={!!selectedTicket}
+        onOpenChange={(open) => !open && setSelectedTicket(null)}
+        onCancel={(ticketId) => {
+          handleCancel(ticketId);
+          setSelectedTicket(null);
+        }}
+        onRefund={(ticketId) => {
+          handleRefund(ticketId);
+          setSelectedTicket(null);
+        }}
+      />
     </div>
   );
 };
