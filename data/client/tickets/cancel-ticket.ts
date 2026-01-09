@@ -1,4 +1,4 @@
-import { useRevalidateTables } from "@supabase-cache-helpers/postgrest-react-query";
+import { useTripTickets } from "@/data/client/tickets/get-trip-tickets";
 import { useMutation } from "@tanstack/react-query";
 
 type CancelTicketVariables = {
@@ -6,8 +6,8 @@ type CancelTicketVariables = {
   refund?: boolean;
 };
 
-export const useCancelTicket = () => {
-	const revalidate = useRevalidateTables([{ schema: "public", table: "tickets" }])
+export const useCancelTicket = (tripId: string) => {
+	const { refetch } = useTripTickets(tripId)
 
   return useMutation({
     mutationFn: async ({ ticketId, refund }: CancelTicketVariables) => {
@@ -27,7 +27,7 @@ export const useCancelTicket = () => {
       return response.json();
     },
     onSuccess: async () => { 
-			await revalidate();
+			await refetch();
     }
   });
 };

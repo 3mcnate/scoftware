@@ -42,7 +42,7 @@ export const TripParticipantsTable = ({ tripId }: TripParticipantsTableProps) =>
   const [selectedTicket, setSelectedTicket] = useState<TripTicket | null>(null);
   const { data: tickets, isLoading: isTicketsLoading } = useTripTickets(tripId);
   const { data: trip, isLoading: isTripLoading } = useTrip(tripId);
-  const { mutateAsync: cancelTicket } = useCancelTicket();
+  const { mutateAsync: cancelTicket } = useCancelTicket(tripId);
 
   const handleCancel = async (ticketId: string) => {
     try {
