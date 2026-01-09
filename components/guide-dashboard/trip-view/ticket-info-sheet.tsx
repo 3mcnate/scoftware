@@ -13,12 +13,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import {
-  AlertCircle,
-  CheckCircle,
-  ExternalLink,
-  XCircle,
-} from "lucide-react";
+import { AlertCircle, CheckCircle, ExternalLink, XCircle } from "lucide-react";
 import { getInitials } from "@/utils/names";
 import { getAvatarUrl } from "@/data/client/storage/avatars";
 import { createClient } from "@/utils/supabase/browser";
@@ -151,7 +146,11 @@ export function TicketInfoSheet({
           <section>
             <SectionTitle title="Ticket Details" />
             <div className="grid grid-cols-2 gap-4">
-              <InfoRow label="Ticket Type" value={ticket.type} className="capitalize" />
+              <InfoRow
+                label="Ticket Type"
+                value={ticket.type}
+                className="capitalize"
+              />
               <InfoRow label="Amount Paid" value={`$${ticket.amount_paid}`} />
               <InfoRow
                 label="Signup Date"
@@ -207,9 +206,7 @@ export function TicketInfoSheet({
                     ) : (
                       <AlertCircle className="h-4 w-4 text-muted-foreground" />
                     )}
-                    <span className="text-sm">
-                      Participant Waiver
-                    </span>
+                    <span className="text-sm">Participant Waiver</span>
                   </div>
                   {ticket.waiver_signed_at && (
                     <p className="text-xs text-muted-foreground ml-6 mt-1">
@@ -268,73 +265,9 @@ export function TicketInfoSheet({
 
           <Separator />
 
-          {/* Academic Information */}
+          {/* Participant Info */}
           {info && (
             <>
-              <section>
-                <SectionTitle title="Academic Information" />
-                <div className="grid grid-cols-2 gap-4">
-                  <InfoRow
-                    label="Degree Path"
-                    value={formatDegreePath(info.degree_path)}
-                  />
-                  <InfoRow
-                    label="Graduation"
-                    value={`${
-                      info.graduation_season.charAt(0).toUpperCase() +
-                      info.graduation_season.slice(1)
-                    } ${info.graduation_year}`}
-                  />
-                </div>
-              </section>
-
-              <Separator />
-
-              {/* Emergency Contact */}
-              <section>
-                <SectionTitle title="Emergency Contact" />
-                <div className="grid grid-cols-2 gap-4">
-                  <InfoRow label="Name" value={info.emergency_contact_name} />
-                  <InfoRow
-                    label="Relationship"
-                    value={info.emergency_contact_relationship}
-                  />
-                  <InfoRow
-                    label="Phone"
-                    value={formatPhoneNumber(info.emergency_contact_phone_number)}
-                    className="col-span-2"
-                  />
-                </div>
-              </section>
-
-              <Separator />
-
-              {/* Health Insurance */}
-              <section>
-                <SectionTitle title="Health Insurance" />
-                <div className="grid grid-cols-2 gap-4">
-                  <InfoRow
-                    label="Provider"
-                    value={info.health_insurance_provider}
-                    className="col-span-2"
-                  />
-                  <InfoRow
-                    label="Member ID"
-                    value={info.health_insurance_member_id}
-                  />
-                  <InfoRow
-                    label="Group #"
-                    value={info.health_insurance_group_number}
-                  />
-                  <InfoRow
-                    label="BIN #"
-                    value={info.health_insurance_bin_number}
-                  />
-                </div>
-              </section>
-
-              <Separator />
-
               {/* Medical Information */}
               <section>
                 <SectionTitle title="Medical Information" />
@@ -363,6 +296,70 @@ export function TicketInfoSheet({
                   <InfoRow
                     label="Medical History"
                     value={info.medical_history || "None"}
+                  />
+                </div>
+              </section>
+
+							<Separator />
+
+              <section>
+                <SectionTitle title="Academic Information" />
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoRow
+                    label="Degree Path"
+                    value={formatDegreePath(info.degree_path)}
+                  />
+                  <InfoRow
+                    label="Graduation"
+                    value={info.graduation_year}
+                    className="capitalize"
+                  />
+                </div>
+              </section>
+
+              <Separator />
+
+              {/* Emergency Contact */}
+              <section>
+                <SectionTitle title="Emergency Contact" />
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoRow label="Name" value={info.emergency_contact_name} />
+                  <InfoRow
+                    label="Relationship"
+                    value={info.emergency_contact_relationship}
+                  />
+                  <InfoRow
+                    label="Phone"
+                    value={formatPhoneNumber(
+                      info.emergency_contact_phone_number
+                    )}
+                    className="col-span-2"
+                  />
+                </div>
+              </section>
+
+              <Separator />
+
+              {/* Health Insurance */}
+              <section>
+                <SectionTitle title="Health Insurance" />
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoRow
+                    label="Provider"
+                    value={info.health_insurance_provider}
+                    className="col-span-2"
+                  />
+                  <InfoRow
+                    label="Member ID"
+                    value={info.health_insurance_member_id}
+                  />
+                  <InfoRow
+                    label="Group #"
+                    value={info.health_insurance_group_number}
+                  />
+                  <InfoRow
+                    label="BIN #"
+                    value={info.health_insurance_bin_number}
                   />
                 </div>
               </section>
