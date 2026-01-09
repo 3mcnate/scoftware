@@ -69,7 +69,7 @@ export const TripParticipantRow = ({
   return (
     <TableRow
       key={ticket.id}
-      className={ticket.cancelled ? "bg-muted/30" : ""}
+      className={ticket.cancelled ? "opacity-70 bg-muted" : ""}
     >
       <TableCell>
         <button

@@ -1,5 +1,4 @@
-"use client";
-
+import { useState } from "react";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +12,14 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, CheckCircle, ExternalLink, XCircle } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  ExternalLink,
+  XCircle,
+  Copy,
+  Check,
+} from "lucide-react";
 import { getInitials } from "@/utils/names";
 import { getAvatarUrl } from "@/data/client/storage/avatars";
 import { createClient } from "@/utils/supabase/browser";
@@ -47,6 +53,42 @@ const InfoRow = ({
 const SectionTitle = ({ title }: { title: string }) => (
   <h3 className="text-sm font-medium mb-3">{title}</h3>
 );
+
+const WaiverCopyAction = ({
+  tripId,
+  type,
+}: {
+  tripId: string;
+  type: "participant" | "driver";
+}) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    const url = `${window.location.origin}/participant/trips/${tripId}/waiver?type=${type}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    toast.success("Waiver link copied to clipboard");
+    setTimeout(() => setCopied(false), 3000);
+  };
+
+  return (
+    <div className="text-xs text-muted-foreground ml-6 mt-1 flex items-center gap-1">
+      <span>Not signed.</span>
+      {copied ? (
+        <>
+          <Check className="h-3 w-3" /> Waiver link copied! Send to your participant.
+        </>
+      ) : (
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1 hover:text-primary transition-colors hover:underline underline-offset-2"
+        >
+          <Copy className="h-3 w-3" /> Copy waiver URL
+        </button>
+      )}
+    </div>
+  );
+};
 
 export function TicketInfoSheet({
   ticket,
@@ -208,7 +250,7 @@ export function TicketInfoSheet({
                     )}
                     <span className="text-sm">Participant Waiver</span>
                   </div>
-                  {ticket.waiver_signed_at && (
+                  {ticket.waiver_signed_at ? (
                     <p className="text-xs text-muted-foreground ml-6 mt-1">
                       Signed{" "}
                       {format(
@@ -216,6 +258,11 @@ export function TicketInfoSheet({
                         "MMM d, yyyy h:mm a"
                       )}
                     </p>
+                  ) : (
+                    <WaiverCopyAction
+                      tripId={ticket.trip_id}
+                      type="participant"
+                    />
                   )}
                 </div>
                 {ticket.waiver_filepath && (
@@ -239,7 +286,7 @@ export function TicketInfoSheet({
                       )}
                       <span className="text-sm">Driver Waiver</span>
                     </div>
-                    {ticket.driver_waiver_signed_at && (
+                    {ticket.driver_waiver_signed_at ? (
                       <p className="text-xs text-muted-foreground ml-6 mt-1">
                         Signed{" "}
                         {format(
@@ -247,6 +294,8 @@ export function TicketInfoSheet({
                           "MMM d, yyyy h:mm a"
                         )}
                       </p>
+                    ) : (
+                      <WaiverCopyAction tripId={ticket.trip_id} type="driver" />
                     )}
                   </div>
                   {ticket.driver_waiver_filepath && (
@@ -300,7 +349,7 @@ export function TicketInfoSheet({
                 </div>
               </section>
 
-							<Separator />
+              <Separator />
 
               <section>
                 <SectionTitle title="Academic Information" />
