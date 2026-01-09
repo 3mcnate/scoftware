@@ -1,16 +1,23 @@
 import { db } from "@/utils/drizzle";
 import { tickets } from "@/drizzle/schema";
-import { eq, and, InferSelectModel } from "drizzle-orm";
+import { and, eq, InferSelectModel } from "drizzle-orm";
 
+// TODO: fix signed_at fields
 export async function updateTicketWaiverFilepath(
 	userId: string,
 	tripId: string,
 	waiverFilepath: string,
-	isDriverWaiver: boolean
+	isDriverWaiver: boolean,
 ) {
 	const updateData = isDriverWaiver
-		? { driver_waiver_filepath: waiverFilepath }
-		: { waiver_filepath: waiverFilepath };
+		? {
+			driver_waiver_filepath: waiverFilepath,
+			driver_wavier_signed_at: new Date().toISOString(),
+		}
+		: {
+			waiver_filepath: waiverFilepath,
+			waiver_signed_at: new Date().toISOString(),
+		};
 
 	const result = await db
 		.update(tickets)
@@ -24,9 +31,12 @@ export async function updateTicketWaiverFilepath(
 	return result[0];
 }
 
-export type GetTicketReturn = InferSelectModel<typeof tickets> | null
+export type GetTicketReturn = InferSelectModel<typeof tickets> | null;
 
-export async function getTicketByUserAndTrip(userId: string, tripId: string): Promise<GetTicketReturn> {
+export async function getTicketByUserAndTrip(
+	userId: string,
+	tripId: string,
+): Promise<GetTicketReturn> {
 	const result = await db
 		.select()
 		.from(tickets)

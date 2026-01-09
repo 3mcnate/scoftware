@@ -5,7 +5,6 @@ import { formatPhoneNumber } from "react-phone-number-input";
 import {
   CheckCircle,
   AlertCircle,
-  MoreHorizontal,
   XCircle,
   RefreshCcw,
 	EllipsisVertical,
@@ -106,7 +105,7 @@ export const TripParticipantRow = ({
               {ticket.refunded && (
                 <Badge
                   variant="outline"
-                  className="text-[10px] h-4 px-1 text-amber-600 border-amber-600"
+                  className="text-[10px] h-4 px-1 text-white bg-amber-600/80 border-amber-600/80" 
                 >
                   Refunded
                 </Badge>

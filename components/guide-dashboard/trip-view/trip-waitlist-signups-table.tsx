@@ -199,7 +199,7 @@ export const TripWaitlistSignupsTable = ({
             })}
             {waitlist?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                   No one on the waitlist yet.
                 </TableCell>
               </TableRow>

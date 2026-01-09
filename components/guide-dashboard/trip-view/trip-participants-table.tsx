@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Phone, Mail, Clipboard, RotateCcw } from "lucide-react";
+import {
+  Download,
+  Phone,
+  Mail,
+  Clipboard,
+  RotateCcw,
+  Users,
+	Car,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +40,7 @@ import { useTrip } from "@/data/client/trips/get-guide-trips";
 import { TicketInfoSheet } from "./ticket-info-sheet";
 import { TripParticipantRow } from "./trip-participant-row";
 import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/components/ui/badge";
 
 type TripParticipantsTableProps = {
   tripId: string;
@@ -119,16 +128,16 @@ export const TripParticipantsTable = ({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col md:flex-row items-start md:items-center md:justify-between gap-4">
-        <div>
+        <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">Participants</h2>
-          <p className="text-sm text-muted-foreground">
-            {trip.driver_spots ? (
-              <span>
-                {activeDriversCount}/{trip.driver_spots} drivers,{" "}
-              </span>
-            ) : null}
-            {activeParticipantsCount}/{trip.participant_spots} participants
-          </p>
+          <Badge variant={"secondary"}>
+            <Users /> {activeParticipantsCount}/{trip.participant_spots}
+          </Badge>
+          {trip.driver_spots > 0 && (
+            <Badge variant={"secondary"}>
+              <Car /> {activeDriversCount}/{trip.driver_spots}
+            </Badge>
+          )}
         </div>
         <ButtonGroup>
           <ButtonGroup>
@@ -194,7 +203,10 @@ export const TripParticipantsTable = ({
             ))}
             {tickets?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
+                <TableCell
+                  colSpan={8}
+                  className="h-24 text-center text-muted-foreground"
+                >
                   No participants yet.
                 </TableCell>
               </TableRow>
