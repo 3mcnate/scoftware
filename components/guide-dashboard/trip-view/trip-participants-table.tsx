@@ -28,7 +28,7 @@ import {
 import { ButtonGroup } from "@/components/ui/button-group";
 
 import { useTripTickets, type TripTicket } from "@/data/client/tickets/get-trip-tickets";
-import { useUpdateTicket } from "@/data/client/tickets/update-ticket";
+import { useCancelTicket } from "@/data/client/tickets/cancel-ticket";
 import { useTrip } from "@/data/client/trips/get-guide-trips";
 
 import { TicketInfoSheet } from "./ticket-info-sheet";
@@ -42,15 +42,11 @@ export const TripParticipantsTable = ({ tripId }: TripParticipantsTableProps) =>
   const [selectedTicket, setSelectedTicket] = useState<TripTicket | null>(null);
   const { data: tickets, isLoading: isTicketsLoading } = useTripTickets(tripId);
   const { data: trip, isLoading: isTripLoading } = useTrip(tripId);
-  const { mutateAsync: updateTicket } = useUpdateTicket();
+  const { mutateAsync: cancelTicket } = useCancelTicket();
 
   const handleCancel = async (ticketId: string) => {
     try {
-      await updateTicket({
-        id: ticketId,
-        cancelled: true,
-        cancelled_at: new Date().toISOString(),
-      });
+      await cancelTicket({ ticketId, refund: false });
       toast.success("Ticket cancelled");
     } catch (error) {
       toast.error(`Failed to cancel ticket`);
@@ -59,7 +55,13 @@ export const TripParticipantsTable = ({ tripId }: TripParticipantsTableProps) =>
   };
 
   const handleRefund = async (ticketId: string) => {
-    toast.error("Not implemented yet " + ticketId);
+    try {
+      await cancelTicket({ ticketId, refund: true });
+      toast.success("Ticket refunded");
+    } catch (error) {
+      toast.error("Failed to refund ticket");
+      console.error(error);
+    }
   };
 
   const copyPhoneNumbers = () => {

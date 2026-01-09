@@ -169,7 +169,6 @@ async function generateWaiverPdf(
 	}
 }
 
-// TODO: prevent users from signing waiver if they've already signed it
 export async function POST(request: NextRequest) {
 	const signedAt = new Date().toISOString();
 

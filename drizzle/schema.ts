@@ -231,6 +231,20 @@ export const published_trips = pgTable("published_trips", {
 	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
+export const roles = pgTable("roles", {
+	user_id: uuid().defaultRandom().primaryKey().notNull(),
+	role: user_role().default('participant').notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "roles_user_id_fkey"
+		}).onUpdate("cascade").onDelete("cascade"),
+	pgPolicy("Allow auth admin to read user roles", { as: "permissive", for: "select", to: ["supabase_auth_admin"], using: sql`true` }),
+	pgPolicy("Allow guides to view roles", { as: "permissive", for: "select", to: ["authenticated"] }),
+]);
+
 export const profiles = pgTable("profiles", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	first_name: text().notNull(),

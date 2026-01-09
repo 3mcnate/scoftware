@@ -8,6 +8,7 @@ import {
   MoreHorizontal,
   XCircle,
   RefreshCcw,
+	EllipsisVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -207,9 +208,9 @@ export const TripParticipantRow = ({
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" size="icon-sm" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
+              <EllipsisVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -218,14 +219,14 @@ export const TripParticipantRow = ({
               onClick={() => onCancel(ticket.id)}
               disabled={ticket.cancelled}
             >
-              <XCircle className="mr-2 h-4 w-4" />
+              <XCircle className="h-4 w-4" />
               Cancel Ticket
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onRefund(ticket.id)}
               disabled={ticket.refunded}
             >
-              <RefreshCcw className="mr-2 h-4 w-4" />
+              <RefreshCcw className="h-4 w-4" />
               Refund Ticket
             </DropdownMenuItem>
           </DropdownMenuContent>
