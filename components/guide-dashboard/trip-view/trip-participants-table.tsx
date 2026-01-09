@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Download,
-  Phone,
-  Mail,
-  Clipboard,
-} from "lucide-react";
+import { Download, Phone, Mail, Clipboard, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -27,20 +22,31 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ButtonGroup } from "@/components/ui/button-group";
 
-import { useTripTickets, type TripTicket } from "@/data/client/tickets/get-trip-tickets";
+import {
+  useTripTickets,
+  type TripTicket,
+} from "@/data/client/tickets/get-trip-tickets";
 import { useCancelTicket } from "@/data/client/tickets/cancel-ticket";
 import { useTrip } from "@/data/client/trips/get-guide-trips";
 
 import { TicketInfoSheet } from "./ticket-info-sheet";
 import { TripParticipantRow } from "./trip-participant-row";
+import { Spinner } from "@/components/ui/spinner";
 
 type TripParticipantsTableProps = {
   tripId: string;
 };
 
-export const TripParticipantsTable = ({ tripId }: TripParticipantsTableProps) => {
+export const TripParticipantsTable = ({
+  tripId,
+}: TripParticipantsTableProps) => {
   const [selectedTicket, setSelectedTicket] = useState<TripTicket | null>(null);
-  const { data: tickets, isLoading: isTicketsLoading } = useTripTickets(tripId);
+  const {
+    data: tickets,
+    refetch: refetchTickets,
+    isRefetching: isTicketsRefetching,
+    isLoading: isTicketsLoading,
+  } = useTripTickets(tripId);
   const { data: trip, isLoading: isTripLoading } = useTrip(tripId);
   const { mutateAsync: cancelTicket } = useCancelTicket(tripId);
 
@@ -112,7 +118,7 @@ export const TripParticipantsTable = ({ tripId }: TripParticipantsTableProps) =>
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center md:justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">Participants</h2>
           <p className="text-sm text-muted-foreground">
@@ -125,28 +131,41 @@ export const TripParticipantsTable = ({ tripId }: TripParticipantsTableProps) =>
           </p>
         </div>
         <ButtonGroup>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant={"outline"} size="sm">
-                <Clipboard /> Copy contact info
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuGroup>
-                <DropdownMenuItem onClick={copyPhoneNumbers}>
-                  <Phone /> Copy phone numbers
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={copyEmailAddresses}>
-                  <Mail /> Copy email addresses
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ButtonGroup>
+            <Button
+              variant={"outline"}
+              size="sm"
+              onClick={() => refetchTickets()}
+              disabled={isTicketsRefetching}
+            >
+              {isTicketsRefetching ? <Spinner /> : <RotateCcw />}
+              <span className="hidden md:block">Refresh</span>
+            </Button>
+          </ButtonGroup>
+          <ButtonGroup>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={"outline"} size="sm">
+                  <Clipboard /> Copy contact info
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={copyPhoneNumbers}>
+                    <Phone /> Copy phone numbers
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={copyEmailAddresses}>
+                    <Mail /> Copy email addresses
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          <Button variant="outline" className="bg-transparent" size={"sm"}>
-            <Download className="h-4 w-4" />
-            Download Trip Report
-          </Button>
+            <Button variant="outline" className="bg-transparent" size={"sm"}>
+              <Download className="h-4 w-4" />
+              Download Trip Report
+            </Button>
+          </ButtonGroup>
         </ButtonGroup>
       </div>
       <div className="rounded-md border">
