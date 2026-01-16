@@ -34,7 +34,6 @@ import {
   useTripTickets,
   type TripTicket,
 } from "@/data/client/tickets/get-trip-tickets";
-import { useCancelTicket } from "@/data/client/tickets/cancel-ticket";
 import { useTrip } from "@/data/client/trips/get-guide-trips";
 
 import { TicketInfoSheet } from "./ticket-info-sheet";
@@ -57,27 +56,6 @@ export const TripParticipantsTable = ({
     isLoading: isTicketsLoading,
   } = useTripTickets(tripId);
   const { data: trip, isLoading: isTripLoading } = useTrip(tripId);
-  const { mutateAsync: cancelTicket } = useCancelTicket(tripId);
-
-  const handleCancel = async (ticketId: string) => {
-    try {
-      await cancelTicket({ ticketId, refund: false });
-      toast.success("Ticket cancelled");
-    } catch (error) {
-      toast.error(`Failed to cancel ticket`);
-      console.error(error);
-    }
-  };
-
-  const handleRefund = async (ticketId: string) => {
-    try {
-      await cancelTicket({ ticketId, refund: true });
-      toast.success("Ticket refunded");
-    } catch (error) {
-      toast.error("Failed to refund ticket");
-      console.error(error);
-    }
-  };
 
   const copyPhoneNumbers = () => {
     const phones = tickets
@@ -197,8 +175,6 @@ export const TripParticipantsTable = ({
                 key={ticket.id}
                 ticket={ticket}
                 onSelect={setSelectedTicket}
-                onCancel={handleCancel}
-                onRefund={handleRefund}
               />
             ))}
             {tickets?.length === 0 && (
@@ -219,14 +195,6 @@ export const TripParticipantsTable = ({
         ticket={selectedTicket}
         open={!!selectedTicket}
         onOpenChange={(open) => !open && setSelectedTicket(null)}
-        onCancel={(ticketId) => {
-          handleCancel(ticketId);
-          setSelectedTicket(null);
-        }}
-        onRefund={(ticketId) => {
-          handleRefund(ticketId);
-          setSelectedTicket(null);
-        }}
       />
     </div>
   );

@@ -26,13 +26,13 @@ import { createClient } from "@/utils/supabase/browser";
 import { toast } from "sonner";
 import { type TripTicket } from "@/data/client/tickets/get-trip-tickets";
 import { formatPhoneNumber } from "react-phone-number-input";
+import { CancelTicketDialog } from "./cancel-ticket-dialog";
+import { RefundTicketDialog } from "./refund-ticket-dialog";
 
 type TicketInfoSheetProps = {
   ticket: TripTicket | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCancel: (ticketId: string) => void;
-  onRefund: (ticketId: string) => void;
 };
 
 const InfoRow = ({
@@ -94,9 +94,10 @@ export function TicketInfoSheet({
   ticket,
   open,
   onOpenChange,
-  onCancel,
-  onRefund,
 }: TicketInfoSheetProps) {
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+
   if (!ticket) return null;
 
   const user = ticket.user;
@@ -429,7 +430,7 @@ export function TicketInfoSheet({
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => onCancel(ticket.id)}
+              onClick={() => setCancelDialogOpen(true)}
               disabled={ticket.cancelled}
             >
               <XCircle className="h-4 w-4 mr-2" />
@@ -438,13 +439,32 @@ export function TicketInfoSheet({
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => onRefund(ticket.id)}
+              onClick={() => setRefundDialogOpen(true)}
               disabled={ticket.refunded}
             >
               Refund Ticket
             </Button>
           </div>
         </SheetFooter>
+
+        <CancelTicketDialog
+          open={cancelDialogOpen}
+          onOpenChange={setCancelDialogOpen}
+          ticketId={ticket.id}
+          tripId={ticket.trip_id}
+          ticketType={isDriver ? "driver" : "participant"}
+          amountPaid={ticket.amount_paid}
+          onSuccess={() => onOpenChange(false)}
+        />
+
+        <RefundTicketDialog
+          open={refundDialogOpen}
+          onOpenChange={setRefundDialogOpen}
+          ticketId={ticket.id}
+          tripId={ticket.trip_id}
+          amountPaid={ticket.amount_paid}
+          onSuccess={() => onOpenChange(false)}
+        />
       </SheetContent>
     </Sheet>
   );

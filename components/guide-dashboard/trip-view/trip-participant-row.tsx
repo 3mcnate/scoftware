@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { format } from "date-fns";
 import { formatPhoneNumber } from "react-phone-number-input";
 import {
@@ -7,7 +8,7 @@ import {
   AlertCircle,
   XCircle,
   RefreshCcw,
-	EllipsisVertical,
+  EllipsisVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,20 +33,20 @@ import { type TripTicket } from "@/data/client/tickets/get-trip-tickets";
 import { createClient } from "@/utils/supabase/browser";
 import { getInitials } from "@/utils/names";
 import { getAvatarUrl } from "@/data/client/storage/avatars";
+import { CancelTicketDialog } from "./cancel-ticket-dialog";
+import { RefundTicketDialog } from "./refund-ticket-dialog";
 
 interface TripParticipantRowProps {
   ticket: TripTicket;
   onSelect: (ticket: TripTicket) => void;
-  onCancel: (ticketId: string) => void;
-  onRefund: (ticketId: string) => void;
 }
 
 export const TripParticipantRow = ({
   ticket,
   onSelect,
-  onCancel,
-  onRefund,
 }: TripParticipantRowProps) => {
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const user = ticket.user;
   const isDriver = ticket.type === "driver";
 
@@ -215,14 +216,14 @@ export const TripParticipantRow = ({
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => onCancel(ticket.id)}
+              onClick={() => setCancelDialogOpen(true)}
               disabled={ticket.cancelled}
             >
               <XCircle className="h-4 w-4" />
               Cancel Ticket
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => onRefund(ticket.id)}
+              onClick={() => setRefundDialogOpen(true)}
               disabled={ticket.refunded}
             >
               <RefreshCcw className="h-4 w-4" />
@@ -230,6 +231,23 @@ export const TripParticipantRow = ({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <CancelTicketDialog
+          open={cancelDialogOpen}
+          onOpenChange={setCancelDialogOpen}
+          ticketId={ticket.id}
+          tripId={ticket.trip_id}
+          ticketType={isDriver ? "driver" : "participant"}
+          amountPaid={ticket.amount_paid}
+        />
+
+        <RefundTicketDialog
+          open={refundDialogOpen}
+          onOpenChange={setRefundDialogOpen}
+          ticketId={ticket.id}
+          tripId={ticket.trip_id}
+          amountPaid={ticket.amount_paid}
+        />
       </TableCell>
     </TableRow>
   );
