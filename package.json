@@ -9,9 +9,10 @@
     "lint": "eslint",
     "gentypes": "supabase gen types typescript --local > types/database.types.ts && drizzle-kit pull && sed -i \"\" \"s/.default(')/.default('')/g\" '/Users/nateboxer/code/scoftware/drizzle/schema.ts'",
     "sbrestart": "supabase stop && supabase start",
-		"save": "supabase db diff -f save && pnpm run gentypes"
+    "save": "supabase db diff -f save && pnpm run gentypes"
   },
   "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.970.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",

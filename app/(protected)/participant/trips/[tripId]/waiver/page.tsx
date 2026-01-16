@@ -12,13 +12,13 @@ import type { JSONContent } from "@tiptap/core";
 import { WaiverSignatureForm } from "../../../../../../components/waiver/waiver-signature-form";
 import { getTripWaiverByTripAndType } from "@/data/server/waivers/get-trip-waiver";
 import { createServerClient } from "@/utils/supabase/server";
-import { NextResponse } from "next/server";
 import { generateWaiverHTML } from "@/utils/tiptap";
 import { getTicketByUserAndTrip } from "@/data/server/waivers/update-ticket-waiver";
 import { getPublishedTrip } from "@/data/server/trips/get-published-trip";
 import { createWaiverEvent } from "@/data/server/waivers/create-waiver-event";
 import { getUserIP } from "@/utils/logging";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 const waiverTypeSchema = z
   .enum(["participant", "driver"])
@@ -65,7 +65,7 @@ export default async function WaiverPage({
   ]);
 
   if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+		redirect(`/login?next=${encodeURIComponent(`/participant/trips/${tripId}/waiver?type=${type}`)}`)
   }
 
   const [ticket, trip] = await Promise.all([

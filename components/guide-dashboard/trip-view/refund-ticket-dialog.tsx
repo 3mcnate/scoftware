@@ -56,7 +56,7 @@ export const RefundTicketDialog = ({
         <DialogHeader>
           <DialogTitle>Refund Ticket</DialogTitle>
           <DialogDescription className="text-foreground">
-            Refunding this ticket will not open up a spot. If you want to open
+          <span className="font-bold">  Refunding this ticket will  not open up a spot.</span> If you want to open
             up a spot, cancel and refund the ticket instead.
           </DialogDescription>
         </DialogHeader>

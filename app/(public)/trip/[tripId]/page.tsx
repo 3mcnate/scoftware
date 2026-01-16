@@ -11,7 +11,7 @@ import { formatDateWithWeekday } from "@/utils/date-time";
 export default async function TripPage({
   params,
 }: {
-  params: { tripId: string };
+  params: Promise<{ tripId: string }>;
 }) {
   const { tripId } = await params;
   let trip = null;

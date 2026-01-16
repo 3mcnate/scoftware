@@ -61,11 +61,11 @@ export const updateSession = async (request: NextRequest) => {
 	}
 
 	if (role === "guide" && isAdminPath(pathname)) {
-		return redirectResponse(request, "/guide");
+		return redirectResponse(request, "/guide/my-trips");
 	}
 
 	if (isGuideRole(role) && isParticipantPath(pathname)) {
-		return redirectResponse(request, "/guide");
+		return redirectResponse(request, "/guide/my-trips");
 	}
 
 	return response;
