@@ -205,7 +205,7 @@ export function TicketInfoSheet({
               <InfoRow
                 label="Stripe Payment ID"
                 value={
-                  <span className="font-mono text-xs">
+                  <span className="text-xs">
                     {ticket.stripe_payment_id}
                   </span>
                 }

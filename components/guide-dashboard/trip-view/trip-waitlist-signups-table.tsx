@@ -43,7 +43,7 @@ export const TripWaitlistSignupsTable = ({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <h2 className="text-lg font-semibold">Waitlist</h2>
+        <h2 className="text-xl font-semibold">Waitlist</h2>
         <Badge variant={"secondary"}>{waitlist?.length || 0}</Badge>
       </div>
       <div className="rounded-md border">

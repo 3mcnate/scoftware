@@ -58,6 +58,16 @@
 
 
 
+trip statuses:
+- draft
+- ready to drop
+- open - anyone can sign up
+- waitlist - only people on the waitlist who have been emailed signup links can sign up
+- closed - no one can sign up, displays waitlist
+- cancelled - all current tickets are cancelled, no one can sign up, displays cancelled
+- completed - moves to past trips table
+
+
 
 The plan:
 12/26	 guide/admin layout, start on guide trips page

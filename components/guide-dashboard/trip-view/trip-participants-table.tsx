@@ -129,7 +129,7 @@ export const TripParticipantsTable = ({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col md:flex-row items-start md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold">Participants</h2>
+          <h2 className="text-xl font-semibold">Participants</h2>
           <Badge variant={"secondary"}>
             <Users /> {activeParticipantsCount}/{trip.participant_spots}
           </Badge>

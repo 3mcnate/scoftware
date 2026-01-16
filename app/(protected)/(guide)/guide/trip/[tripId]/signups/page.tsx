@@ -10,7 +10,7 @@ const SignupsPage = () => {
   const tripId = params.tripId as string;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       <TripParticipantsTable tripId={tripId} />
       <TripAlerts tripId={tripId} />
       <TripWaitlistSignupsTable tripId={tripId} />
