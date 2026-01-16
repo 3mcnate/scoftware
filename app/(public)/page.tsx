@@ -4,9 +4,18 @@ import { formatDateWithWeekday, formatTime } from "@/utils/date-time";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { History, Undo2 } from "lucide-react";
+import { unstable_cache } from "next/cache";
+
+export const dynamic = 'force-dynamic'
+
+const getUpcomingTrips = unstable_cache(
+	getUpcomingPublishedTrips,
+	['upcoming-trips'],
+	{ revalidate: 60 }
+)
 
 export default async function TripsPage() {
-  const upcomingTrips = await getUpcomingPublishedTrips();
+  const upcomingTrips = await getUpcomingTrips();
 
   const currentTrips = upcomingTrips.map((trip) => ({
     id: trip.id,
