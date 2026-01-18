@@ -57,7 +57,7 @@ const TripPageSchema = z.object({
   location: z.string().min(1, "Trip location is required"),
   native_land: z.string().min(1, "Native land information is required"),
   description: z.string().min(1, "Trip description is required"),
-  what_to_bring: z.string().min(1, "Packing list is required"),
+  what_to_bring: z.array(z.string()).min(1, "Packing list is required"),
 });
 
 type TripPageFormData = z.infer<typeof TripPageSchema>;
@@ -82,12 +82,7 @@ export default function TripPageTab() {
 function TripPageContent({ trip }: { trip: TripData }) {
   const { mutateAsync: updateTrip, isPending: isSaving } = useUpdateTrip();
 
-  const initialPackingItems = trip.what_to_bring
-    ? trip.what_to_bring
-        .split("\n")
-        .map((item) => item.trim())
-        .filter(Boolean)
-    : [];
+  const initialPackingItems = trip.what_to_bring ?? [];
 
   const [packingItems, setPackingItems] =
     useState<string[]>(initialPackingItems);
@@ -116,7 +111,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
       location: trip.location ?? "",
       native_land: trip.native_land ?? "",
       description: trip.description ?? "",
-      what_to_bring: trip.what_to_bring ?? "",
+      what_to_bring: trip.what_to_bring ?? [],
     },
   });
 
@@ -126,7 +121,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
     if (newItem.trim()) {
       const newItems = [...packingItems, newItem.trim()];
       setPackingItems(newItems);
-      setValue("what_to_bring", newItems.join("\n"), { shouldDirty: true });
+      setValue("what_to_bring", newItems, { shouldDirty: true });
       setNewItem("");
     }
   };
@@ -134,7 +129,42 @@ function TripPageContent({ trip }: { trip: TripData }) {
   const removePackingItem = (index: number) => {
     const newItems = packingItems.filter((_, i) => i !== index);
     setPackingItems(newItems);
-    setValue("what_to_bring", newItems.join("\n"), { shouldDirty: true });
+    setValue("what_to_bring", newItems, { shouldDirty: true });
+  };
+
+  const addOvernightPackingList = () => {
+    const overnightItems = [
+      "Sleeping bag",
+      "Sleeping pad",
+      "Mess kit (utensils and bowl/plate/tupperware)",
+      "3+ liters of water",
+      "Hat/sunscreen/sunglasses",
+      "Comfortable hiking shoes",
+      "Comfortable hiking clothes",
+      "Toiletries/medications",
+      "Headlamp/flashlight",
+      "Warm clothes for night/sleeping",
+    ];
+    const newItems = [...packingItems, ...overnightItems];
+    setPackingItems(newItems);
+    setValue("what_to_bring", newItems, { shouldDirty: true });
+  };
+
+  const addDayTripPackingList = () => {
+    const dayTripItems = [
+      "3+ liters of water",
+      "Hat/sunscreen/sunglasses",
+      "Comfortable hiking shoes",
+      "Comfortable hiking clothes",
+    ];
+    const newItems = [...packingItems, ...dayTripItems];
+    setPackingItems(newItems);
+    setValue("what_to_bring", newItems, { shouldDirty: true });
+  };
+
+  const clearPackingList = () => {
+    setPackingItems([]);
+    setValue("what_to_bring", [], { shouldDirty: true });
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -456,6 +486,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
               />
             )}
           />
+					<FieldError>{errors.description?.message}</FieldError>
         </CardContent>
       </Card>
 
@@ -501,10 +532,40 @@ function TripPageContent({ trip }: { trip: TripData }) {
               variant="outline"
               className="bg-transparent"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus />
               Add
             </Button>
           </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              onClick={addOvernightPackingList}
+              variant="outline"
+              size="sm"
+              className="bg-transparent"
+            >
+              <Plus/> Add Overnight List
+            </Button>
+            <Button
+              type="button"
+              onClick={addDayTripPackingList}
+              variant="outline"
+              size="sm"
+              className="bg-transparent"
+            >
+              <Plus/> Add Day Trip List
+            </Button>
+            <Button
+              type="button"
+              onClick={clearPackingList}
+              variant="outline"
+              size="sm"
+              className="bg-transparent"
+            >
+              <X /> Clear All
+            </Button>
+          </div>
+					<FieldError>{errors.what_to_bring?.message}</FieldError>
         </CardContent>
       </Card>
 

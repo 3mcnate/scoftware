@@ -882,7 +882,7 @@ export type Database = {
           total_miles: number | null
           trail: string | null
           updated_at: string
-          what_to_bring: string | null
+          what_to_bring: string[] | null
         }
         Insert: {
           access_code?: string | null
@@ -914,7 +914,7 @@ export type Database = {
           total_miles?: number | null
           trail?: string | null
           updated_at?: string
-          what_to_bring?: string | null
+          what_to_bring?: string[] | null
         }
         Update: {
           access_code?: string | null
@@ -946,7 +946,7 @@ export type Database = {
           total_miles?: number | null
           trail?: string | null
           updated_at?: string
-          what_to_bring?: string | null
+          what_to_bring?: string[] | null
         }
         Relationships: []
       }

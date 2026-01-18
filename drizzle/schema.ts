@@ -245,24 +245,6 @@ export const roles = pgTable("roles", {
 	pgPolicy("Allow guides to view roles", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
-export const profiles = pgTable("profiles", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	first_name: text().notNull(),
-	last_name: text().notNull(),
-	phone: text().default('').notNull(),
-	avatar_path: text(),
-	email: text().notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.id],
-			foreignColumns: [usersInAuth.id],
-			name: "profiles_id_fkey"
-		}).onUpdate("cascade").onDelete("cascade"),
-	unique("profiles_phone_key").on(table.phone),
-	pgPolicy("Allow users to update own profile", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))`, withCheck: sql`(id = ( SELECT auth.uid() AS uid))`  }),
-	pgPolicy("Allow guides, user to select own profile", { as: "permissive", for: "select", to: ["authenticated"] }),
-]);
-
 export const trips = pgTable("trips", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -273,7 +255,7 @@ export const trips = pgTable("trips", {
 	participant_spots: integer().notNull(),
 	gear_questions: text().array(),
 	signup_status: trip_signup_status().default('open').notNull(),
-	what_to_bring: text(),
+	what_to_bring: text().array(),
 	access_code: text(),
 	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	picture_path: text(),
@@ -297,6 +279,7 @@ export const trips = pgTable("trips", {
 }, (table) => [
 	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"], using: sql`((is_trip_guide(id, ( SELECT auth.uid() AS uid)) OR authorize('admin'::user_role)) AND (NOT trip_has_tickets(id)))` }),
 	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"] }),
+	pgPolicy("Guides, admin can edit trips", { as: "permissive", for: "update", to: ["authenticated"] }),
 	check("trips_driver_spots_check", sql`driver_spots >= 0`),
 	check("trips_participant_spots_check", sql`participant_spots >= 0`),
 	check("ends_after_start", sql`start_date < end_date`),
@@ -306,6 +289,24 @@ export const trips = pgTable("trips", {
 	check("trips_lunches_check", sql`lunches >= 0`),
 	check("trips_snacks_check", sql`snacks >= 0`),
 	check("trips_total_miles_check", sql`total_miles >= 0`),
+]);
+
+export const profiles = pgTable("profiles", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	first_name: text().notNull(),
+	last_name: text().notNull(),
+	phone: text().default('').notNull(),
+	avatar_path: text(),
+	email: text().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.id],
+			foreignColumns: [usersInAuth.id],
+			name: "profiles_id_fkey"
+		}).onUpdate("cascade").onDelete("cascade"),
+	unique("profiles_phone_key").on(table.phone),
+	pgPolicy("Allow users to update own profile", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))`, withCheck: sql`(id = ( SELECT auth.uid() AS uid))`  }),
+	pgPolicy("Allow guides, user to select own profile", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
 export const trip_guides = pgTable("trip_guides", {
