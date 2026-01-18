@@ -484,6 +484,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
                 onBlur={field.onBlur}
                 placeholder="Describe the trip, what participants can expect, highlights, and any important information..."
                 minHeight="250px"
+                tripId={trip.id}
               />
             )}
           />

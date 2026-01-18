@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+export type ImageUploadFn = (file: File) => Promise<string>;
+
 interface UseImageUploadProps {
   onUpload?: (url: string) => void;
+  uploadFn?: ImageUploadFn;
 }
 
-export function useImageUpload({ onUpload }: UseImageUploadProps = {}) {
+export function useImageUpload({ onUpload, uploadFn }: UseImageUploadProps = {}) {
   const previewRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -12,20 +15,17 @@ export function useImageUpload({ onUpload }: UseImageUploadProps = {}) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Dummy upload function that simulates a delay and returns the local preview URL
-  const dummyUpload = async (file: File, localUrl: string): Promise<string> => {
+  const performUpload = async (file: File, localUrl: string): Promise<string> => {
     try {
       setUploading(true);
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      setError(null);
       
-      // Simulate random upload errors (20% chance)
-      if (Math.random() < 0.2) {
-        throw new Error("Upload failed - This is a demo error");
+      if (uploadFn) {
+        // Use the provided upload function
+        return await uploadFn(file);
       }
       
-      setError(null);
-      // In a real implementation, this would be the URL from the server
+      // Fallback: return the local blob URL (not persisted)
       return localUrl;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Upload failed";
@@ -50,7 +50,7 @@ export function useImageUpload({ onUpload }: UseImageUploadProps = {}) {
         previewRef.current = localUrl;
 
         try {
-          const uploadedUrl = await dummyUpload(file, localUrl);
+          const uploadedUrl = await performUpload(file, localUrl);
           onUpload?.(uploadedUrl);
         } catch (err) {
           URL.revokeObjectURL(localUrl);
@@ -60,7 +60,7 @@ export function useImageUpload({ onUpload }: UseImageUploadProps = {}) {
         }
       }
     },
-    [onUpload]
+    [onUpload, uploadFn]
   );
 
   const handleRemove = useCallback(() => {

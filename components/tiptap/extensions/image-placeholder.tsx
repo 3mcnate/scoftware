@@ -18,13 +18,14 @@ import {
 } from "@tiptap/react";
 import { Image, Link, Upload, Loader2, X } from "lucide-react";
 import { type FormEvent, useState } from "react";
-import { useImageUpload } from "@/hooks/use-image-upload";
+import { useImageUpload, type ImageUploadFn } from "@/hooks/use-image-upload";
 import { cn } from "@/lib/utils";
 
 export interface ImagePlaceholderOptions {
 	HTMLAttributes: Record<string, any>;
 	onUpload?: (url: string) => void;
 	onError?: (error: string) => void;
+	uploadFn?: ImageUploadFn;
 }
 
 declare module "@tiptap/core" {
@@ -46,6 +47,7 @@ export const ImagePlaceholder = Node.create<ImagePlaceholderOptions>({
 			HTMLAttributes: {},
 			onUpload: () => {},
 			onError: () => {},
+			uploadFn: undefined,
 		};
 	},
 
@@ -85,6 +87,8 @@ function ImagePlaceholderComponent(props: NodeViewProps) {
 	const [urlError, setUrlError] = useState(false);
 	const [isDragActive, setIsDragActive] = useState(false);
 
+	const uploadFn = extension.options.uploadFn as ImageUploadFn | undefined;
+
 	const {
 		previewUrl,
 		fileInputRef,
@@ -93,6 +97,7 @@ function ImagePlaceholderComponent(props: NodeViewProps) {
 		uploading,
 		error,
 	} = useImageUpload({
+		uploadFn,
 		onUpload: (imageUrl) => {
 			editor.chain().focus().setImage({ 
 				src: imageUrl,

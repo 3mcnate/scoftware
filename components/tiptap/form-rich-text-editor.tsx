@@ -16,8 +16,18 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { FormEditorToolbar } from "@/components/tiptap/toolbars/form-editor-toolbar";
 import { FloatingToolbar } from "@/components/tiptap/extensions/floating-toolbar";
+import {
+  uploadTripPicture,
+  getTripPictureUrl,
+} from "@/data/client/storage/trip-pictures";
+import type { ImageUploadFn } from "@/hooks/use-image-upload";
 
-const createExtensions = (placeholder?: string) => [
+interface CreateExtensionsOptions {
+  placeholder?: string;
+  uploadFn?: ImageUploadFn;
+}
+
+const createExtensions = ({ placeholder, uploadFn }: CreateExtensionsOptions) => [
   StarterKit.configure({
     orderedList: {
       HTMLAttributes: {
@@ -61,7 +71,9 @@ const createExtensions = (placeholder?: string) => [
     multicolor: true,
   }),
   ImageExtension,
-  ImagePlaceholder,
+  ImagePlaceholder.configure({
+    uploadFn,
+  }),
   Typography,
 ];
 
@@ -84,6 +96,8 @@ export interface FormRichTextEditorProps {
   disabled?: boolean;
   /** Whether to show the floating toolbar on text selection (desktop) */
   showFloatingToolbar?: boolean;
+  /** Trip ID for uploading images to the trip_pictures storage bucket */
+  tripId?: string;
 }
 
 /**
@@ -116,10 +130,19 @@ export function FormRichTextEditor({
   minHeight = "300px",
   disabled = false,
   showFloatingToolbar = true,
+  tripId,
 }: FormRichTextEditorProps) {
+  // Create upload function if tripId is provided
+  const uploadFn: ImageUploadFn | undefined = tripId
+    ? async (file: File) => {
+        const path = await uploadTripPicture(tripId, file);
+        return getTripPictureUrl(path);
+      }
+    : undefined;
+
   const editor = useEditor({
     immediatelyRender: false,
-    extensions: createExtensions(placeholder) as Extension[],
+    extensions: createExtensions({ placeholder, uploadFn }) as Extension[],
     content: value,
     editable: !disabled,
     editorProps: {
@@ -141,7 +164,7 @@ export function FormRichTextEditor({
 
   // Sync external value changes
   if (editor && value !== editor.getHTML() && !editor.isFocused) {
-    editor.commands.setContent(value, { emitUpdate: false });
+    editor.commands.setContent(value, false);
   }
 
   if (!editor) return null;
