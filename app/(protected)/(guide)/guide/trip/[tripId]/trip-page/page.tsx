@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { FormRichTextEditor } from "@/components/tiptap/form-rich-text-editor";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Field, FieldDescription, FieldError } from "@/components/ui/field";
@@ -478,15 +478,16 @@ function TripPageContent({ trip }: { trip: TripData }) {
             control={control}
             name="description"
             render={({ field }) => (
-              <Textarea
-                placeholder="Describe the trip, what participants can expect, highlights, and any important information..."
-                className="min-h-[200px]"
-                {...field}
+              <FormRichTextEditor
                 value={field.value ?? ""}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="Describe the trip, what participants can expect, highlights, and any important information..."
+                minHeight="250px"
               />
             )}
           />
-					<FieldError>{errors.description?.message}</FieldError>
+          <FieldError>{errors.description?.message}</FieldError>
         </CardContent>
       </Card>
 
