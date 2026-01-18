@@ -52,6 +52,7 @@ import {
 } from "@/data/client/storage/trip-pictures";
 import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
 import { format } from "date-fns";
+import Image from "next/image";
 
 const TripPageSchema = z.object({
   start_date: z.string().optional(),
@@ -235,10 +236,11 @@ export default function TripPageTab() {
         <CardContent>
           {trip?.picture_path ? (
             <div className="relative rounded-lg overflow-hidden aspect-video w-full max-w-2xl mx-auto border border-border">
-              <img
+              <Image
                 src={getTripPictureUrl(trip.picture_path)}
                 alt="Trip"
                 className="w-full h-full object-cover"
+								fill
               />
               <div className="absolute top-2 right-2 flex gap-2">
                 <Button

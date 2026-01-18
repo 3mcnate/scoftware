@@ -141,7 +141,7 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
   return (
     <TableRow
       className="group cursor-pointer"
-      onClick={() => router.push(`/guide/trip/${trip.id}`)}
+      onClick={() => router.push(`/guide/trip/${trip.id}/signups`)}
     >
       <TableCell className="w-[120px] p-2.5">
         <Link href={`/guide/trip/${trip.id}`}>
