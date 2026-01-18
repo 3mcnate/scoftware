@@ -45,7 +45,7 @@ export const useGuideTrips = (guideId: string) => {
 	return useQuery(getGuideTrips(guideId, client));
 };
 
-const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
+export const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
 	return client
 		.from('trips')
 		.select(

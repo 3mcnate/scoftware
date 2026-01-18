@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
@@ -15,6 +15,7 @@ import {
   Camera,
   Trash2,
 } from "lucide-react";
+import { QueryData } from "@supabase/supabase-js";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,23 +28,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldDescription, FieldError } from "@/components/ui/field";
 
-import { useTrip } from "@/data/client/trips/get-guide-trips";
+import { useTrip, getAllTripInfo } from "@/data/client/trips/get-guide-trips";
 import { useUpdateTrip } from "@/data/client/trips/use-update-trip";
 import {
   uploadTripPicture,
@@ -51,18 +40,24 @@ import {
   getTripPictureUrl,
 } from "@/data/client/storage/trip-pictures";
 import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
-import { format } from "date-fns";
 import Image from "next/image";
+import { DifficultyModal } from "@/components/public-trip-page/difficulty-modal";
+import Link from "next/link";
+
+type TripData = QueryData<ReturnType<typeof getAllTripInfo>>;
 
 const TripPageSchema = z.object({
-  start_date: z.string().optional(),
-  meet: z.string().optional(),
-  trail: z.string().optional(),
-  activity: z.string().optional(),
-  native_land: z.string().optional(),
-  prior_experience: z.string().optional(),
-  description: z.string().optional(),
-  what_to_bring: z.string().optional(),
+  start_date: z.string().min(1, "Meeting time is required"),
+  meet: z.string().min(1, "Meeting place is required"),
+  return: z.string().min(1, "Return information is required"),
+  activity: z.string().min(1, "Activity is required"),
+  difficulty: z.string().min(1, "Difficulty is required"),
+  trail: z.string().min(1, "Trail information is required"),
+  prior_experience: z.string().min(1, "Prior experience level is required"),
+  location: z.string().min(1, "Trip location is required"),
+  native_land: z.string().min(1, "Native land information is required"),
+  description: z.string().min(1, "Trip description is required"),
+  what_to_bring: z.string().min(1, "Packing list is required"),
 });
 
 type TripPageFormData = z.infer<typeof TripPageSchema>;
@@ -72,9 +67,30 @@ export default function TripPageTab() {
   const tripId = params.tripId as string;
 
   const { data: trip, isLoading } = useTrip(tripId);
+
+  if (isLoading) {
+    return <TripPageTabSkeleton />;
+  }
+
+  if (!trip) {
+    return null;
+  }
+
+  return <TripPageContent trip={trip} />;
+}
+
+function TripPageContent({ trip }: { trip: TripData }) {
   const { mutateAsync: updateTrip, isPending: isSaving } = useUpdateTrip();
 
-  const [packingItems, setPackingItems] = useState<string[]>([]);
+  const initialPackingItems = trip.what_to_bring
+    ? trip.what_to_bring
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+
+  const [packingItems, setPackingItems] =
+    useState<string[]>(initialPackingItems);
   const [newItem, setNewItem] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -82,51 +98,27 @@ export default function TripPageTab() {
   const {
     control,
     handleSubmit,
-    formState: { isDirty },
+    formState: { isDirty, errors },
     reset,
     setValue,
   } = useForm<TripPageFormData>({
     resolver: standardSchemaResolver(TripPageSchema),
     defaultValues: {
-      start_date: "",
-      meet: "",
-      trail: "",
-      activity: "",
-      native_land: "",
-      prior_experience: "",
-      description: "",
-      what_to_bring: "",
+      start_date: trip.start_date
+        ? new Date(trip.start_date).toISOString().slice(0, 16)
+        : "",
+      meet: trip.meet ?? "",
+      return: trip.return ?? "",
+      activity: trip.activity ?? "",
+      difficulty: trip.difficulty ?? "",
+      trail: trip.trail ?? "",
+      prior_experience: trip.prior_experience ?? "",
+      location: trip.location ?? "",
+      native_land: trip.native_land ?? "",
+      description: trip.description ?? "",
+      what_to_bring: trip.what_to_bring ?? "",
     },
   });
-
-  // Sync form with data when loaded
-  useEffect(() => {
-    if (trip) {
-      reset({
-        start_date: trip.start_date
-          ? new Date(trip.start_date).toISOString().slice(0, 16)
-          : "",
-        meet: trip.meet ?? "",
-        trail: trip.trail ?? "",
-        activity: trip.activity ?? "",
-        native_land: trip.native_land ?? "",
-        prior_experience: trip.prior_experience ?? "",
-        description: trip.description ?? "",
-        what_to_bring: trip.what_to_bring ?? "",
-      });
-
-      if (trip.what_to_bring) {
-        setPackingItems(
-          trip.what_to_bring
-            .split("\n")
-            .map((item) => item.trim())
-            .filter(Boolean)
-        );
-      } else {
-        setPackingItems([]);
-      }
-    }
-  }, [trip, reset]);
 
   useUnsavedChangesPrompt(isDirty);
 
@@ -147,32 +139,25 @@ export default function TripPageTab() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !tripId) return;
+    if (!file || !trip.id) return;
 
-    if (file.size > 5000000) {
-      toast.error("File too large (limit 5 MB)");
+    if (file.size > 10000000) {
+      toast.error("File too large (limit 10 MB)");
       return;
     }
 
     setIsUploading(true);
     try {
-      const oldPath = trip?.picture_path;
-
-      const path = await uploadTripPicture(tripId, file);
+      const path = await uploadTripPicture(trip.id, file);
       await updateTrip({
-        id: tripId,
+        id: trip.id,
         picture_path: path,
       });
-
-      if (oldPath && oldPath !== path) {
-        // Optional: delete old image if it's different and not used elsewhere
-        // await deleteTripPicture(oldPath)
-      }
 
       toast.success("Trip picture updated");
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to upload image"
+        err instanceof Error ? err.message : "Failed to upload image",
       );
     } finally {
       setIsUploading(false);
@@ -183,13 +168,13 @@ export default function TripPageTab() {
   };
 
   const handleRemoveImage = async () => {
-    if (!tripId || !trip?.picture_path) return;
+    if (!trip.picture_path) return;
 
     setIsUploading(true);
     try {
       await Promise.all([
         deleteTripPicture(trip.picture_path),
-        updateTrip({ id: tripId, picture_path: null }),
+        updateTrip({ id: trip.id, picture_path: null }),
       ]);
       toast.success("Trip picture removed");
     } catch {
@@ -200,28 +185,28 @@ export default function TripPageTab() {
   };
 
   const onSubmit = async (data: TripPageFormData) => {
-    if (!tripId) return;
-
     try {
       await updateTrip({
-        id: tripId,
-        ...data,
-        start_date: data.start_date
-          ? new Date(data.start_date).toISOString()
-          : trip?.start_date ?? "", // Fallback to existing if empty? Or allow clearing?
+        id: trip.id,
+        meet: data.meet,
+        return: data.return,
+        activity: data.activity,
+        difficulty: data.difficulty,
+        trail: data.trail,
+        prior_experience: data.prior_experience,
+        location: data.location,
+        native_land: data.native_land,
+        description: data.description,
+        what_to_bring: data.what_to_bring,
       });
       toast.success("Trip details saved successfully");
       reset(data);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to save trip details"
+        err instanceof Error ? err.message : "Failed to save trip details",
       );
     }
   };
-
-  if (isLoading) {
-    return <TripPageTabSkeleton />;
-  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -234,13 +219,13 @@ export default function TripPageTab() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {trip?.picture_path ? (
+          {trip.picture_path ? (
             <div className="relative rounded-lg overflow-hidden aspect-video w-full max-w-2xl mx-auto border border-border">
               <Image
                 src={getTripPictureUrl(trip.picture_path)}
                 alt="Trip"
                 className="w-full h-full object-cover"
-								fill
+                fill
               />
               <div className="absolute top-2 right-2 flex gap-2">
                 <Button
@@ -308,21 +293,6 @@ export default function TripPageTab() {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field>
-              <Label htmlFor="start_date">Meeting Time</Label>
-              <Controller
-                control={control}
-                name="start_date"
-                render={({ field }) => (
-                  <Input
-                    id="start_date"
-                    type="datetime-local"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                )}
-              />
-            </Field>
-            <Field>
               <Label htmlFor="meet">Meeting Place</Label>
               <Controller
                 control={control}
@@ -330,67 +300,83 @@ export default function TripPageTab() {
                 render={({ field }) => (
                   <Input
                     id="meet"
-                    placeholder="e.g., Student Union Building"
+                    placeholder="e.g. Village fountain on Saturday 2/7 at 7am"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                )}
+              />{" "}
+              <FieldError>{errors.meet?.message}</FieldError>{" "}
+            </Field>
+            <Field>
+              <Label htmlFor="return">Return</Label>
+              <Controller
+                control={control}
+                name="return"
+                render={({ field }) => (
+                  <Input
+                    id="return"
+                    placeholder="e.g. Sunday 2/8 3pm"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                )}
+              />{" "}
+              <FieldError>{errors.return?.message}</FieldError>{" "}
+            </Field>
+            <Field>
+              <Label htmlFor="activity">Activity</Label>
+              <Controller
+                control={control}
+                name="activity"
+                render={({ field }) => (
+                  <Input
+                    id="activity"
+                    placeholder="e.g. hiking, camping, chilling"
                     {...field}
                     value={field.value ?? ""}
                   />
                 )}
               />
+              <FieldError>{errors.activity?.message}</FieldError>
             </Field>
             <Field>
-              <Label htmlFor="trail">Trail Length</Label>
+              <Label htmlFor="difficulty">Difficulty</Label>
+              <Controller
+                control={control}
+                name="difficulty"
+                render={({ field }) => (
+                  <Input
+                    id="difficulty"
+                    placeholder="x/10 easy/medium/hard"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                )}
+              />
+              <FieldDescription>
+                <DifficultyModal />
+              </FieldDescription>
+              <FieldError>{errors.difficulty?.message}</FieldError>
+            </Field>
+            <Field>
+              <Label htmlFor="trail">Trail</Label>
               <Controller
                 control={control}
                 name="trail"
                 render={({ field }) => (
                   <Input
                     id="trail"
-                    placeholder="e.g., 8 miles round trip"
+                    placeholder="8 miles/12.8 km, 1400 ft/426 m"
                     {...field}
                     value={field.value ?? ""}
                   />
                 )}
               />
-            </Field>
-            <Field>
-              <Label htmlFor="activity">Activities</Label>
-              <Controller
-                control={control}
-                name="activity"
-                render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value ?? ""}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select activities" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hiking">Hiking</SelectItem>
-                      <SelectItem value="backpacking">Backpacking</SelectItem>
-                      <SelectItem value="camping">Camping</SelectItem>
-                      <SelectItem value="climbing">Rock Climbing</SelectItem>
-                      <SelectItem value="kayaking">Kayaking</SelectItem>
-                      <SelectItem value="skiing">Skiing</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </Field>
-            <Field>
-              <Label htmlFor="native_land">Native Land</Label>
-              <Controller
-                control={control}
-                name="native_land"
-                render={({ field }) => (
-                  <Input
-                    id="native_land"
-                    placeholder="e.g., Havasupai and Hualapai territories"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                )}
-              />
+              <FieldDescription>
+                Put distance in miles/kms and elevation gain in feet/meters
+              </FieldDescription>
+              <FieldError>{errors.trail?.message}</FieldError>
             </Field>
             <Field>
               <Label htmlFor="prior_experience">
@@ -400,30 +386,53 @@ export default function TripPageTab() {
                 control={control}
                 name="prior_experience"
                 render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
+                  <Input
+                    id="prior_experience"
+                    placeholder="e.g. some hiking experience required"
+                    {...field}
                     value={field.value ?? ""}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select experience level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">
-                        None - Beginner friendly
-                      </SelectItem>
-                      <SelectItem value="some">
-                        Some outdoor experience
-                      </SelectItem>
-                      <SelectItem value="moderate">
-                        Moderate experience required
-                      </SelectItem>
-                      <SelectItem value="advanced">
-                        Advanced experience required
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  />
                 )}
               />
+              <FieldError>{errors.prior_experience?.message}</FieldError>
+            </Field>
+            <Field>
+              <Label htmlFor="location">Location of Trip</Label>
+              <Controller
+                control={control}
+                name="location"
+                render={({ field }) => (
+                  <Input
+                    id="location"
+                    placeholder="e.g. Grand Canyon National Park"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                )}
+              />
+              <FieldError>{errors.location?.message}</FieldError>
+            </Field>
+            <Field>
+              <Label htmlFor="native_land">Native Land</Label>
+              <Controller
+                control={control}
+                name="native_land"
+                render={({ field }) => (
+                  <Input
+                    id="native_land"
+                    placeholder="e.g. Chumash"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                )}
+              />
+              <FieldDescription>
+                Use{" "}
+                <Link href="https://native-land.ca/maps/native-land" target="_blank">
+                  native-land.ca
+                </Link>
+              </FieldDescription>
+              <FieldError>{errors.native_land?.message}</FieldError>
             </Field>
           </div>
         </CardContent>
@@ -447,9 +456,6 @@ export default function TripPageTab() {
               />
             )}
           />
-          <p className="text-xs text-muted-foreground mt-2">
-            Markdown formatting is supported
-          </p>
         </CardContent>
       </Card>
 
@@ -534,7 +540,7 @@ function TripPageTabSkeleton() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
               <div key={i} className="space-y-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-10 w-full" />

@@ -37,7 +37,7 @@ type Guide = {
 
 export function TripDetails({ trip }: TripDetailsProps) {
   const guides: Guide[] = Array.isArray(trip.guides) ? (trip.guides as Guide[]) : [];
-  const whatToBring = Array.isArray(trip.what_to_bring) ? trip.what_to_bring : [];
+  const whatToBring = trip.what_to_bring;
   const memberPrice = 0;
   const nonMemberPrice = 0;
   const driverPrice = 0;
