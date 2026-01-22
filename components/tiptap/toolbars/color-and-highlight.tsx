@@ -163,6 +163,7 @@ export const ColorHighlightToolbar = () => {
 					<TooltipTrigger asChild>
 						<PopoverTrigger disabled={isDisabled} asChild>
 							<Button
+								type="button"
 								variant="ghost"
 								size="sm"
 								style={{

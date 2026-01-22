@@ -59,6 +59,7 @@ export const HeadingsToolbar = React.forwardRef<
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               className={cn(

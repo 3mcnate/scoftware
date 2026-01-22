@@ -458,7 +458,10 @@ function TripPageContent({ trip }: { trip: TripData }) {
               />
               <FieldDescription>
                 Use{" "}
-                <Link href="https://native-land.ca/maps/native-land" target="_blank">
+                <Link
+                  href="https://native-land.ca/maps/native-land"
+                  target="_blank"
+                >
                   native-land.ca
                 </Link>
               </FieldDescription>
@@ -469,28 +472,24 @@ function TripPageContent({ trip }: { trip: TripData }) {
       </Card>
 
       {/* Trip Description */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Trip Description</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Controller
-            control={control}
-            name="description"
-            render={({ field }) => (
-              <FormRichTextEditor
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                placeholder="Describe the trip, what participants can expect, highlights, and any important information..."
-                minHeight="250px"
-                tripId={trip.id}
-              />
-            )}
-          />
-          <FieldError>{errors.description?.message}</FieldError>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <h3 className="font-semibold">Trip Description</h3>
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <FormRichTextEditor
+              value={field.value ?? ""}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder=""
+              minHeight="250px"
+              tripId={trip.id}
+            />
+          )}
+        />
+        <FieldError>{errors.description?.message}</FieldError>
+      </div>
 
       {/* Packing List */}
       <Card>
@@ -546,7 +545,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
               size="sm"
               className="bg-transparent"
             >
-              <Plus/> Add Overnight List
+              <Plus /> Add Overnight List
             </Button>
             <Button
               type="button"
@@ -555,7 +554,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
               size="sm"
               className="bg-transparent"
             >
-              <Plus/> Add Day Trip List
+              <Plus /> Add Day Trip List
             </Button>
             <Button
               type="button"
@@ -567,7 +566,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
               <X /> Clear All
             </Button>
           </div>
-					<FieldError>{errors.what_to_bring?.message}</FieldError>
+          <FieldError>{errors.what_to_bring?.message}</FieldError>
         </CardContent>
       </Card>
 

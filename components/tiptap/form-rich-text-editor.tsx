@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import "./tiptap.css";
 import { cn } from "@/lib/utils";
 import { ImageExtension } from "@/components/tiptap/extensions/image";
@@ -148,7 +149,7 @@ export function FormRichTextEditor({
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm sm:prose lg:prose-lg max-w-full focus:outline-none",
+          "prose prose-sm sm:prose lg:prose-lg max-w-full focus:outline-none p-4 lg:p-0 [&_p]:text-sm",
           disabled && "opacity-50 cursor-not-allowed"
         ),
       },
@@ -163,9 +164,11 @@ export function FormRichTextEditor({
   });
 
   // Sync external value changes
-  if (editor && value !== editor.getHTML() && !editor.isFocused) {
-    editor.commands.setContent(value, false);
-  }
+  useEffect(() => {
+    if (editor && value !== editor.getHTML() && !editor.isFocused) {
+      editor.commands.setContent(value, false);
+    }
+  }, [editor, value]);
 
   if (!editor) return null;
 
@@ -182,7 +185,7 @@ export function FormRichTextEditor({
       <EditorContent
         editor={editor}
         className={cn(
-          "w-full cursor-text overflow-y-auto p-4",
+          "w-full cursor-text overflow-y-auto",
           editorClassName
         )}
         style={{ minHeight }}

@@ -34,7 +34,7 @@ export const AlignmentTooolbar = () => {
   };
 
   const isDisabled =
-    editor?.isActive("image") ?? editor?.isActive("video") ?? !editor ?? false;
+    editor?.isActive("image") ?? editor?.isActive("video") ?? false;
 
   const currentTextAlign = () => {
     if (editor?.isActive({ textAlign: "left" })) {
@@ -104,7 +104,7 @@ export const AlignmentTooolbar = () => {
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger disabled={isDisabled} asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-max font-normal">
+            <Button type="button" variant="ghost" size="sm" className="h-8 w-max font-normal">
               <span className="mr-2">
                 {alignmentOptions[findIndex(currentTextAlign())]?.icon}
               </span>
