@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
@@ -40,6 +40,7 @@ import {
   getTripPictureUrl,
 } from "@/data/client/storage/trip-pictures";
 import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { DifficultyModal } from "@/components/public-trip-page/difficulty-modal";
 import Link from "next/link";
@@ -88,7 +89,14 @@ function TripPageContent({ trip }: { trip: TripData }) {
     useState<string[]>(initialPackingItems);
   const [newItem, setNewItem] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (trip.picture_path) {
+      setIsImageLoading(true);
+    }
+  }, [trip.picture_path]);
 
   const {
     control,
@@ -177,6 +185,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
     }
 
     setIsUploading(true);
+		setIsImageLoading(true);
     try {
       const path = await uploadTripPicture(trip.id, file);
       await updateTrip({
@@ -251,11 +260,20 @@ function TripPageContent({ trip }: { trip: TripData }) {
         <CardContent>
           {trip.picture_path ? (
             <div className="relative rounded-lg overflow-hidden aspect-video w-full max-w-2xl mx-auto border border-border">
+              {isImageLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-muted z-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              )}
               <Image
                 src={getTripPictureUrl(trip.picture_path)}
                 alt="Trip"
-                className="w-full h-full object-cover"
+                className={cn(
+                  "w-full h-full object-cover transition-opacity",
+                  isImageLoading ? "opacity-0" : "opacity-100"
+                )}
                 fill
+                onLoad={() => setIsImageLoading(false)}
               />
               <div className="absolute top-2 right-2 flex gap-2">
                 <Button
