@@ -34,10 +34,10 @@ VALUES
 		'2026-12-06 17:00:00+00',
 		null,
 		'open',
-		'2+ liters of water
-Hat/sunscreen/sunglasses
-Comfortable hiking shoes
-Comfortable hiking clothes',
+		'{"2+ liters of water",
+			"Hat/sunscreen/sunglasses",
+			"Comfortable hiking shoes",
+			"Comfortable hiking clothes"}',
 		null
 	),
 	(
