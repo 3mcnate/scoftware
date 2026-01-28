@@ -13,12 +13,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
   Field,
   FieldError,
@@ -26,17 +21,14 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
-import {
-  Item,
-  ItemContent,
-  ItemActions,
-} from "@/components/ui/item";
+import { Item, ItemContent, ItemActions } from "@/components/ui/item";
 import { Plus, Trash2, Car, Utensils, Receipt, Calculator } from "lucide-react";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { Badge } from "@/components/ui/badge";
 
 // Budget constants
 const MEAL_PRICES = {
@@ -288,7 +280,10 @@ export default function BudgetPage() {
               <Separator />
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Cars</span>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-sm font-medium">Cars</span>
+                    <Badge variant={"secondary"}>{carFields.length}</Badge>
+                  </div>
                   <Button
                     type="button"
                     variant="outline"
@@ -325,7 +320,6 @@ export default function BudgetPage() {
                               <div className="flex items-center gap-2">
                                 <Input
                                   type="number"
-                                  min={1}
                                   step={0.1}
                                   className="w-20 h-8"
                                   {...field}
@@ -490,11 +484,14 @@ export default function BudgetPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Calculator className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-base font-medium">Preview</CardTitle>
+                <CardTitle className="text-base font-medium">
+                  Budget & Prices
+                </CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2 text-sm">
+                <p className="font-medium">Budget</p>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Food</span>
                   <span>{formatCurrency(budgetTotals.totalFoodCost)}</span>
@@ -508,8 +505,8 @@ export default function BudgetPage() {
                   <span>{formatCurrency(budgetTotals.totalOtherExpenses)}</span>
                 </div>
                 <Separator />
-                <div className="flex justify-between items-center font-medium">
-                  <span>Total</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Total</span>
                   <span>{formatCurrency(budgetTotals.totalTripBudget)}</span>
                 </div>
               </div>
@@ -517,6 +514,7 @@ export default function BudgetPage() {
               <Separator />
 
               <div className="space-y-2 text-sm">
+                <p className="font-medium">Prices</p>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Member</span>
                   <span className="font-medium">

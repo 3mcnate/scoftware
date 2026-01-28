@@ -42,3 +42,84 @@ Here's the logical flow:
 	When a user clicks "sign waiver", they are brought to the sign waiver page for that trip. This page loads the waiver from the trip_waivers table, depending on the ticket type ("driver" or "participant") 
 
 Create a backend api route to process waiver completions. When the user signs a waiver, the route should be send their typed full legal name, birthday, trip Id, and waiver id. Next, the route should generate a PDF of the signed document that is an accurate visual representation of the online form they just signed. This PDF should be uploaded to the supabase storage "waivers" bucket, with the filepath being "<user_id>/<document_id>", where document_id is a randomly generated uuidv4. This filepath should be saved to their ticket in the waiver_filepath (or driver_waiver_filepath) column. The route should also add a row to the waiver_events table with a "user_signed" event. Use Drizzle to interact with the database, and place all queries in data/waivers.
+
+
+Budget formulas: mathjs library
+
+Inputs:
+- breakfasts
+- lunches
+- dinners
+- snacks
+- total_miles
+- num_cars
+- average_mpg
+- total_other_expenses
+- num_participants
+- num_participant_drivers
+- num_guides
+- num_nights
+
+Outputs
+- member_price			# required
+- nonmember_price		# required
+- driver_price			# required
+- food_budget				# required
+- gas_budget 				# required
+- other_budget			# required
+... anything else		
+
+csv export?
+
+
+gas_price = 4.50
+gas_budget = gas_price * num_cars * total_miles / average_mpg 
+
+base_price = food_budget + gas_budget
+total_people = num_participants + num_drivers
+member_price = base_price / total_people
+
+# constants
+price_of_gas = 4.85
+price_of_breakfast = 1.50
+price_of_lunch = 4.20
+price_of_dinner = 3
+price_of_snack = 3.50
+
+profit_margin = 0.05
+nonmember_markup = 0.3
+additional_driver_discount = 0.8
+
+driver_incentive_day_trip = 10
+driver_incentive_overnight = 20
+
+stripe_percentage_fee = 0.029
+stripe_fixed_fee = 0.3
+
+# helpers
+total_people = num_participants + num_drivers + num_guides
+total_participants = num_participants + num_participant_drivers
+
+# transportation
+gas_cost = price_of_gas * num_cars * total_miles / average_mpg 
+driver_incentive = num_nights >= 1 ? driver_incentive_overnight : driver_incentive_day_trip
+total_transportation_cost = gas_cost + driver_incentive
+
+# food
+food_cost_per_person = breakfasts * price_of_breakfast + lunches * price_of_lunches + dinners * price_of_dinners + snacks * price_of_snacks
+total_food_cost = total_people * food_cost_per_person
+
+# other
+raw_trip_cost = total_transportation_cost + total_food_cost + total_other_expenses
+adjusted_trip_price = raw_trip_cost * (1 + profit_margin) * (1 + stripe_percentage_fee) + (total_participants * stripe_fixed_fee)
+base_price = adjusted_trip_price / total_participants 
+
+# final prices
+driver_price = (base_price - ((1 / total_participants) * total_transportation_costs)) * additional_driver_discount
+member_price = (adjusted_trip_price - (num_participant_drivers * driver_price)) / num_participants
+nonmember_price = member_price * (1 + nonmember_markup)
+
+# final budget
+gas_budget = gas_cost
+food_budget = food_cost
+other_budget = total_other_expenses
