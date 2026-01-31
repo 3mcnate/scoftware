@@ -1,6 +1,7 @@
 import { TypedSupabaseClient } from "@/types/typed-supabase-client";
 import { createClient } from "@/utils/supabase/browser";
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
+import { QueryData } from "@supabase/supabase-js";
 
 const getGuideTrips = (guideId: string, client: TypedSupabaseClient) => {
 	return client
@@ -78,8 +79,18 @@ export const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
 			lunches,
 			dinners,
 			snacks,
-			other_costs,
-			budget_confirmed
+			other_expenses,
+			budget_confirmed,
+			trip_guides (
+				profiles (
+					id,
+					first_name,
+					last_name,
+					phone,
+					avatar_path,
+					email
+				)
+			)
 			`)
 		.eq('id', tripId)
 		.single();
@@ -89,3 +100,5 @@ export const useTrip = (tripId: string) => {
 	const client = createClient();
 	return useQuery(getAllTripInfo(tripId, client));
 };
+
+export type TripData = QueryData<ReturnType<typeof getAllTripInfo>>;

@@ -120,20 +120,6 @@ export const profiles = pgTable("profiles", {
 	pgPolicy("Allow guides, user to select own profile", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
-export const roles = pgTable("roles", {
-	user_id: uuid().defaultRandom().primaryKey().notNull(),
-	role: user_role().default('participant').notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.user_id],
-			foreignColumns: [profiles.id],
-			name: "roles_user_id_fkey"
-		}).onUpdate("cascade").onDelete("cascade"),
-	pgPolicy("Allow guides to view roles", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
-	pgPolicy("Allow auth admin to read user roles", { as: "permissive", for: "select", to: ["supabase_auth_admin"] }),
-]);
-
 export const published_trips = pgTable("published_trips", {
 	id: uuid().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -204,51 +190,6 @@ export const tickets = pgTable("tickets", {
 	pgPolicy("Guides, participants can select their own tickets", { as: "permissive", for: "select", to: ["authenticated"], using: sql`((user_id = ( SELECT auth.uid() AS uid)) OR authorize('guide'::user_role))` }),
 ]);
 
-export const trips = pgTable("trips", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	name: text().notNull(),
-	description: text(),
-	driver_spots: integer().notNull(),
-	participant_spots: integer().notNull(),
-	gear_questions: text().array(),
-	signup_status: trip_signup_status().default('open').notNull(),
-	what_to_bring: text().array(),
-	access_code: text(),
-	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	picture_path: text(),
-	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	activity: text(),
-	breakfasts: smallint(),
-	budget_confirmed: boolean().default(false).notNull(),
-	car_mpgs: numeric().array(),
-	difficulty: text(),
-	dinners: smallint(),
-	location: text(),
-	lunches: smallint(),
-	meet: text(),
-	native_land: text(),
-	other_costs: jsonb(),
-	prior_experience: text(),
-	return: text(),
-	snacks: smallint(),
-	total_miles: integer(),
-	trail: text(),
-}, (table) => [
-	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
-	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"] }),
-	check("ends_after_start", sql`start_date < end_date`),
-	check("trips_breakfasts_check", sql`breakfasts >= 0`),
-	check("trips_car_mpgs_check", sql`(0)::numeric <= ALL (car_mpgs)`),
-	check("trips_dinners_check", sql`dinners >= 0`),
-	check("trips_driver_spots_check", sql`driver_spots >= 0`),
-	check("trips_lunches_check", sql`lunches >= 0`),
-	check("trips_participant_spots_check", sql`participant_spots >= 0`),
-	check("trips_snacks_check", sql`snacks >= 0`),
-	check("trips_total_miles_check", sql`total_miles >= 0`),
-]);
-
 export const trip_waivers = pgTable("trip_waivers", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -307,6 +248,66 @@ export const waiver_templates = pgTable("waiver_templates", {
 	title: text().notNull(),
 	type: participant_type().default('participant').notNull(),
 });
+
+export const roles = pgTable("roles", {
+	user_id: uuid().defaultRandom().primaryKey().notNull(),
+	role: user_role().default('participant').notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "roles_user_id_fkey"
+		}).onUpdate("cascade").onDelete("cascade"),
+	pgPolicy("Allow guides to view roles", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
+	pgPolicy("Allow auth admin to read user roles", { as: "permissive", for: "select", to: ["supabase_auth_admin"] }),
+]);
+
+export const trips = pgTable("trips", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	name: text().notNull(),
+	description: text(),
+	driver_spots: integer().notNull(),
+	participant_spots: integer().notNull(),
+	gear_questions: text().array(),
+	signup_status: trip_signup_status().default('open').notNull(),
+	what_to_bring: text().array(),
+	access_code: text(),
+	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	picture_path: text(),
+	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	activity: text(),
+	breakfasts: smallint(),
+	budget_confirmed: boolean().default(false).notNull(),
+	car_mpgs: numeric().array(),
+	difficulty: text(),
+	dinners: smallint(),
+	location: text(),
+	lunches: smallint(),
+	meet: text(),
+	native_land: text(),
+	prior_experience: text(),
+	return: text(),
+	snacks: smallint(),
+	total_miles: integer(),
+	trail: text(),
+	other_expenses: jsonb(),
+}, (table) => [
+	pgPolicy("Allow trip guides, admins to update trips", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(is_trip_guide(( SELECT auth.uid() AS uid), id) OR authorize('admin'::user_role))`, withCheck: sql`(is_trip_guide(( SELECT auth.uid() AS uid), id) OR authorize('admin'::user_role))`  }),
+	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"] }),
+	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"] }),
+	check("ends_after_start", sql`start_date < end_date`),
+	check("trips_breakfasts_check", sql`breakfasts >= 0`),
+	check("trips_car_mpgs_check", sql`(0)::numeric <= ALL (car_mpgs)`),
+	check("trips_dinners_check", sql`dinners >= 0`),
+	check("trips_driver_spots_check", sql`driver_spots >= 0`),
+	check("trips_lunches_check", sql`lunches >= 0`),
+	check("trips_participant_spots_check", sql`participant_spots >= 0`),
+	check("trips_snacks_check", sql`snacks >= 0`),
+	check("trips_total_miles_check", sql`total_miles >= 0`),
+]);
 
 export const trip_guides = pgTable("trip_guides", {
 	user_id: uuid().defaultRandom().notNull(),

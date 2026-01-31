@@ -15,7 +15,6 @@ import {
   Camera,
   Trash2,
 } from "lucide-react";
-import { QueryData } from "@supabase/supabase-js";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Field, FieldDescription, FieldError } from "@/components/ui/field";
 
-import { useTrip, getAllTripInfo } from "@/data/client/trips/get-guide-trips";
+import { useTrip, TripData } from "@/data/client/trips/get-guide-trips";
 import { useUpdateTrip } from "@/data/client/trips/use-update-trip";
 import {
   uploadTripPicture,
@@ -44,8 +43,6 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { DifficultyModal } from "@/components/public-trip-page/difficulty-modal";
 import Link from "next/link";
-
-type TripData = QueryData<ReturnType<typeof getAllTripInfo>>;
 
 const TripPageSchema = z.object({
   start_date: z.string().min(1, "Meeting time is required"),

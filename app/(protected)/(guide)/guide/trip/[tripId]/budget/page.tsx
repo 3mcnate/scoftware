@@ -28,34 +28,26 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Badge } from "@/components/ui/badge";
-
-// Budget constants
-const MEAL_PRICES = {
-  breakfast: 5,
-  lunch: 8,
-  dinner: 12,
-  snack: 3,
-} as const;
-
-const GAS_PRICE_PER_GALLON = 4.5;
-const MEMBER_DISCOUNT = 5;
-const DRIVER_DISCOUNT_PERCENT = 0.5;
+import { compile } from "mathjs";
+import { useTrip, type TripData } from "@/data/client/trips/get-guide-trips";
+import { useParams } from "next/navigation";
+import { useBudgetFormulas } from "@/data/client/budget/budget-formulas";
+import { BudgetFormSkeleton } from "@/components/guide-dashboard/trip-view/budget-form-skeleton";
+import { differenceInCalendarDays } from "date-fns";
+import { useUpdateTrip } from "@/data/client/trips/use-update-trip";
 
 const BudgetSchema = z.object({
-  meals: z.object({
-    breakfasts: z.coerce.number().min(0, "Must be 0 or more"),
-    lunches: z.coerce.number().min(0, "Must be 0 or more"),
-    dinners: z.coerce.number().min(0, "Must be 0 or more"),
-    snacks: z.coerce.number().min(0, "Must be 0 or more"),
-  }),
-  totalMiles: z.coerce.number().min(0, "Must be 0 or more"),
+  breakfasts: z.coerce.number().min(0, "Must be 0 or more"),
+  lunches: z.coerce.number().min(0, "Must be 0 or more"),
+  dinners: z.coerce.number().min(0, "Must be 0 or more"),
+  snacks: z.coerce.number().min(0, "Must be 0 or more"),
+  total_miles: z.coerce.number().min(0, "Must be 0 or more"),
   cars: z.array(
     z.object({
       mpg: z.coerce.number().min(1, "MPG must be at least 1"),
     }),
   ),
-  otherExpenses: z.array(
+  other_expenses: z.array(
     z.object({
       description: z.string().min(1, "Description required"),
       cost: z.coerce.number().min(0.01, "Cost must be 0.01 or more"),
@@ -74,23 +66,34 @@ function formatCurrency(amount: number): string {
 }
 
 export default function BudgetPage() {
+  const params = useParams();
+  const tripId = params.tripId as string;
+
+  const { data: trip } = useTrip(tripId);
+  const { data: formulas } = useBudgetFormulas();
+
+  if (!trip || !formulas) {
+    return <BudgetFormSkeleton />;
+  }
+
+  return <BudgetForm trip={trip} formulas={formulas.formulas} />;
+}
+
+function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
   const {
     control,
-    handleSubmit,
     watch,
     formState: { errors },
   } = useForm<BudgetFormData>({
     resolver: standardSchemaResolver(BudgetSchema),
     defaultValues: {
-      meals: {
-        breakfasts: 0,
-        lunches: 0,
-        dinners: 0,
-        snacks: 0,
-      },
-      totalMiles: 0,
+      breakfasts: 0,
+      lunches: 0,
+      dinners: 0,
+      snacks: 0,
+      total_miles: 0,
       cars: [{ mpg: 0 }, { mpg: 0 }],
-      otherExpenses: [],
+      other_expenses: [],
     },
   });
 
@@ -109,72 +112,74 @@ export default function BudgetPage() {
     remove: removeExpense,
   } = useFieldArray({
     control,
-    name: "otherExpenses",
+    name: "other_expenses",
   });
 
+	const { mutateAsync: updateTrip, isPending: isSaving } = useUpdateTrip();
+
   // Watch all form values for real-time calculations
-  const meals = watch("meals");
-  const totalMiles = watch("totalMiles");
+  const breakfasts = watch("breakfasts");
+  const lunches = watch("lunches");
+  const dinners = watch("dinners");
+  const snacks = watch("snacks");
+  const totalMiles = watch("total_miles");
   const cars = watch("cars");
-  const otherExpenses = watch("otherExpenses");
+  const otherExpenses = watch("other_expenses");
 
   // Calculate budget totals
   const budgetTotals = useMemo(() => {
-    const totalParticipants = 10;
-
-    // Food costs
-    const foodCostPerPerson =
-      meals.breakfasts * MEAL_PRICES.breakfast +
-      meals.lunches * MEAL_PRICES.lunch +
-      meals.dinners * MEAL_PRICES.dinner +
-      meals.snacks * MEAL_PRICES.snack;
-    const totalFoodCost = foodCostPerPerson * totalParticipants;
-
-    // Gas costs
-    const avgMpg =
-      cars.length > 0
-        ? cars.reduce((sum, car) => sum + (car.mpg || 0), 0) / cars.length
-        : 25;
-    const totalGallons = avgMpg > 0 ? totalMiles / avgMpg : 0;
-    const totalGasCost = totalGallons * GAS_PRICE_PER_GALLON;
-    const gasCostPerPerson =
-      totalParticipants > 0 ? totalGasCost / totalParticipants : 0;
-
-    // Other expenses
-    const totalOtherExpenses = otherExpenses.reduce(
-      (sum, e) => sum + (e.cost || 0),
-      0,
+    const f = compile(formulas);
+    const scope = new Map(
+      Object.entries({
+        breakfasts,
+        lunches,
+        dinners,
+        snacks,
+        total_miles: totalMiles,
+        num_cars: cars.length,
+        average_mpg:
+          cars.reduce((prev, { mpg }) => prev + mpg, 0) / cars.length,
+        total_other_expenses: otherExpenses.reduce(
+          (prev, { cost }) => prev + cost,
+          0,
+        ),
+        num_participants: trip.participant_spots,
+        num_participant_drivers: trip.driver_spots,
+        num_guides: trip.trip_guides.length,
+        num_nights: differenceInCalendarDays(
+          new Date(trip.end_date),
+          new Date(trip.start_date),
+        ),
+      }),
     );
-    const otherCostPerPerson =
-      totalParticipants > 0 ? totalOtherExpenses / totalParticipants : 0;
-
-    // Total trip budget
-    const totalTripBudget = totalFoodCost + totalGasCost + totalOtherExpenses;
-
-    // Per-person base cost
-    const baseCostPerPerson =
-      foodCostPerPerson + gasCostPerPerson + otherCostPerPerson;
-
-    // Participant prices
-    const nonMemberPrice = Math.ceil(baseCostPerPerson);
-    const memberPrice = Math.max(0, nonMemberPrice - MEMBER_DISCOUNT);
-    const driverPrice = Math.ceil(
-      baseCostPerPerson * (1 - DRIVER_DISCOUNT_PERCENT),
-    );
+    f.evaluate(scope);
 
     return {
-      totalFoodCost,
-      totalGasCost,
-      totalOtherExpenses,
-      totalTripBudget,
-      memberPrice,
-      nonMemberPrice,
-      driverPrice,
+      driver_price: scope.get("driver_price"),
+      member_price: scope.get("member_price"),
+      nonmember_price: scope.get("nonmember_price"),
+      gas_budget: scope.get("gas_budget"),
+      food_budget: scope.get("food_budget"),
+      other_budget: scope.get("other_budget"),
     };
-  }, [meals, totalMiles, cars, otherExpenses]);
+  }, [
+    breakfasts,
+    lunches,
+    dinners,
+    snacks,
+    totalMiles,
+    cars,
+    otherExpenses,
+    trip,
+    formulas,
+  ]);
 
   const onSubmit = (data: BudgetFormData) => {
     console.log("Budget data:", data, budgetTotals);
+		updateTrip({
+			...data,
+			
+		})
   };
 
   return (
@@ -199,51 +204,45 @@ export default function BudgetPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <Controller
                     control={control}
-                    name="meals.breakfasts"
+                    name="breakfasts"
                     render={({ field }) => (
                       <Field>
                         <FieldLabel>Breakfasts</FieldLabel>
                         <Input type="number" min={0} {...field} />
-                        <FieldError>
-                          {errors.meals?.breakfasts?.message}
-                        </FieldError>
+                        <FieldError>{errors.breakfasts?.message}</FieldError>
                       </Field>
                     )}
                   />
                   <Controller
                     control={control}
-                    name="meals.lunches"
+                    name="lunches"
                     render={({ field }) => (
                       <Field>
                         <FieldLabel>Lunches</FieldLabel>
                         <Input type="number" min={0} {...field} />
-                        <FieldError>
-                          {errors.meals?.lunches?.message}
-                        </FieldError>
+                        <FieldError>{errors.lunches?.message}</FieldError>
                       </Field>
                     )}
                   />
                   <Controller
                     control={control}
-                    name="meals.dinners"
+                    name="dinners"
                     render={({ field }) => (
                       <Field>
                         <FieldLabel>Dinners</FieldLabel>
                         <Input type="number" min={0} {...field} />
-                        <FieldError>
-                          {errors.meals?.dinners?.message}
-                        </FieldError>
+                        <FieldError>{errors.dinners?.message}</FieldError>
                       </Field>
                     )}
                   />
                   <Controller
                     control={control}
-                    name="meals.snacks"
+                    name="snacks"
                     render={({ field }) => (
                       <Field>
                         <FieldLabel>Snacks</FieldLabel>
                         <Input type="number" min={0} {...field} />
-                        <FieldError>{errors.meals?.snacks?.message}</FieldError>
+                        <FieldError>{errors.snacks?.message}</FieldError>
                       </Field>
                     )}
                   />
@@ -267,12 +266,12 @@ export default function BudgetPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Controller
                   control={control}
-                  name="totalMiles"
+                  name="total_miles"
                   render={({ field }) => (
                     <Field>
                       <FieldLabel>Total Miles (Round Trip)</FieldLabel>
                       <Input type="number" min={0} placeholder="0" {...field} />
-                      <FieldError>{errors.totalMiles?.message}</FieldError>
+                      <FieldError>{errors.total_miles?.message}</FieldError>
                     </Field>
                   )}
                 />
@@ -280,10 +279,7 @@ export default function BudgetPage() {
               <Separator />
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex gap-2 items-center">
-                    <span className="text-sm font-medium">Cars</span>
-                    <Badge variant={"secondary"}>{carFields.length}</Badge>
-                  </div>
+                  <span className="text-sm font-medium">Cars</span>
                   <Button
                     type="button"
                     variant="outline"
@@ -382,7 +378,7 @@ export default function BudgetPage() {
                           <TableCell className="py-2">
                             <Controller
                               control={control}
-                              name={`otherExpenses.${index}.description`}
+                              name={`other_expenses.${index}.description`}
                               render={({ field }) => (
                                 <div className="flex flex-col">
                                   <Input
@@ -390,11 +386,11 @@ export default function BudgetPage() {
                                     className="border-0 shadow-none px-0 h-8 focus-visible:ring-0 focus-visible:ring-offset-0"
                                     {...field}
                                   />
-                                  {errors.otherExpenses?.[index]
+                                  {errors.other_expenses?.[index]
                                     ?.description && (
                                     <span className="text-xs text-destructive">
                                       {
-                                        errors.otherExpenses[index].description
+                                        errors.other_expenses[index].description
                                           .message
                                       }
                                     </span>
@@ -406,7 +402,7 @@ export default function BudgetPage() {
                           <TableCell className="py-2">
                             <Controller
                               control={control}
-                              name={`otherExpenses.${index}.cost`}
+                              name={`other_expenses.${index}.cost`}
                               render={({ field }) => (
                                 <div className="flex flex-col items-end">
                                   <div className="flex items-center justify-end gap-1">
@@ -426,9 +422,12 @@ export default function BudgetPage() {
                                       </InputGroupAddon>
                                     </InputGroup>
                                   </div>
-                                  {errors.otherExpenses?.[index]?.cost && (
+                                  {errors.other_expenses?.[index]?.cost && (
                                     <div className="text-xs text-destructive">
-                                      {errors.otherExpenses[index].cost.message}
+                                      {
+                                        errors.other_expenses[index].cost
+                                          .message
+                                      }
                                     </div>
                                   )}
                                 </div>

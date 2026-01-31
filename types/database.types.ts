@@ -80,6 +80,21 @@ export type Database = {
           },
         ]
       }
+      budget_formulas: {
+        Row: {
+          formulas: string
+          updated_at: string
+        }
+        Insert: {
+          formulas: string
+          updated_at?: string
+        }
+        Update: {
+          formulas?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       driver_info: {
         Row: {
           affirm_good_condition: boolean
@@ -871,7 +886,7 @@ export type Database = {
           meet: string | null
           name: string
           native_land: string | null
-          other_costs: Json | null
+          other_expenses: Json | null
           participant_spots: number
           picture_path: string | null
           prior_experience: string | null
@@ -903,7 +918,7 @@ export type Database = {
           meet?: string | null
           name: string
           native_land?: string | null
-          other_costs?: Json | null
+          other_expenses?: Json | null
           participant_spots: number
           picture_path?: string | null
           prior_experience?: string | null
@@ -935,7 +950,7 @@ export type Database = {
           meet?: string | null
           name?: string
           native_land?: string | null
-          other_costs?: Json | null
+          other_expenses?: Json | null
           participant_spots?: number
           picture_path?: string | null
           prior_experience?: string | null
