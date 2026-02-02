@@ -254,341 +254,337 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Left column - Form sections */}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 space-y-6">
-          {/* Section 1: Meals */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Utensils className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-base font-medium">Meals</CardTitle>
-              </div>
-              <CardDescription>
-                Number of times you will be having each meal, NOT meals times
-                people
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FieldGroup>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Controller
-                    control={control}
-                    name="breakfasts"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Breakfasts</FieldLabel>
-                        <Input
-                          type="number"
-                          min={0}
-                          onWheel={(e) => e.currentTarget.blur()}
-                          {...field}
-                        />
-                        <FieldError>{errors.breakfasts?.message}</FieldError>
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="lunches"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Lunches</FieldLabel>
-                        <Input
-                          type="number"
-                          min={0}
-                          onWheel={(e) => e.currentTarget.blur()}
-                          {...field}
-                        />
-                        <FieldError>{errors.lunches?.message}</FieldError>
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="dinners"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Dinners</FieldLabel>
-                        <Input
-                          type="number"
-                          min={0}
-                          onWheel={(e) => e.currentTarget.blur()}
-                          {...field}
-                        />
-                        <FieldError>{errors.dinners?.message}</FieldError>
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="snacks"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Snacks</FieldLabel>
-                        <Input
-                          type="number"
-                          min={0}
-                          onWheel={(e) => e.currentTarget.blur()}
-                          {...field}
-                        />
-                        <FieldError>{errors.snacks?.message}</FieldError>
-                      </Field>
-                    )}
-                  />
-                </div>
-              </FieldGroup>
-            </CardContent>
-          </Card>
-
-          {/* Section 2: Gas */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Car className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-base font-medium">Gas</CardTitle>
-              </div>
-              <CardDescription>
-                Mileage and car MPGs for gas budget
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 space-y-6">
+        {/* Section 1: Meals */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Utensils className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-base font-medium">Meals</CardTitle>
+            </div>
+            <CardDescription>
+              Number of times you will be having each meal, NOT meals times
+              people
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Controller
                   control={control}
-                  name="total_miles"
+                  name="breakfasts"
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Total Miles (Round Trip)</FieldLabel>
+                      <FieldLabel>Breakfasts</FieldLabel>
                       <Input
                         type="number"
                         min={0}
-                        placeholder="0"
                         onWheel={(e) => e.currentTarget.blur()}
                         {...field}
                       />
-                      <FieldError>{errors.total_miles?.message}</FieldError>
+                      <FieldError>{errors.breakfasts?.message}</FieldError>
+                    </Field>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="lunches"
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>Lunches</FieldLabel>
+                      <Input
+                        type="number"
+                        min={0}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        {...field}
+                      />
+                      <FieldError>{errors.lunches?.message}</FieldError>
+                    </Field>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="dinners"
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>Dinners</FieldLabel>
+                      <Input
+                        type="number"
+                        min={0}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        {...field}
+                      />
+                      <FieldError>{errors.dinners?.message}</FieldError>
+                    </Field>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="snacks"
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>Snacks</FieldLabel>
+                      <Input
+                        type="number"
+                        min={0}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        {...field}
+                      />
+                      <FieldError>{errors.snacks?.message}</FieldError>
                     </Field>
                   )}
                 />
               </div>
-              <Separator />
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Cars</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => appendCar({ mpg: DEFAULT_MPG })}
-                    className=""
-                  >
-                    <Plus className="h-3.5 w-3.5 mr-1.5" />
-                    Add Car
-                  </Button>
-                </div>
-                {errors.cars?.root && (
-                  <p className="text-sm text-destructive">
-                    {errors.cars.root.message}
-                  </p>
+            </FieldGroup>
+          </CardContent>
+        </Card>
+
+        {/* Section 2: Gas */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Car className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-base font-medium">Gas</CardTitle>
+            </div>
+            <CardDescription>
+              Mileage and car MPGs for gas budget
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Controller
+                control={control}
+                name="total_miles"
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>Total Miles (Round Trip)</FieldLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="0"
+                      onWheel={(e) => e.currentTarget.blur()}
+                      {...field}
+                    />
+                    <FieldError>{errors.total_miles?.message}</FieldError>
+                  </Field>
                 )}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                  {carFields.map((field, index) => (
-                    <Item
-                      key={field.id}
-                      variant="muted"
-                      size="sm"
-                      className="border border-border"
-                    >
-                      <ItemContent>
-                        <div className="flex flex-row gap-2 items-center">
-                          <div className="text-sm text-muted-foreground font-semibold shrink-0">
-                            Car {index + 1}:
-                          </div>
+              />
+            </div>
+            <Separator />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Cars</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => appendCar({ mpg: DEFAULT_MPG })}
+                  className=""
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  Add Car
+                </Button>
+              </div>
+              {errors.cars?.root && (
+                <p className="text-sm text-destructive">
+                  {errors.cars.root.message}
+                </p>
+              )}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                {carFields.map((field, index) => (
+                  <Item
+                    key={field.id}
+                    variant="muted"
+                    size="sm"
+                    className="border border-border"
+                  >
+                    <ItemContent>
+                      <div className="flex flex-row gap-2 items-center">
+                        <div className="text-sm text-muted-foreground font-semibold shrink-0">
+                          Car {index + 1}:
+                        </div>
+                        <Controller
+                          control={control}
+                          name={`cars.${index}.mpg`}
+                          render={({ field }) => (
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                step={0.1}
+                                className="w-20 h-8 no-spin"
+                                onWheel={(e) => e.currentTarget.blur()}
+                                {...field}
+                                onChange={(e) => field.onChange(e)}
+                              />
+                              <span className="text-sm text-muted-foreground">
+                                MPG
+                              </span>
+                            </div>
+                          )}
+                        />
+                      </div>
+                      {errors.cars?.[index]?.mpg && (
+                        <span className="text-xs text-destructive">
+                          {errors.cars[index].mpg.message}
+                        </span>
+                      )}
+                    </ItemContent>
+                    <ItemActions>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeCar(index)}
+                        className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </ItemActions>
+                  </Item>
+                ))}
+              </div>
+              {carFields.length === 0 && (
+                <div className="flex h-11.5">
+                  <p className="text-muted-foreground text-sm m-auto">
+                    No cars added
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Section 3: Other Expenses */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Receipt className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-base font-medium">
+                Other Expenses
+              </CardTitle>
+            </div>
+            <CardDescription>
+              Parking fees, permits, rentals, campsite fees, and other costs
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {expenseFields.length > 0 ? (
+              <div className="border rounded-md">
+                <Table>
+                  <TableBody>
+                    {expenseFields.map((field, index) => (
+                      <TableRow key={field.id}>
+                        <TableCell className="py-2 text-center text-muted-foreground text-sm">
+                          {index + 1}
+                        </TableCell>
+                        <TableCell className="py-2">
                           <Controller
                             control={control}
-                            name={`cars.${index}.mpg`}
+                            name={`other_expenses.${index}.description`}
                             render={({ field }) => (
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-col">
                                 <Input
-                                  type="number"
-                                  step={0.1}
-                                  className="w-20 h-8 no-spin"
-                                  onWheel={(e) => e.currentTarget.blur()}
+                                  placeholder="e.g., Campsite reservation"
+                                  className="border-0 shadow-none px-0 h-8 focus-visible:ring-0 focus-visible:ring-offset-0"
                                   {...field}
-                                  onChange={(e) => field.onChange(e)}
                                 />
-                                <span className="text-sm text-muted-foreground">
-                                  MPG
-                                </span>
+                                {errors.other_expenses?.[index]
+                                  ?.description && (
+                                  <span className="text-xs text-destructive">
+                                    {
+                                      errors.other_expenses[index].description
+                                        .message
+                                    }
+                                  </span>
+                                )}
                               </div>
                             )}
                           />
-                        </div>
-                        {errors.cars?.[index]?.mpg && (
-                          <span className="text-xs text-destructive">
-                            {errors.cars[index].mpg.message}
-                          </span>
-                        )}
-                      </ItemContent>
-                      <ItemActions>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeCar(index)}
-                          className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </ItemActions>
-                    </Item>
-                  ))}
-                </div>
-                {carFields.length === 0 && (
-                  <div className="flex h-11.5">
-                    <p className="text-muted-foreground text-sm m-auto">
-                      No cars added
-                    </p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Section 3: Other Expenses */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Receipt className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-base font-medium">
-                  Other Expenses
-                </CardTitle>
-              </div>
-              <CardDescription>
-                Parking fees, permits, rentals, campsite fees, and other costs
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {expenseFields.length > 0 ? (
-                <div className="border rounded-md">
-                  <Table>
-                    <TableBody>
-                      {expenseFields.map((field, index) => (
-                        <TableRow key={field.id}>
-                          <TableCell className="py-2 text-center text-muted-foreground text-sm">
-                            {index + 1}
-                          </TableCell>
-                          <TableCell className="py-2">
-                            <Controller
-                              control={control}
-                              name={`other_expenses.${index}.description`}
-                              render={({ field }) => (
-                                <div className="flex flex-col">
-                                  <Input
-                                    placeholder="e.g., Campsite reservation"
-                                    className="border-0 shadow-none px-0 h-8 focus-visible:ring-0 focus-visible:ring-offset-0"
-                                    {...field}
-                                  />
-                                  {errors.other_expenses?.[index]
-                                    ?.description && (
-                                    <span className="text-xs text-destructive">
-                                      {
-                                        errors.other_expenses[index].description
-                                          .message
-                                      }
-                                    </span>
-                                  )}
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <Controller
+                            control={control}
+                            name={`other_expenses.${index}.cost`}
+                            render={({ field }) => (
+                              <div className="flex flex-col items-end">
+                                <div className="flex items-center justify-end gap-1">
+                                  <InputGroup className="border-0 shadow-none h-8 w-30 has-[[data-slot=input-group-control]:focus-visible]:border-transparent has-[[data-slot=input-group-control]:focus-visible]:ring-0">
+                                    <InputGroupInput
+                                      type="number"
+                                      min={0}
+                                      step={0.01}
+                                      placeholder="0.00"
+                                      className="border-0 shadow-none px-0 text-right focus-visible:ring-0 focus-visible:ring-offset-0"
+                                      onWheel={(e) => e.currentTarget.blur()}
+                                      {...field}
+                                      onChange={(e) => field.onChange(e)}
+                                    />
+                                    <InputGroupAddon className="border-0 bg-transparent">
+                                      <span className="text-muted-foreground">
+                                        $
+                                      </span>
+                                    </InputGroupAddon>
+                                  </InputGroup>
                                 </div>
-                              )}
-                            />
-                          </TableCell>
-                          <TableCell className="py-2">
-                            <Controller
-                              control={control}
-                              name={`other_expenses.${index}.cost`}
-                              render={({ field }) => (
-                                <div className="flex flex-col items-end">
-                                  <div className="flex items-center justify-end gap-1">
-                                    <InputGroup className="border-0 shadow-none h-8 w-30 has-[[data-slot=input-group-control]:focus-visible]:border-transparent has-[[data-slot=input-group-control]:focus-visible]:ring-0">
-                                      <InputGroupInput
-                                        type="number"
-                                        min={0}
-                                        step={0.01}
-                                        placeholder="0.00"
-                                        className="border-0 shadow-none px-0 text-right focus-visible:ring-0 focus-visible:ring-offset-0"
-                                        onWheel={(e) => e.currentTarget.blur()}
-                                        {...field}
-                                        onChange={(e) => field.onChange(e)}
-                                      />
-                                      <InputGroupAddon className="border-0 bg-transparent">
-                                        <span className="text-muted-foreground">
-                                          $
-                                        </span>
-                                      </InputGroupAddon>
-                                    </InputGroup>
+                                {errors.other_expenses?.[index]?.cost && (
+                                  <div className="text-xs text-destructive">
+                                    {errors.other_expenses[index].cost.message}
                                   </div>
-                                  {errors.other_expenses?.[index]?.cost && (
-                                    <div className="text-xs text-destructive">
-                                      {
-                                        errors.other_expenses[index].cost
-                                          .message
-                                      }
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            />
-                          </TableCell>
-                          <TableCell className="py-2">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeExpense(index)}
-                              className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="border border-dashed rounded-md py-3.5 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    No other expenses added yet
-                  </p>
-                </div>
-              )}
+                                )}
+                              </div>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeExpense(index)}
+                            className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="border border-dashed rounded-md py-3.5 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No other expenses added yet
+                </p>
+              </div>
+            )}
 
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => appendExpense({ description: "", cost: 0 })}
-                className="w-full"
-              >
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                Add Expense
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Save Button */}
-          <div className="flex justify-end pt-2">
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? (
-                <>
-                  <Spinner /> Saving...
-                </>
-              ) : (
-                "Save Budget"
-              )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => appendExpense({ description: "", cost: 0 })}
+              className="w-full"
+            >
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              Add Expense
             </Button>
-          </div>
-        </form>
+          </CardContent>
+        </Card>
 
+        {/* Save Button */}
+        <div className="flex justify-end pt-2">
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <Spinner /> Saving...
+              </>
+            ) : (
+              "Save Budget"
+            )}
+          </Button>
+        </div>
+      </form>
 
       {/* Right column - Preview */}
       <div className="lg:w-80 lg:shrink-0">
@@ -604,11 +600,16 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
               <BudgetFormulasDialog formulas={formulas} inputs={inputs} />
             </div>
             <p className="text-xs text-muted-foreground pt-2">
-              Calculated for{" "}
-              {inputs.num_participants +
-                inputs.num_participant_drivers +
-                inputs.num_guides}{" "}
-              people over {inputs.num_nights} nights.
+              Calculated for {inputs.num_participants} participants
+              {inputs.num_participant_drivers > 0
+                ? `, ${inputs.num_participant_drivers} driver${inputs.num_participant_drivers > 1 ? "s" : ""}, `
+                : " "}
+              and {inputs.num_guides} guides{" "}
+              {inputs.num_nights > 0
+                ? `over ${inputs.num_nights} night
+              ${inputs.num_nights > 1 ? "s" : ""}`
+                : " for a day trip"}
+              .
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -916,7 +917,7 @@ function PriceOverrideDialog({
 
             <Field>
               <FieldLabel>Non-Member Price</FieldLabel>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <Controller
                   control={control}
                   name="nonmemberPrice"
@@ -962,7 +963,7 @@ function PriceOverrideDialog({
                     control={control}
                     name="driverPrice"
                     render={({ field }) => (
-                      <InputGroup className="flex-1">
+                      <InputGroup className="w-64">
                         <InputGroupAddon>$</InputGroupAddon>
                         <InputGroupInput
                           type="number"

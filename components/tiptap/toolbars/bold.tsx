@@ -28,7 +28,7 @@ const BoldToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
 						size="icon"
 						className={cn(
 							"h-8 w-8 p-0 sm:h-9 sm:w-9",
-							editor?.isActive("bold") && "bg-accent",
+							editor?.isActive("bold") && "bg-input border",
 							className,
 						)}
 						onClick={(e) => {
