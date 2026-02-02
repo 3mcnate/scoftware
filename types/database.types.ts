@@ -702,6 +702,7 @@ export type Database = {
       trip_cycles: {
         Row: {
           created_at: string
+          driver_signups_start_at: string
           ends_at: string
           guide_post_trip_form: string | null
           id: string
@@ -716,6 +717,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          driver_signups_start_at: string
           ends_at: string
           guide_post_trip_form?: string | null
           id?: string
@@ -730,6 +732,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          driver_signups_start_at?: string
           ends_at?: string
           guide_post_trip_form?: string | null
           id?: string
@@ -870,6 +873,7 @@ export type Database = {
         Row: {
           access_code: string | null
           activity: string | null
+          allow_signups: boolean
           breakfasts: number | null
           budget_confirmed: boolean
           car_mpgs: number[] | null
@@ -879,6 +883,9 @@ export type Database = {
           dinners: number | null
           driver_price_override: number | null
           driver_spots: number
+          driver_ticket_drop_date_override: string | null
+          enable_driver_waitlist: boolean
+          enable_participant_waitlist: boolean
           end_date: string
           gear_questions: string[] | null
           id: string
@@ -886,15 +893,17 @@ export type Database = {
           lunches: number | null
           meet: string | null
           member_price_override: number | null
+          member_ticket_drop_date_override: string | null
           name: string
           native_land: string | null
           nonmember_price_override: number | null
+          nonmember_ticket_drop_date_override: string | null
           other_expenses: Json | null
           participant_spots: number
           picture_path: string | null
           prior_experience: string | null
+          publish_date_override: string | null
           return: string | null
-          signup_status: Database["public"]["Enums"]["trip_signup_status"]
           snacks: number | null
           start_date: string
           total_miles: number | null
@@ -905,6 +914,7 @@ export type Database = {
         Insert: {
           access_code?: string | null
           activity?: string | null
+          allow_signups?: boolean
           breakfasts?: number | null
           budget_confirmed?: boolean
           car_mpgs?: number[] | null
@@ -914,6 +924,9 @@ export type Database = {
           dinners?: number | null
           driver_price_override?: number | null
           driver_spots: number
+          driver_ticket_drop_date_override?: string | null
+          enable_driver_waitlist?: boolean
+          enable_participant_waitlist?: boolean
           end_date: string
           gear_questions?: string[] | null
           id?: string
@@ -921,15 +934,17 @@ export type Database = {
           lunches?: number | null
           meet?: string | null
           member_price_override?: number | null
+          member_ticket_drop_date_override?: string | null
           name: string
           native_land?: string | null
           nonmember_price_override?: number | null
+          nonmember_ticket_drop_date_override?: string | null
           other_expenses?: Json | null
           participant_spots: number
           picture_path?: string | null
           prior_experience?: string | null
+          publish_date_override?: string | null
           return?: string | null
-          signup_status?: Database["public"]["Enums"]["trip_signup_status"]
           snacks?: number | null
           start_date: string
           total_miles?: number | null
@@ -940,6 +955,7 @@ export type Database = {
         Update: {
           access_code?: string | null
           activity?: string | null
+          allow_signups?: boolean
           breakfasts?: number | null
           budget_confirmed?: boolean
           car_mpgs?: number[] | null
@@ -949,6 +965,9 @@ export type Database = {
           dinners?: number | null
           driver_price_override?: number | null
           driver_spots?: number
+          driver_ticket_drop_date_override?: string | null
+          enable_driver_waitlist?: boolean
+          enable_participant_waitlist?: boolean
           end_date?: string
           gear_questions?: string[] | null
           id?: string
@@ -956,15 +975,17 @@ export type Database = {
           lunches?: number | null
           meet?: string | null
           member_price_override?: number | null
+          member_ticket_drop_date_override?: string | null
           name?: string
           native_land?: string | null
           nonmember_price_override?: number | null
+          nonmember_ticket_drop_date_override?: string | null
           other_expenses?: Json | null
           participant_spots?: number
           picture_path?: string | null
           prior_experience?: string | null
+          publish_date_override?: string | null
           return?: string | null
-          signup_status?: Database["public"]["Enums"]["trip_signup_status"]
           snacks?: number | null
           start_date?: string
           total_miles?: number | null

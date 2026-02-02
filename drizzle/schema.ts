@@ -116,8 +116,8 @@ export const profiles = pgTable("profiles", {
 			name: "profiles_id_fkey"
 		}).onUpdate("cascade").onDelete("cascade"),
 	unique("profiles_phone_key").on(table.phone),
-	pgPolicy("Allow users to update own profile", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(id = ( SELECT auth.uid() AS uid))`, withCheck: sql`(id = ( SELECT auth.uid() AS uid))`  }),
-	pgPolicy("Allow guides, user to select own profile", { as: "permissive", for: "select", to: ["authenticated"] }),
+	pgPolicy("Allow guides, user to select own profile", { as: "permissive", for: "select", to: ["authenticated"], using: sql`((id = ( SELECT auth.uid() AS uid)) OR authorize('guide'::user_role))` }),
+	pgPolicy("Allow users to update own profile", { as: "permissive", for: "update", to: ["authenticated"] }),
 ]);
 
 export const published_trips = pgTable("published_trips", {
@@ -146,8 +146,8 @@ export const published_trips = pgTable("published_trips", {
 			foreignColumns: [trips.id],
 			name: "published_trips_id_fkey"
 		}),
-	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"], using: sql`visible` }),
-	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"] }),
+	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"], using: sql`has_trip_ticket(( SELECT auth.uid() AS uid), id)` }),
+	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
 export const tickets = pgTable("tickets", {
@@ -259,8 +259,8 @@ export const roles = pgTable("roles", {
 			foreignColumns: [profiles.id],
 			name: "roles_user_id_fkey"
 		}).onUpdate("cascade").onDelete("cascade"),
-	pgPolicy("Allow guides to view roles", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
-	pgPolicy("Allow auth admin to read user roles", { as: "permissive", for: "select", to: ["supabase_auth_admin"] }),
+	pgPolicy("Allow auth admin to read user roles", { as: "permissive", for: "select", to: ["supabase_auth_admin"], using: sql`true` }),
+	pgPolicy("Allow guides to view roles", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
 export const trips = pgTable("trips", {
@@ -272,7 +272,6 @@ export const trips = pgTable("trips", {
 	driver_spots: integer().notNull(),
 	participant_spots: integer().notNull(),
 	gear_questions: text().array(),
-	signup_status: trip_signup_status().default('open').notNull(),
 	what_to_bring: text().array(),
 	access_code: text(),
 	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
@@ -297,10 +296,17 @@ export const trips = pgTable("trips", {
 	member_price_override: numeric(),
 	nonmember_price_override: numeric(),
 	driver_price_override: numeric(),
+	allow_signups: boolean().default(true).notNull(),
+	enable_participant_waitlist: boolean().default(false).notNull(),
+	enable_driver_waitlist: boolean().default(false).notNull(),
+	publish_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+	member_ticket_drop_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+	nonmember_ticket_drop_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+	driver_ticket_drop_date_override: timestamp({ withTimezone: true, mode: 'string' }),
 }, (table) => [
-	pgPolicy("Allow trip guides, admins to update trips", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(is_trip_guide(( SELECT auth.uid() AS uid), id) OR authorize('admin'::user_role))`, withCheck: sql`(is_trip_guide(( SELECT auth.uid() AS uid), id) OR authorize('admin'::user_role))`  }),
+	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"], using: sql`((is_trip_guide(id, ( SELECT auth.uid() AS uid)) OR authorize('admin'::user_role)) AND (NOT trip_has_tickets(id)))` }),
+	pgPolicy("Allow trip guides, admins to update trips", { as: "permissive", for: "update", to: ["authenticated"] }),
 	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"] }),
-	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"] }),
 	check("ends_after_start", sql`start_date < end_date`),
 	check("trips_breakfasts_check", sql`breakfasts >= 0`),
 	check("trips_car_mpgs_check", sql`(0)::numeric <= ALL (car_mpgs)`),
@@ -328,4 +334,6 @@ export const trip_guides = pgTable("trip_guides", {
 		}).onUpdate("cascade").onDelete("cascade"),
 	primaryKey({ columns: [table.user_id, table.trip_id], name: "trip_guides_pkey"}),
 	pgPolicy("Allow guides to select trip guides", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
+	pgPolicy("Allow trip guides to remove trip guides", { as: "permissive", for: "delete", to: ["public"] }),
+	pgPolicy("Guides can add other guides to trip", { as: "permissive", for: "insert", to: ["authenticated"] }),
 ]);

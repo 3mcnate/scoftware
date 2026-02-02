@@ -273,3 +273,36 @@ VALUES
 		'2026-01-08 07:50:37.447202+00',
 		'2026-01-07 07:50:22.765013+00'
 	);
+
+INSERT INTO
+	"public"."trip_cycles" (
+		"id",
+		"created_at",
+		"updated_at",
+		"name",
+		"starts_at",
+		"ends_at",
+		"trips_published_at",
+		"member_signups_start_at",
+		"nonmember_signups_start_at",
+		"range",
+		"trip_feedback_form",
+		"guide_post_trip_form",
+		"driver_signups_start_at"
+	)
+VALUES
+	(
+		'316b4e28-a99f-4fc0-8360-19ad1b038c8f',
+		'2026-02-02 23:29:18.092714+00',
+		'2026-02-02 23:30:43.628163+00',
+		'Trip cycle 2 spring 2026',
+		'2026-02-01 08:00:00+00',
+		'2026-03-01 07:59:00+00',
+		'2026-02-05 04:00:00+00',
+		'2026-02-04 07:00:00+00',
+		'2026-02-05 17:00:00+00',
+		'["2026-02-01 08:00:00+00","2026-03-01 07:59:00+00")',
+		null,
+		null,
+		'2026-02-04 20:00:00+00'
+	);

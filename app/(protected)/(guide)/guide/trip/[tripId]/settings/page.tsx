@@ -199,8 +199,8 @@ function TripSettingsForm({ trip }: { trip: TripData }) {
   return (
     <div className="space-y-8">
       <BasicInfoSection trip={trip} />
-      <GuidesSection trip={trip} currentUserId={userId} />
       <SignupSettingsSection trip={trip} />
+      <GuidesSection trip={trip} currentUserId={userId} />
       <DestructiveSection trip={trip} currentUserId={userId} />
     </div>
   );
@@ -629,7 +629,8 @@ function GuidesSection({
 
 const SignupSettingsSchema = z.object({
   allow_signups: z.boolean(),
-  enable_waitlist: z.boolean(),
+  enable_participant_waitlist: z.boolean(),
+  enable_driver_waitlist: z.boolean(),
   require_access_code: z.boolean(),
   access_code: z.string().optional(),
 });
@@ -648,8 +649,9 @@ function SignupSettingsSection({ trip }: { trip: TripData }) {
   } = useForm<SignupSettingsFormData>({
     resolver: standardSchemaResolver(SignupSettingsSchema),
     defaultValues: {
-      allow_signups: trip.signup_status === "open",
-      enable_waitlist: true,
+      allow_signups: trip.allow_signups,
+      enable_participant_waitlist: trip.enable_participant_waitlist,
+      enable_driver_waitlist: trip.enable_driver_waitlist,
       require_access_code: !!trip.access_code,
       access_code: trip.access_code ?? "",
     },
@@ -661,7 +663,9 @@ function SignupSettingsSection({ trip }: { trip: TripData }) {
     await updateTrip(
       {
         id: trip.id,
-        signup_status: data.allow_signups ? "open" : "closed",
+        allow_signups: data.allow_signups,
+        enable_participant_waitlist: data.enable_participant_waitlist,
+        enable_driver_waitlist: data.enable_driver_waitlist,
         access_code: data.require_access_code ? data.access_code || null : null,
       },
       {
@@ -696,7 +700,7 @@ function SignupSettingsSection({ trip }: { trip: TripData }) {
             control={control}
             name="allow_signups"
             render={({ field }) => (
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-12">
                 <div className="space-y-0.5">
                   <FieldLabel>Allow Signups</FieldLabel>
                   <p className="text-sm text-muted-foreground">
@@ -713,13 +717,32 @@ function SignupSettingsSection({ trip }: { trip: TripData }) {
 
           <Controller
             control={control}
-            name="enable_waitlist"
+            name="enable_participant_waitlist"
             render={({ field }) => (
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-12">
                 <div className="space-y-0.5">
-                  <FieldLabel>Enable Waitlist</FieldLabel>
+                  <FieldLabel>Enable Participant Waitlist</FieldLabel>
                   <p className="text-sm text-muted-foreground">
-                    Allow participants to join a waitlist when the trip is full
+                    When enabled, participants cannot sign up and may only join the waitlist, even if a spot is available. Participants can only sign up if you send them a signup link. The waitlist is enabled automatically when participant spots fill up.
+                  </p>
+                </div>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </div>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="enable_driver_waitlist"
+            render={({ field }) => (
+              <div className="flex items-center justify-between gap-12">
+                <div className="space-y-0.5">
+                  <FieldLabel>Enable Driver Waitlist</FieldLabel>
+                  <p className="text-sm text-muted-foreground">
+                    When enabled, drivers cannot sign up and may only join the waitlist, even if a driver spot is available. Drivers can only sign up if you send them a signup link. The waitlist is enabled automatically when driver spots fill up.
                   </p>
                 </div>
                 <Switch
@@ -734,11 +757,11 @@ function SignupSettingsSection({ trip }: { trip: TripData }) {
             control={control}
             name="require_access_code"
             render={({ field }) => (
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-12">
                 <div className="space-y-0.5">
                   <FieldLabel>Require Signup Code</FieldLabel>
                   <p className="text-sm text-muted-foreground">
-                    Participants must enter a code to sign up
+                    Participants and drivers must enter a code to sign up
                   </p>
                 </div>
                 <Switch
@@ -843,15 +866,14 @@ function DestructiveSection({
   const isOnlyGuide = trip.trip_guides.length === 1;
 
   return (
-    <Card className="border-destructive/50">
+    <Card className="">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <Trash2 className="h-4 w-4 text-destructive" />
-          <CardTitle className="text-base font-medium text-destructive">
+          <Trash2 className="h-4 w-4 " />
+          <CardTitle className="text-base font-medium ">
             Danger Zone
           </CardTitle>
         </div>
-        <CardDescription>Irreversible actions for this trip</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between p-4 border border-destructive/30 rounded-lg">
