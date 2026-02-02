@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { Switch } from "@/components/ui/switch";
-import { Pencil } from "lucide-react";
+import { ChevronDownIcon, Pencil } from "lucide-react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { z } from "zod/v4";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Accordion, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const BudgetSchema = z.object({
   breakfasts: z.coerce.number().min(0, "Must be 0 or more"),
@@ -113,7 +119,7 @@ function useBudgetTotals(
   control: Control<BudgetFormData>,
   formulas: string,
   trip: TripData,
-): BudgetTotals & { inputs: BudgetInputs } {
+): BudgetTotals & { inputs: BudgetInputs; scope: Map<string, number> } {
   const formValues = useWatch({ control });
   const compiledFormulas = useMemo(() => compile(formulas), [formulas]);
 
@@ -158,6 +164,7 @@ function useBudgetTotals(
 
     return {
       inputs,
+      scope,
       driver_price: Math.ceil(scope.get("driver_price") ?? 0),
       member_price: Math.ceil(scope.get("member_price") ?? 0),
       nonmember_price: Math.ceil(scope.get("nonmember_price") ?? 0),
@@ -180,7 +187,7 @@ function useBudgetTotals(
 function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
   const { mutateAsync: updateTrip, isPending: isSaving } = useUpdateTrip();
 
-  const DEFAULT_MPG = 25;
+  const DEFAULT_MPG = 22;
 
   const {
     control,
@@ -221,7 +228,11 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
     name: "other_expenses",
   });
 
-  const { inputs, ...budgetTotals } = useBudgetTotals(control, formulas, trip);
+  const { inputs, scope, ...budgetTotals } = useBudgetTotals(
+    control,
+    formulas,
+    trip,
+  );
 
   const onSubmit = async (data: BudgetFormData) => {
     await updateTrip(
@@ -385,6 +396,9 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                   Add Car
                 </Button>
               </div>
+							<CardDescription className="-mt-2">
+								Put {DEFAULT_MPG} for participant drivers
+							</CardDescription>
               {errors.cars?.root && (
                 <p className="text-sm text-destructive">
                   {errors.cars.root.message}
@@ -597,7 +611,11 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                   Budget & Prices
                 </CardTitle>
               </div>
-              <BudgetFormulasDialog formulas={formulas} inputs={inputs} />
+              <BudgetFormulasDialog
+                formulas={formulas}
+                inputs={inputs}
+                scope={scope}
+              />
             </div>
             <p className="text-xs text-muted-foreground pt-2">
               Calculated for {inputs.num_participants} participants
@@ -608,8 +626,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
               {inputs.num_nights > 0
                 ? `over ${inputs.num_nights} night
               ${inputs.num_nights > 1 ? "s" : ""}`
-                : " for a day trip"}
-              .
+                : " on a day trip"}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -718,9 +735,11 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
 function BudgetFormulasDialog({
   formulas,
   inputs,
+  scope,
 }: {
   formulas: string;
   inputs: BudgetInputs;
+  scope: Map<string, number>;
 }) {
   return (
     <Dialog>
@@ -729,7 +748,7 @@ function BudgetFormulasDialog({
           <Info className="size-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="min-w-[400px] md:min-w-[800px]!">
         <DialogHeader>
           <DialogTitle>Budget Formulas</DialogTitle>
           <DialogDescription>
@@ -745,6 +764,12 @@ function BudgetFormulasDialog({
             </pre>
           ))}
           <pre className="text-sm mt-3">{formulas}</pre>
+					<p className="text-sm font-semibold mb-3">All calculated values:</p>
+          {Array.from(scope.entries()).map(([key, value]) => (
+            <pre key={key} className="text-sm">
+              {key} = <span className="text-blue-500">{value}</span>
+            </pre>
+          ))}
         </div>
         <DialogFooter>
           <DialogClose asChild>
@@ -773,6 +798,7 @@ function PriceOverrideDialog({
 }) {
   const [open, setOpen] = useState(false);
   const { mutateAsync: updateTrip, isPending } = useUpdateTrip();
+	const { refetch: refetchTrip } = useTrip(tripId);
 
   const PriceOverrideSchema = z.object({
     memberEnabled: z.boolean(),
@@ -841,8 +867,9 @@ function PriceOverrideDialog({
         driver_price_override: data.driverEnabled ? data.driverPrice : null,
       },
       {
-        onSuccess: () => {
-          toast.success("Price overrides saved");
+        onSuccess: async () => {
+          await refetchTrip();
+					toast.success("Price overrides saved");
           setOpen(false);
         },
         onError: (err) => {
