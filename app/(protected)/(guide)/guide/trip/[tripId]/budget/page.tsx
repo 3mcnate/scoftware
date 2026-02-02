@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { z } from "zod/v4";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,15 @@ import {
 } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { Item, ItemContent, ItemActions } from "@/components/ui/item";
-import { Plus, Trash2, Car, Utensils, Receipt, Calculator } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Car,
+  Utensils,
+  Receipt,
+  Calculator,
+  Info,
+} from "lucide-react";
 import {
   InputGroup,
   InputGroupAddon,
@@ -35,6 +43,18 @@ import { useBudgetFormulas } from "@/data/client/budget/budget-formulas";
 import { BudgetFormSkeleton } from "@/components/guide-dashboard/trip-view/budget-form-skeleton";
 import { differenceInCalendarDays } from "date-fns";
 import { useUpdateTrip } from "@/data/client/trips/use-update-trip";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { DialogTrigger } from "@radix-ui/react-dialog";
+import { getAverageMPGs } from "@/utils/math";
+import { Spinner } from "@/components/ui/spinner";
 
 const BudgetSchema = z.object({
   breakfasts: z.coerce.number().min(0, "Must be 0 or more"),
@@ -80,9 +100,13 @@ export default function BudgetPage() {
 }
 
 function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
+	"use no memo";
+
+  const { mutateAsync: updateTrip, isPending: isSaving } = useUpdateTrip();
+
   const {
     control,
-    watch,
+    handleSubmit,
     formState: { errors },
   } = useForm<BudgetFormData>({
     resolver: standardSchemaResolver(BudgetSchema),
@@ -92,7 +116,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
       dinners: 0,
       snacks: 0,
       total_miles: 0,
-      cars: [{ mpg: 0 }, { mpg: 0 }],
+      cars: [{ mpg: 25 }, { mpg: 25 }],
       other_expenses: [],
     },
   });
@@ -115,34 +139,31 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
     name: "other_expenses",
   });
 
-	const { mutateAsync: updateTrip, isPending: isSaving } = useUpdateTrip();
+  const cars = useWatch({ control, name: "cars" });
+  const breakfasts = useWatch({ control, name: "breakfasts" });
+  const lunches = useWatch({ control, name: "lunches" });
+  const dinners = useWatch({ control, name: "dinners" });
+  const snacks = useWatch({ control, name: "snacks" });
+  const totalMiles = useWatch({ control, name: "total_miles" });
+  const otherExpenses = useWatch({ control, name: "other_expenses" });
 
-  // Watch all form values for real-time calculations
-  const breakfasts = watch("breakfasts");
-  const lunches = watch("lunches");
-  const dinners = watch("dinners");
-  const snacks = watch("snacks");
-  const totalMiles = watch("total_miles");
-  const cars = watch("cars");
-  const otherExpenses = watch("other_expenses");
+  const compiledFormulas = useMemo(() => {
+    return compile(formulas);
+  }, [formulas]);
 
   // Calculate budget totals
   const budgetTotals = useMemo(() => {
-    const f = compile(formulas);
-    const scope = new Map(
+    const scope: Map<string, number> = new Map(
       Object.entries({
-        breakfasts,
-        lunches,
-        dinners,
-        snacks,
-        total_miles: totalMiles,
-        num_cars: cars.length,
-        average_mpg:
-          cars.reduce((prev, { mpg }) => prev + mpg, 0) / cars.length,
-        total_other_expenses: otherExpenses.reduce(
-          (prev, { cost }) => prev + cost,
-          0,
-        ),
+        breakfasts: breakfasts ?? 0,
+        lunches: lunches ?? 0,
+        dinners: dinners ?? 0,
+        snacks: snacks ?? 0,
+        total_miles: totalMiles ?? 0,
+        num_cars: cars?.length ?? 0,
+        average_mpg: getAverageMPGs(cars?.map((c) => c.mpg) ?? []),
+        total_other_expenses:
+          otherExpenses?.reduce((prev, { cost }) => prev + cost, 0) ?? 0,
         num_participants: trip.participant_spots,
         num_participant_drivers: trip.driver_spots,
         num_guides: trip.trip_guides.length,
@@ -152,15 +173,21 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
         ),
       }),
     );
-    f.evaluate(scope);
+
+    compiledFormulas.evaluate(scope);
+
+    const gas_budget = scope.get("gas_budget") ?? 0;
+    const food_budget = scope.get("food_budget") ?? 0;
+    const other_budget = scope.get("other_budget") ?? 0;
 
     return {
-      driver_price: scope.get("driver_price"),
-      member_price: scope.get("member_price"),
-      nonmember_price: scope.get("nonmember_price"),
-      gas_budget: scope.get("gas_budget"),
-      food_budget: scope.get("food_budget"),
-      other_budget: scope.get("other_budget"),
+      driver_price: Math.ceil(scope.get("driver_price") ?? 0),
+      member_price: Math.ceil(scope.get("member_price") ?? 0),
+      nonmember_price: Math.ceil(scope.get("nonmember_price") ?? 0),
+      gas_budget,
+      food_budget,
+      other_budget,
+      total_budget: gas_budget + food_budget + other_budget,
     };
   }, [
     breakfasts,
@@ -170,16 +197,19 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
     totalMiles,
     cars,
     otherExpenses,
-    trip,
-    formulas,
+    compiledFormulas,
+    trip.driver_spots,
+    trip.end_date,
+    trip.participant_spots,
+    trip.start_date,
+    trip.trip_guides.length,
   ]);
 
   const onSubmit = (data: BudgetFormData) => {
     console.log("Budget data:", data, budgetTotals);
-		updateTrip({
-			...data,
-			
-		})
+    updateTrip({
+      ...data,
+    });
   };
 
   return (
@@ -208,7 +238,12 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                     render={({ field }) => (
                       <Field>
                         <FieldLabel>Breakfasts</FieldLabel>
-                        <Input type="number" min={0} {...field} />
+                        <Input
+                          type="number"
+                          min={0}
+                          onWheel={(e) => e.currentTarget.blur()}
+                          {...field}
+                        />
                         <FieldError>{errors.breakfasts?.message}</FieldError>
                       </Field>
                     )}
@@ -219,7 +254,12 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                     render={({ field }) => (
                       <Field>
                         <FieldLabel>Lunches</FieldLabel>
-                        <Input type="number" min={0} {...field} />
+                        <Input
+                          type="number"
+                          min={0}
+                          onWheel={(e) => e.currentTarget.blur()}
+                          {...field}
+                        />
                         <FieldError>{errors.lunches?.message}</FieldError>
                       </Field>
                     )}
@@ -230,7 +270,12 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                     render={({ field }) => (
                       <Field>
                         <FieldLabel>Dinners</FieldLabel>
-                        <Input type="number" min={0} {...field} />
+                        <Input
+                          type="number"
+                          min={0}
+                          onWheel={(e) => e.currentTarget.blur()}
+                          {...field}
+                        />
                         <FieldError>{errors.dinners?.message}</FieldError>
                       </Field>
                     )}
@@ -241,7 +286,12 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                     render={({ field }) => (
                       <Field>
                         <FieldLabel>Snacks</FieldLabel>
-                        <Input type="number" min={0} {...field} />
+                        <Input
+                          type="number"
+                          min={0}
+                          onWheel={(e) => e.currentTarget.blur()}
+                          {...field}
+                        />
                         <FieldError>{errors.snacks?.message}</FieldError>
                       </Field>
                     )}
@@ -270,7 +320,13 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                   render={({ field }) => (
                     <Field>
                       <FieldLabel>Total Miles (Round Trip)</FieldLabel>
-                      <Input type="number" min={0} placeholder="0" {...field} />
+                      <Input
+                        type="number"
+                        min={0}
+                        placeholder="0"
+                        onWheel={(e) => e.currentTarget.blur()}
+                        {...field}
+                      />
                       <FieldError>{errors.total_miles?.message}</FieldError>
                     </Field>
                   )}
@@ -284,7 +340,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => appendCar({ mpg: 22 })}
+                    onClick={() => appendCar({ mpg: 25 })}
                     className=""
                   >
                     <Plus className="h-3.5 w-3.5 mr-1.5" />
@@ -318,6 +374,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                                   type="number"
                                   step={0.1}
                                   className="w-20 h-8"
+                                  onWheel={(e) => e.currentTarget.blur()}
                                   {...field}
                                 />
                                 <span className="text-sm text-muted-foreground">
@@ -346,8 +403,14 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                       </ItemActions>
                     </Item>
                   ))}
-                  <div className="flex"></div>
                 </div>
+                {cars.length === 0 && (
+                  <div className="flex h-11.5">
+                    <p className="text-muted-foreground text-sm m-auto">
+                      No cars added
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -413,6 +476,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                                         step={0.01}
                                         placeholder="0.00"
                                         className="border-0 shadow-none px-0 text-right focus-visible:ring-0 focus-visible:ring-offset-0"
+                                        onWheel={(e) => e.currentTarget.blur()}
                                         {...field}
                                       />
                                       <InputGroupAddon className="border-0 bg-transparent">
@@ -473,7 +537,15 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
 
           {/* Save Button */}
           <div className="flex justify-end pt-2">
-            <Button type="submit">Save Budget</Button>
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Spinner /> Saving...
+                </>
+              ) : (
+                "Save Budget"
+              )}
+            </Button>
           </div>
         </div>
 
@@ -481,11 +553,37 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
         <div className="lg:w-80 lg:shrink-0">
           <Card className="lg:sticky lg:top-6">
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <Calculator className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-base font-medium">
-                  Budget & Prices
-                </CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Calculator className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-base font-medium">
+                    Budget & Prices
+                  </CardTitle>
+                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button size="icon" variant="ghost">
+                      <Info className="size-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Budget Formulas</DialogTitle>
+                      <DialogDescription>
+                        View the budget formulas used to calculate the prices
+                        and budget for this trip.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="h-128 overflow-scroll">
+                      <pre className="text-sm">{formulas}</pre>
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant={"outline"}>Close</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -493,20 +591,20 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                 <p className="font-medium">Budget</p>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Food</span>
-                  <span>{formatCurrency(budgetTotals.totalFoodCost)}</span>
+                  <span>{formatCurrency(budgetTotals.food_budget)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Gas</span>
-                  <span>{formatCurrency(budgetTotals.totalGasCost)}</span>
+                  <span>{formatCurrency(budgetTotals.gas_budget)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Other</span>
-                  <span>{formatCurrency(budgetTotals.totalOtherExpenses)}</span>
+                  <span>{formatCurrency(budgetTotals.other_budget)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Total</span>
-                  <span>{formatCurrency(budgetTotals.totalTripBudget)}</span>
+                  <span>{formatCurrency(budgetTotals.total_budget)}</span>
                 </div>
               </div>
 
@@ -517,19 +615,19 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Member</span>
                   <span className="font-medium">
-                    {formatCurrency(budgetTotals.memberPrice)}
+                    {formatCurrency(budgetTotals.member_price)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Non-Member</span>
                   <span className="font-medium">
-                    {formatCurrency(budgetTotals.nonMemberPrice)}
+                    {formatCurrency(budgetTotals.nonmember_price)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Driver</span>
                   <span className="font-medium">
-                    {formatCurrency(budgetTotals.driverPrice)}
+                    {formatCurrency(budgetTotals.driver_price)}
                   </span>
                 </div>
               </div>

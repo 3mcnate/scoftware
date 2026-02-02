@@ -12,3 +12,16 @@ export interface CalculateBudgetInputs {
 	num_guides: number;
 	num_nights: number;
 }
+
+/**
+ * Returns 1 if the list is empty or the avg mpgs are 0.
+ */
+export function getAverageMPGs(mpgs: number[]): number {
+  const valid = mpgs.filter(n => Number.isFinite(n));
+
+  if (valid.length === 0) return 1;
+
+  const sum = valid.reduce((acc, n) => acc + n, 0);
+	if (sum === 0) return 1;
+  return sum / valid.length;
+}
