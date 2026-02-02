@@ -81,6 +81,9 @@ export const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
 			snacks,
 			other_expenses,
 			budget_confirmed,
+			member_price_override,
+			nonmember_price_override,
+			driver_price_override,
 			trip_guides (
 				profiles (
 					id,

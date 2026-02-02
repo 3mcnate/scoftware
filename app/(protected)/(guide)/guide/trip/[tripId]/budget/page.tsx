@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
+import { Switch } from "@/components/ui/switch";
+import { Pencil } from "lucide-react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { z } from "zod/v4";
 import { Button } from "@/components/ui/button";
@@ -53,9 +55,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
-import { getAverageMPGs } from "@/utils/math";
+import { BudgetTotals, BudgetInputs, getAverageMPGs } from "@/utils/math";
 import { Spinner } from "@/components/ui/spinner";
 import type { Control } from "react-hook-form";
+import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
+import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const BudgetSchema = z.object({
   breakfasts: z.coerce.number().min(0, "Must be 0 or more"),
@@ -100,22 +109,11 @@ export default function BudgetPage() {
   return <BudgetForm trip={trip} formulas={formulas.formulas} />;
 }
 
-type BudgetTotals = {
-  driver_price: number;
-  member_price: number;
-  nonmember_price: number;
-  gas_budget: number;
-  food_budget: number;
-  other_budget: number;
-  total_budget: number;
-};
-
 function useBudgetTotals(
   control: Control<BudgetFormData>,
   formulas: string,
   trip: TripData,
-): BudgetTotals {
-
+): BudgetTotals & { inputs: BudgetInputs } {
   const formValues = useWatch({ control });
   const compiledFormulas = useMemo(() => compile(formulas), [formulas]);
 
@@ -130,29 +128,28 @@ function useBudgetTotals(
       other_expenses = [],
     } = formValues;
 
-    const scope: Map<string, number> = new Map(
-      Object.entries({
-        breakfasts,
-        lunches,
-        dinners,
-        snacks,
-        total_miles,
-        num_cars: cars.length,
-        average_mpg: getAverageMPGs(cars.map((c) => Number(c.mpg) ?? 0)),
-        total_other_expenses: other_expenses.reduce(
-          (prev, { cost }) => prev + (Number(cost) ?? 0),
-          0,
-        ),
-        num_participants: trip.participant_spots,
-        num_participant_drivers: trip.driver_spots,
-        num_guides: trip.trip_guides.length,
-        num_nights: differenceInCalendarDays(
-          new Date(trip.end_date),
-          new Date(trip.start_date),
-        ),
-      }),
-    );
+    const inputs = {
+      breakfasts,
+      lunches,
+      dinners,
+      snacks,
+      total_miles,
+      num_cars: cars.length,
+      average_mpg: getAverageMPGs(cars.map((c) => Number(c.mpg) ?? 0)),
+      total_other_expenses: other_expenses.reduce(
+        (prev, { cost }) => prev + (Number(cost) ?? 0),
+        0,
+      ),
+      num_participants: trip.participant_spots,
+      num_participant_drivers: trip.driver_spots,
+      num_guides: trip.trip_guides.length,
+      num_nights: differenceInCalendarDays(
+        new Date(trip.end_date),
+        new Date(trip.start_date),
+      ),
+    };
 
+    const scope: Map<string, number> = new Map(Object.entries(inputs));
     compiledFormulas.evaluate(scope);
 
     const gas_budget = scope.get("gas_budget") ?? 0;
@@ -160,6 +157,7 @@ function useBudgetTotals(
     const other_budget = scope.get("other_budget") ?? 0;
 
     return {
+      inputs,
       driver_price: Math.ceil(scope.get("driver_price") ?? 0),
       member_price: Math.ceil(scope.get("member_price") ?? 0),
       nonmember_price: Math.ceil(scope.get("nonmember_price") ?? 0),
@@ -182,19 +180,25 @@ function useBudgetTotals(
 function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
   const { mutateAsync: updateTrip, isPending: isSaving } = useUpdateTrip();
 
+  const DEFAULT_MPG = 25;
+
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm<BudgetFormData>({
     resolver: standardSchemaResolver(BudgetSchema),
     defaultValues: {
-      breakfasts: 0,
-      lunches: 0,
-      dinners: 0,
-      snacks: 0,
-      total_miles: 0,
-      cars: [{ mpg: 25 }, { mpg: 25 }],
+      breakfasts: trip.breakfasts ?? 0,
+      lunches: trip.lunches ?? 0,
+      dinners: trip.dinners ?? 0,
+      snacks: trip.snacks ?? 0,
+      total_miles: trip.total_miles ?? 0,
+      cars: trip.car_mpgs?.map((mpg) => ({ mpg })) ?? [
+        { mpg: DEFAULT_MPG },
+        { mpg: DEFAULT_MPG },
+      ],
       other_expenses: [],
     },
   });
@@ -217,20 +221,40 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
     name: "other_expenses",
   });
 
-  const budgetTotals = useBudgetTotals(control, formulas, trip);
+  const { inputs, ...budgetTotals } = useBudgetTotals(control, formulas, trip);
 
-  const onSubmit = (data: BudgetFormData) => {
-    console.log("Budget data:", data, budgetTotals);
-    updateTrip({
-      ...data,
-    });
+  const onSubmit = async (data: BudgetFormData) => {
+    await updateTrip(
+      {
+        id: trip.id,
+        breakfasts: data.breakfasts,
+        lunches: data.lunches,
+        dinners: data.dinners,
+        snacks: data.snacks,
+        total_miles: data.total_miles,
+        car_mpgs: data.cars.map((c) => Number(c.mpg)) ?? [],
+        other_expenses: data.other_expenses,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Successfully saved budget");
+          reset(data);
+        },
+        onError: (err) => {
+          toast.error("Error: failed to save budget");
+          console.error(err);
+        },
+      },
+    );
   };
 
+  useUnsavedChangesPrompt(isDirty);
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left column - Form sections */}
-        <div className="flex-1 space-y-6">
+    <div className="flex flex-col lg:flex-row gap-6">
+      {/* Left column - Form sections */}
+
+        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 space-y-6">
           {/* Section 1: Meals */}
           <Card>
             <CardHeader>
@@ -354,7 +378,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => appendCar({ mpg: 25 })}
+                    onClick={() => appendCar({ mpg: DEFAULT_MPG })}
                     className=""
                   >
                     <Plus className="h-3.5 w-3.5 mr-1.5" />
@@ -563,94 +587,433 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
               )}
             </Button>
           </div>
-        </div>
+        </form>
 
-        {/* Right column - Preview */}
-        <div className="lg:w-80 lg:shrink-0">
-          <Card className="lg:sticky lg:top-6">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calculator className="h-4 w-4 text-muted-foreground" />
-                  <CardTitle className="text-base font-medium">
-                    Budget & Prices
-                  </CardTitle>
-                </div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button size="icon" variant="ghost">
-                      <Info className="size-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Budget Formulas</DialogTitle>
-                      <DialogDescription>
-                        View the budget formulas used to calculate the prices
-                        and budget for this trip.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="h-128 overflow-scroll">
-                      <pre className="text-sm">{formulas}</pre>
-                    </div>
-                    <DialogFooter>
-                      <DialogClose asChild>
-                        <Button variant={"outline"}>Close</Button>
-                      </DialogClose>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2 text-sm">
-                <p className="font-medium">Budget</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Food</span>
-                  <span>{formatCurrency(budgetTotals.food_budget)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Gas</span>
-                  <span>{formatCurrency(budgetTotals.gas_budget)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Other</span>
-                  <span>{formatCurrency(budgetTotals.other_budget)}</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Total</span>
-                  <span>{formatCurrency(budgetTotals.total_budget)}</span>
-                </div>
-              </div>
 
+      {/* Right column - Preview */}
+      <div className="lg:w-80 lg:shrink-0">
+        <Card className="lg:sticky lg:top-6">
+          <CardHeader className="">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calculator className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-base font-medium">
+                  Budget & Prices
+                </CardTitle>
+              </div>
+              <BudgetFormulasDialog formulas={formulas} inputs={inputs} />
+            </div>
+            <p className="text-xs text-muted-foreground pt-2">
+              Calculated for{" "}
+              {inputs.num_participants +
+                inputs.num_participant_drivers +
+                inputs.num_guides}{" "}
+              people over {inputs.num_nights} nights.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2 text-sm">
+              <p className="font-medium">Budget</p>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Food</span>
+                <span>{formatCurrency(budgetTotals.food_budget)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Gas</span>
+                <span>{formatCurrency(budgetTotals.gas_budget)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Other</span>
+                <span>{formatCurrency(budgetTotals.other_budget)}</span>
+              </div>
               <Separator />
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Total</span>
+                <span>{formatCurrency(budgetTotals.total_budget)}</span>
+              </div>
+            </div>
 
-              <div className="space-y-2 text-sm">
-                <p className="font-medium">Prices</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Member</span>
+            <Separator />
+
+            <div className="space-y-2 text-sm">
+              <p className="font-medium">Prices</p>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Member</span>
+                {trip.member_price_override != null ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="font-medium text-blue-500 cursor-help">
+                        {formatCurrency(trip.member_price_override)}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      This price has been overridden manually
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
                   <span className="font-medium">
                     {formatCurrency(budgetTotals.member_price)}
                   </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Non-Member</span>
+                )}
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Non-Member</span>
+                {trip.nonmember_price_override != null ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="font-medium text-blue-500 cursor-help">
+                        {formatCurrency(trip.nonmember_price_override)}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      This price has been overridden manually
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
                   <span className="font-medium">
                     {formatCurrency(budgetTotals.nonmember_price)}
                   </span>
-                </div>
+                )}
+              </div>
+              {trip.driver_spots > 0 && (
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Driver</span>
-                  <span className="font-medium">
-                    {formatCurrency(budgetTotals.driver_price)}
-                  </span>
+                  {trip.driver_price_override != null ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="font-medium text-blue-500 cursor-help">
+                          {formatCurrency(trip.driver_price_override)}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        This price has been overridden manually
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <span className="font-medium">
+                      {formatCurrency(budgetTotals.driver_price)}
+                    </span>
+                  )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              )}
+              <PriceOverrideDialog
+                tripId={trip.id}
+                calculatedPrices={budgetTotals}
+                currentOverrides={{
+                  member: trip.member_price_override,
+                  nonmember: trip.nonmember_price_override,
+                  driver: trip.driver_price_override,
+                }}
+                hasDriverSpots={trip.driver_spots > 0}
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </form>
+    </div>
+  );
+}
+
+function BudgetFormulasDialog({
+  formulas,
+  inputs,
+}: {
+  formulas: string;
+  inputs: BudgetInputs;
+}) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button size="icon" variant="ghost">
+          <Info className="size-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Budget Formulas</DialogTitle>
+          <DialogDescription>
+            View the budget formulas used to calculate the prices and budget for
+            this trip.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="h-128 overflow-scroll">
+          <pre className="text-sm"># Inputs from your trip</pre>
+          {Object.entries(inputs).map(([key, value]) => (
+            <pre key={key} className="text-sm">
+              {key} = <span className="text-blue-500">{value}</span>
+            </pre>
+          ))}
+          <pre className="text-sm mt-3">{formulas}</pre>
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant={"outline"}>Close</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PriceOverrideDialog({
+  tripId,
+  calculatedPrices,
+  currentOverrides,
+  hasDriverSpots,
+}: {
+  tripId: string;
+  calculatedPrices: BudgetTotals;
+  currentOverrides: {
+    member: number | null;
+    nonmember: number | null;
+    driver: number | null;
+  };
+  hasDriverSpots: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const { mutateAsync: updateTrip, isPending } = useUpdateTrip();
+
+  const PriceOverrideSchema = z.object({
+    memberEnabled: z.boolean(),
+    memberPrice: z.coerce.number().min(0).optional(),
+    nonmemberEnabled: z.boolean(),
+    nonmemberPrice: z.coerce.number().min(0).optional(),
+    driverEnabled: z.boolean(),
+    driverPrice: z.coerce.number().min(0).optional(),
+  });
+
+  type PriceOverrideFormData = z.infer<typeof PriceOverrideSchema>;
+
+  const { control, handleSubmit, reset, setValue } =
+    useForm<PriceOverrideFormData>({
+      resolver: standardSchemaResolver(PriceOverrideSchema),
+      defaultValues: {
+        memberEnabled: currentOverrides.member != null,
+        memberPrice: currentOverrides.member ?? calculatedPrices.member_price,
+        nonmemberEnabled: currentOverrides.nonmember != null,
+        nonmemberPrice:
+          currentOverrides.nonmember ?? calculatedPrices.nonmember_price,
+        driverEnabled: currentOverrides.driver != null,
+        driverPrice: currentOverrides.driver ?? calculatedPrices.driver_price,
+      },
+    });
+
+  const memberEnabled = useWatch({ control, name: "memberEnabled" });
+  const nonmemberEnabled = useWatch({ control, name: "nonmemberEnabled" });
+  const driverEnabled = useWatch({ control, name: "driverEnabled" });
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) {
+      reset({
+        memberEnabled: currentOverrides.member != null,
+        memberPrice: currentOverrides.member ?? calculatedPrices.member_price,
+        nonmemberEnabled: currentOverrides.nonmember != null,
+        nonmemberPrice:
+          currentOverrides.nonmember ?? calculatedPrices.nonmember_price,
+        driverEnabled: currentOverrides.driver != null,
+        driverPrice: currentOverrides.driver ?? calculatedPrices.driver_price,
+      });
+    }
+  };
+
+  const handleToggle = (
+    field: "memberEnabled" | "nonmemberEnabled" | "driverEnabled",
+    priceField: "memberPrice" | "nonmemberPrice" | "driverPrice",
+    calculatedValue: number,
+    enabled: boolean,
+  ) => {
+    setValue(field, enabled);
+    if (!enabled) {
+      setValue(priceField, calculatedValue);
+    }
+  };
+
+  const onSubmit = async (data: PriceOverrideFormData) => {
+    await updateTrip(
+      {
+        id: tripId,
+        member_price_override: data.memberEnabled ? data.memberPrice : null,
+        nonmember_price_override: data.nonmemberEnabled
+          ? data.nonmemberPrice
+          : null,
+        driver_price_override: data.driverEnabled ? data.driverPrice : null,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Price overrides saved");
+          setOpen(false);
+        },
+        onError: (err) => {
+          toast.error("Failed to save price overrides");
+          console.error(err);
+        },
+      },
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="mt-2 text-sm font-normal text-muted-foreground float-right"
+        >
+          <Pencil className="size-3" />
+          Override trip prices
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogHeader>
+            <DialogTitle>Override Prices</DialogTitle>
+            <DialogDescription>
+              Manually override the calculated prices. Enable the toggle next to
+              a price to set a custom value.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Field>
+              <FieldLabel>Member Price</FieldLabel>
+              <div className="flex items-center gap-3">
+                <Controller
+                  control={control}
+                  name="memberPrice"
+                  render={({ field }) => (
+                    <InputGroup className="w-64">
+                      <InputGroupAddon>$</InputGroupAddon>
+                      <InputGroupInput
+                        type="number"
+                        min={0}
+                        step={1}
+                        disabled={!memberEnabled}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        {...field}
+                      />
+                    </InputGroup>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="memberEnabled"
+                  render={({ field }) => (
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={(checked) =>
+                        handleToggle(
+                          "memberEnabled",
+                          "memberPrice",
+                          calculatedPrices.member_price,
+                          checked,
+                        )
+                      }
+                    />
+                  )}
+                />
+              </div>
+            </Field>
+
+            <Field>
+              <FieldLabel>Non-Member Price</FieldLabel>
+              <div className="flex items-center gap-4">
+                <Controller
+                  control={control}
+                  name="nonmemberPrice"
+                  render={({ field }) => (
+                    <InputGroup className="w-64">
+                      <InputGroupAddon>$</InputGroupAddon>
+                      <InputGroupInput
+                        type="number"
+                        min={0}
+                        step={1}
+                        disabled={!nonmemberEnabled}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        {...field}
+                      />
+                    </InputGroup>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="nonmemberEnabled"
+                  render={({ field }) => (
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={(checked) =>
+                        handleToggle(
+                          "nonmemberEnabled",
+                          "nonmemberPrice",
+                          calculatedPrices.nonmember_price,
+                          checked,
+                        )
+                      }
+                    />
+                  )}
+                />
+              </div>
+            </Field>
+
+            {hasDriverSpots && (
+              <Field>
+                <FieldLabel>Driver Price</FieldLabel>
+                <div className="flex items-center gap-3">
+                  <Controller
+                    control={control}
+                    name="driverPrice"
+                    render={({ field }) => (
+                      <InputGroup className="flex-1">
+                        <InputGroupAddon>$</InputGroupAddon>
+                        <InputGroupInput
+                          type="number"
+                          min={0}
+                          step={1}
+                          disabled={!driverEnabled}
+                          onWheel={(e) => e.currentTarget.blur()}
+                          {...field}
+                        />
+                      </InputGroup>
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="driverEnabled"
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={(checked) =>
+                          handleToggle(
+                            "driverEnabled",
+                            "driverPrice",
+                            calculatedPrices.driver_price,
+                            checked,
+                          )
+                        }
+                      />
+                    )}
+                  />
+                </div>
+              </Field>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Spinner /> Saving...
+                </>
+              ) : (
+                "Save"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

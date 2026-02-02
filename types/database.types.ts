@@ -877,6 +877,7 @@ export type Database = {
           description: string | null
           difficulty: string | null
           dinners: number | null
+          driver_price_override: number | null
           driver_spots: number
           end_date: string
           gear_questions: string[] | null
@@ -884,8 +885,10 @@ export type Database = {
           location: string | null
           lunches: number | null
           meet: string | null
+          member_price_override: number | null
           name: string
           native_land: string | null
+          nonmember_price_override: number | null
           other_expenses: Json | null
           participant_spots: number
           picture_path: string | null
@@ -909,6 +912,7 @@ export type Database = {
           description?: string | null
           difficulty?: string | null
           dinners?: number | null
+          driver_price_override?: number | null
           driver_spots: number
           end_date: string
           gear_questions?: string[] | null
@@ -916,8 +920,10 @@ export type Database = {
           location?: string | null
           lunches?: number | null
           meet?: string | null
+          member_price_override?: number | null
           name: string
           native_land?: string | null
+          nonmember_price_override?: number | null
           other_expenses?: Json | null
           participant_spots: number
           picture_path?: string | null
@@ -941,6 +947,7 @@ export type Database = {
           description?: string | null
           difficulty?: string | null
           dinners?: number | null
+          driver_price_override?: number | null
           driver_spots?: number
           end_date?: string
           gear_questions?: string[] | null
@@ -948,8 +955,10 @@ export type Database = {
           location?: string | null
           lunches?: number | null
           meet?: string | null
+          member_price_override?: number | null
           name?: string
           native_land?: string | null
+          nonmember_price_override?: number | null
           other_expenses?: Json | null
           participant_spots?: number
           picture_path?: string | null

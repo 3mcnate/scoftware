@@ -1,4 +1,4 @@
-export interface CalculateBudgetInputs {
+export type BudgetInputs = {
 	breakfasts: number;
 	lunches: number;
 	dinners: number;
@@ -12,6 +12,16 @@ export interface CalculateBudgetInputs {
 	num_guides: number;
 	num_nights: number;
 }
+
+export type BudgetTotals = {
+	driver_price: number;
+	member_price: number;
+	nonmember_price: number;
+	gas_budget: number;
+	food_budget: number;
+	other_budget: number;
+	total_budget: number;
+};
 
 /**
  * Returns 1 if the list is empty or the avg mpgs are 0.

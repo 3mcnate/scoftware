@@ -294,6 +294,9 @@ export const trips = pgTable("trips", {
 	total_miles: integer(),
 	trail: text(),
 	other_expenses: jsonb(),
+	member_price_override: numeric(),
+	nonmember_price_override: numeric(),
+	driver_price_override: numeric(),
 }, (table) => [
 	pgPolicy("Allow trip guides, admins to update trips", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(is_trip_guide(( SELECT auth.uid() AS uid), id) OR authorize('admin'::user_role))`, withCheck: sql`(is_trip_guide(( SELECT auth.uid() AS uid), id) OR authorize('admin'::user_role))`  }),
 	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"] }),
