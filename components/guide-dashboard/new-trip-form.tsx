@@ -22,18 +22,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useGuides } from "@/data/client/users/get-guides";
-import {
-  MultiSelect,
-  MultiSelectContent,
-  MultiSelectItem,
-  MultiSelectTrigger,
-  MultiSelectValue,
-} from "@/components/ui/multi-select";
 import { useAuth } from "@/hooks/use-auth";
 import { useCreateTrip } from "@/data/client/trips/use-create-trip";
 import { useRouter } from "next/navigation";
 import { useGuideTrips } from "@/data/client/trips/get-guide-trips";
+import { GuideMultiSelect } from "@/components/guide-dashboard/guide-multi-select";
 
 const NewTripSchema = z
   .object({
@@ -52,7 +45,6 @@ const NewTripSchema = z
 type NewTripFormData = z.infer<typeof NewTripSchema>;
 
 export default function NewTripForm() {
-  const { data: guidesData, isLoading: isLoadingGuides } = useGuides();
   const auth = useAuth();
   const userId = auth.status === "authenticated" ? auth.user.id : "unknown";
   const createTrip = useCreateTrip();
@@ -119,8 +111,6 @@ export default function NewTripForm() {
       console.error(error);
     }
   };
-
-  const guides = guidesData ?? [];
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -244,33 +234,12 @@ export default function NewTripForm() {
                 name="guides"
                 render={({ field, fieldState: { error } }) => (
                   <>
-                    <MultiSelect
+                    <GuideMultiSelect
                       values={field.value}
                       onValuesChange={field.onChange}
-                    >
-                      <MultiSelectTrigger className="w-full">
-                        <MultiSelectValue placeholder="Select guides" />
-                      </MultiSelectTrigger>
-                      <MultiSelectContent>
-                        {isLoadingGuides ? (
-                          <div className="p-2 text-sm text-muted-foreground text-center">
-                            Loading guides...
-                          </div>
-                        ) : (
-                          guides
-                            .filter((guide) => guide.user_id !== userId)
-                            .map((guide) => (
-                              <MultiSelectItem
-                                key={guide.user_id}
-                                value={guide.user_id}
-                              >
-                                {guide.profiles.first_name}{" "}
-                                {guide.profiles.last_name}
-                              </MultiSelectItem>
-                            ))
-                        )}
-                      </MultiSelectContent>
-                    </MultiSelect>
+                      excludeUserIds={[userId]}
+                      placeholder="Select guides"
+                    />
                     <FieldError errors={error ? [error] : undefined} />
                     <FieldDescription>
                       Add your co guide(s).
