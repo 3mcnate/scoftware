@@ -44,6 +44,28 @@ Here's the logical flow:
 Create a backend api route to process waiver completions. When the user signs a waiver, the route should be send their typed full legal name, birthday, trip Id, and waiver id. Next, the route should generate a PDF of the signed document that is an accurate visual representation of the online form they just signed. This PDF should be uploaded to the supabase storage "waivers" bucket, with the filepath being "<user_id>/<document_id>", where document_id is a randomly generated uuidv4. This filepath should be saved to their ticket in the waiver_filepath (or driver_waiver_filepath) column. The route should also add a row to the waiver_events table with a "user_signed" event. Use Drizzle to interact with the database, and place all queries in data/waivers.
 
 
+Trip settings
+ - Name
+ - start date
+ - end date
+ - participant spots
+ - driver spots
+ - add/remove guides (I think for now any guide can add/remove any other guide)
+ - Trip cycle dates override:
+		- trip published date
+		- member signup date
+		- nonmember signup date
+		- driver signup date
+ - Signup settings:
+		- allow signups (yes/no)
+		- enable waitlist (yes/no)
+		  - Participants must join the waitlist, even if there is a spot available. Participants can only sign up for the trip if they are sent a waitlist email. This will turn on automatically when the trip is full.
+		- require code
+ - Destructive settings:
+	  - leave trip
+		- delete trip (only available if there are no signups)
+
+
 Budget formulas: mathjs library
 
 Inputs:

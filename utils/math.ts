@@ -35,3 +35,11 @@ export function getAverageMPGs(mpgs: number[]): number {
 	if (sum === 0) return 1;
   return sum / valid.length;
 }
+
+export function formatCurrency(amount: number): string {
+	return amount.toLocaleString("en-US", {
+		style: "currency",
+		currency: "USD",
+		minimumFractionDigits: 2,
+	});
+}
