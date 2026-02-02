@@ -181,3 +181,15 @@ h3.tiptap-heading + h2.tiptap-heading {
 	margin: 1.5rem 0;
 	padding-left: 1rem;
 }
+
+@layer utilities {
+  .no-spin {
+    appearance: textfield;
+  }
+
+  .no-spin::-webkit-outer-spin-button,
+  .no-spin::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+}

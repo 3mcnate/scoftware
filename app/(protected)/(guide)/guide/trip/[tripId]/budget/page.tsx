@@ -55,6 +55,7 @@ import {
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { getAverageMPGs } from "@/utils/math";
 import { Spinner } from "@/components/ui/spinner";
+import type { Control } from "react-hook-form";
 
 const BudgetSchema = z.object({
   breakfasts: z.coerce.number().min(0, "Must be 0 or more"),
@@ -99,9 +100,86 @@ export default function BudgetPage() {
   return <BudgetForm trip={trip} formulas={formulas.formulas} />;
 }
 
-function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
-	"use no memo";
+type BudgetTotals = {
+  driver_price: number;
+  member_price: number;
+  nonmember_price: number;
+  gas_budget: number;
+  food_budget: number;
+  other_budget: number;
+  total_budget: number;
+};
 
+function useBudgetTotals(
+  control: Control<BudgetFormData>,
+  formulas: string,
+  trip: TripData,
+): BudgetTotals {
+
+  const formValues = useWatch({ control });
+  const compiledFormulas = useMemo(() => compile(formulas), [formulas]);
+
+  return useMemo(() => {
+    const {
+      breakfasts = 0,
+      lunches = 0,
+      dinners = 0,
+      snacks = 0,
+      total_miles = 0,
+      cars = [],
+      other_expenses = [],
+    } = formValues;
+
+    const scope: Map<string, number> = new Map(
+      Object.entries({
+        breakfasts,
+        lunches,
+        dinners,
+        snacks,
+        total_miles,
+        num_cars: cars.length,
+        average_mpg: getAverageMPGs(cars.map((c) => Number(c.mpg) ?? 0)),
+        total_other_expenses: other_expenses.reduce(
+          (prev, { cost }) => prev + (Number(cost) ?? 0),
+          0,
+        ),
+        num_participants: trip.participant_spots,
+        num_participant_drivers: trip.driver_spots,
+        num_guides: trip.trip_guides.length,
+        num_nights: differenceInCalendarDays(
+          new Date(trip.end_date),
+          new Date(trip.start_date),
+        ),
+      }),
+    );
+
+    compiledFormulas.evaluate(scope);
+
+    const gas_budget = scope.get("gas_budget") ?? 0;
+    const food_budget = scope.get("food_budget") ?? 0;
+    const other_budget = scope.get("other_budget") ?? 0;
+
+    return {
+      driver_price: Math.ceil(scope.get("driver_price") ?? 0),
+      member_price: Math.ceil(scope.get("member_price") ?? 0),
+      nonmember_price: Math.ceil(scope.get("nonmember_price") ?? 0),
+      gas_budget,
+      food_budget,
+      other_budget,
+      total_budget: gas_budget + food_budget + other_budget,
+    };
+  }, [
+    formValues,
+    compiledFormulas,
+    trip.driver_spots,
+    trip.end_date,
+    trip.participant_spots,
+    trip.start_date,
+    trip.trip_guides.length,
+  ]);
+}
+
+function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
   const { mutateAsync: updateTrip, isPending: isSaving } = useUpdateTrip();
 
   const {
@@ -139,71 +217,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
     name: "other_expenses",
   });
 
-  const cars = useWatch({ control, name: "cars" });
-  const breakfasts = useWatch({ control, name: "breakfasts" });
-  const lunches = useWatch({ control, name: "lunches" });
-  const dinners = useWatch({ control, name: "dinners" });
-  const snacks = useWatch({ control, name: "snacks" });
-  const totalMiles = useWatch({ control, name: "total_miles" });
-  const otherExpenses = useWatch({ control, name: "other_expenses" });
-
-  const compiledFormulas = useMemo(() => {
-    return compile(formulas);
-  }, [formulas]);
-
-  // Calculate budget totals
-  const budgetTotals = useMemo(() => {
-    const scope: Map<string, number> = new Map(
-      Object.entries({
-        breakfasts: breakfasts ?? 0,
-        lunches: lunches ?? 0,
-        dinners: dinners ?? 0,
-        snacks: snacks ?? 0,
-        total_miles: totalMiles ?? 0,
-        num_cars: cars?.length ?? 0,
-        average_mpg: getAverageMPGs(cars?.map((c) => c.mpg) ?? []),
-        total_other_expenses:
-          otherExpenses?.reduce((prev, { cost }) => prev + cost, 0) ?? 0,
-        num_participants: trip.participant_spots,
-        num_participant_drivers: trip.driver_spots,
-        num_guides: trip.trip_guides.length,
-        num_nights: differenceInCalendarDays(
-          new Date(trip.end_date),
-          new Date(trip.start_date),
-        ),
-      }),
-    );
-
-    compiledFormulas.evaluate(scope);
-
-    const gas_budget = scope.get("gas_budget") ?? 0;
-    const food_budget = scope.get("food_budget") ?? 0;
-    const other_budget = scope.get("other_budget") ?? 0;
-
-    return {
-      driver_price: Math.ceil(scope.get("driver_price") ?? 0),
-      member_price: Math.ceil(scope.get("member_price") ?? 0),
-      nonmember_price: Math.ceil(scope.get("nonmember_price") ?? 0),
-      gas_budget,
-      food_budget,
-      other_budget,
-      total_budget: gas_budget + food_budget + other_budget,
-    };
-  }, [
-    breakfasts,
-    lunches,
-    dinners,
-    snacks,
-    totalMiles,
-    cars,
-    otherExpenses,
-    compiledFormulas,
-    trip.driver_spots,
-    trip.end_date,
-    trip.participant_spots,
-    trip.start_date,
-    trip.trip_guides.length,
-  ]);
+  const budgetTotals = useBudgetTotals(control, formulas, trip);
 
   const onSubmit = (data: BudgetFormData) => {
     console.log("Budget data:", data, budgetTotals);
@@ -373,9 +387,10 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                                 <Input
                                   type="number"
                                   step={0.1}
-                                  className="w-20 h-8"
+                                  className="w-20 h-8 no-spin"
                                   onWheel={(e) => e.currentTarget.blur()}
                                   {...field}
+                                  onChange={(e) => field.onChange(e)}
                                 />
                                 <span className="text-sm text-muted-foreground">
                                   MPG
@@ -404,7 +419,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                     </Item>
                   ))}
                 </div>
-                {cars.length === 0 && (
+                {carFields.length === 0 && (
                   <div className="flex h-11.5">
                     <p className="text-muted-foreground text-sm m-auto">
                       No cars added
@@ -478,6 +493,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
                                         className="border-0 shadow-none px-0 text-right focus-visible:ring-0 focus-visible:ring-offset-0"
                                         onWheel={(e) => e.currentTarget.blur()}
                                         {...field}
+                                        onChange={(e) => field.onChange(e)}
                                       />
                                       <InputGroupAddon className="border-0 bg-transparent">
                                         <span className="text-muted-foreground">
