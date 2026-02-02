@@ -251,7 +251,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
   useUnsavedChangesPrompt(isDirty);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col-reverse md:flex-row lg:flex-row gap-6">
       {/* Left column - Form sections */}
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex-1 space-y-6">
