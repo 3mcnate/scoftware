@@ -23,9 +23,11 @@ import {
 export function DestructiveSection({
   trip,
   currentUserId,
+	allowDeletion,
 }: {
   trip: TripData;
   currentUserId: string;
+	allowDeletion: boolean
 }) {
   const router = useRouter();
   const { mutateAsync: removeGuide, isPending: isLeaving } =
@@ -38,7 +40,7 @@ export function DestructiveSection({
       {
         onSuccess: () => {
           toast.success("You have left the trip");
-          router.push("/guide");
+          router.push("/guide/my-trips");
         },
         onError: (err) => {
           toast.error("Failed to leave trip");
@@ -114,15 +116,18 @@ export function DestructiveSection({
           <div>
             <p className="font-medium">Delete Trip</p>
             <p className="text-sm text-muted-foreground">
-              Permanently delete this trip and all associated data
+							{
+								allowDeletion ? "Permanently delete this trip and all associated data" : "This trip can't be deleted because it has signups."
+ 							}
+              
             </p>
           </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
-                className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground bg-transparent"
-                disabled={isDeleting}
+                className="border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive-foreground bg-transparent"
+                disabled={isDeleting || !allowDeletion}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete

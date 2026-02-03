@@ -1,83 +1,19 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import { z } from "zod/v4";
-import { toast } from "sonner";
-import { differenceInCalendarDays } from "date-fns";
-import {
-  Loader2,
-  Settings,
-  Users,
-  ToggleLeft,
-  Trash2,
-  LogOut,
-  UserPlus,
-  X,
-  Calendar,
-  AlertTriangle,
-} from "lucide-react";
-import { useState } from "react";
-
+import { useParams } from "next/navigation";
 import { useTrip, type TripData } from "@/data/client/trips/get-guide-trips";
-import { useUpdateTrip } from "@/data/client/trips/use-update-trip";
-import { useDeleteTrip } from "@/data/client/trips/use-delete-trip";
-import { useAddTripGuide } from "@/data/client/trips/use-add-trip-guide";
-import { useRemoveTripGuide } from "@/data/client/trips/use-remove-trip-guide";
 import { useAuth } from "@/hooks/use-auth";
-
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Item, ItemContent, ItemActions } from "@/components/ui/item";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { GuideMultiSelect } from "@/components/guide-dashboard/guide-multi-select";
-import { getAvatarUrl } from "@/data/client/storage/avatars";
-import { formatDateTimeLocal } from "@/utils/date-time";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useTripCycleByDate, type TripCycle } from "@/data/client/trip-cycles/get-trip-cycle";
-import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
+import { useTripCycleByDate } from "@/data/client/trip-cycles/get-trip-cycle";
 import { BasicInfoSection } from "@/components/guide-dashboard/trip-view/settings/basic-info-section";
-import { SignupSettingsSection } from "@/components/guide-dashboard/trip-view/settings/signup-settings-section";
+import {
+  SignupSettingsSection,
+  TripCycleSkeleton,
+} from "@/components/guide-dashboard/trip-view/settings/signup-settings-section";
 import { GuidesSection } from "@/components/guide-dashboard/trip-view/settings/guides-section";
 import { DestructiveSection } from "@/components/guide-dashboard/trip-view/settings/destructive-section";
+import { useTripTickets } from "@/data/client/tickets/get-trip-tickets";
 
 export default function SettingsPage() {
   const params = useParams();
@@ -206,19 +142,20 @@ function TripSettingsForm({ trip }: { trip: TripData }) {
   const auth = useAuth();
   const userId = auth.status === "authenticated" ? auth.user.id : "";
   const { data: tripCycle, isLoading: isTripCycleLoading } = useTripCycleByDate(
-    new Date(trip.start_date)
+    new Date(trip.start_date),
   );
+	const { data: tickets } = useTripTickets(trip.id);
 
   return (
     <div className="space-y-8">
       <BasicInfoSection trip={trip} />
-      <SignupSettingsSection
-        trip={trip}
-        tripCycle={tripCycle ?? null}
-        isTripCycleLoading={isTripCycleLoading}
-      />
+      {isTripCycleLoading ? (
+        <TripCycleSkeleton />
+      ) : (
+        <SignupSettingsSection trip={trip} tripCycle={tripCycle ?? null} />
+      )}
       <GuidesSection trip={trip} currentUserId={userId} />
-      <DestructiveSection trip={trip} currentUserId={userId} />
+      <DestructiveSection trip={trip} currentUserId={userId} allowDeletion={tickets?.length === 0}/>
     </div>
   );
 }

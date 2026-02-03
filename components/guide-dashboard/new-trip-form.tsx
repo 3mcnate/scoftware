@@ -27,11 +27,18 @@ import { useCreateTrip } from "@/data/client/trips/use-create-trip";
 import { useRouter } from "next/navigation";
 import { useGuideTrips } from "@/data/client/trips/get-guide-trips";
 import { GuideMultiSelect } from "@/components/guide-dashboard/guide-multi-select";
+import { useTripCycleByDate } from "@/data/client/trip-cycles/get-trip-cycle";
 
 const NewTripSchema = z
   .object({
     name: z.string().min(1, "Trip name is required"),
-    start_date: z.string().min(1, "Start date is required").refine(start_date => new Date(start_date) >= new Date(), "Start date must be in the future"),
+    start_date: z
+      .string()
+      .min(1, "Start date is required")
+      .refine(
+        (start_date) => new Date(start_date) >= new Date(),
+        "Start date must be in the future",
+      ),
     end_date: z.string().min(1, "End date is required"),
     participant_spots: z.coerce.number().min(0, "Must be 0 or more"),
     driver_spots: z.coerce.number().min(0, "Must be 0 or more"),
@@ -48,7 +55,7 @@ export default function NewTripForm() {
   const auth = useAuth();
   const userId = auth.status === "authenticated" ? auth.user.id : "unknown";
   const createTrip = useCreateTrip();
-	const { refetch: refetchGuideTrips } = useGuideTrips(userId);
+  const { refetch: refetchGuideTrips } = useGuideTrips(userId);
   const router = useRouter();
 
   const {
@@ -87,6 +94,10 @@ export default function NewTripForm() {
   const totalParticipants = participantSpots + driverSpots;
   const totalGuides = selectedGuides.length + 1;
 
+  const { data: tripCycle, isLoading: isTripCycleLoading } = useTripCycleByDate(
+    startDate ? new Date(startDate) : new Date(),
+  );
+
   let durationLabel = "-";
   if (startDate && endDate) {
     const start = new Date(startDate);
@@ -103,7 +114,7 @@ export default function NewTripForm() {
   const onSubmit = async (data: NewTripFormData) => {
     try {
       const result = await createTrip.mutateAsync(data);
-			await refetchGuideTrips();
+      await refetchGuideTrips();
       toast.success("Trip created successfully!");
       router.push(`/guide/trip/${result.tripId}`);
     } catch (error) {
@@ -241,9 +252,7 @@ export default function NewTripForm() {
                       placeholder="Select guides"
                     />
                     <FieldError errors={error ? [error] : undefined} />
-                    <FieldDescription>
-                      Add your co guide(s).
-                    </FieldDescription>
+                    <FieldDescription>Add your co guide(s).</FieldDescription>
                   </>
                 )}
               />
@@ -263,10 +272,36 @@ export default function NewTripForm() {
                   {durationLabel}
                 </span>
               </div>
+              <div className="flex justify-between">
+                <span>Trip Cycle:</span>
+                <span className="font-medium text-foreground">
+                  {!startDate ? (
+                    "-"
+                  ) : isTripCycleLoading ? (
+                    <Loader2 className="h-3 w-3 animate-spin inline" />
+                  ) : tripCycle ? (
+                    <>
+                      {tripCycle.name}{" "}
+                      <span className="font-normal">
+                        {`(${new Date(tripCycle.starts_at).toLocaleDateString()} - 
+                        ${new Date(tripCycle.ends_at).toLocaleDateString()})`}
+                      </span>
+
+                    </>
+                  ) : (
+                    "Falls outside existing trip cycles"
+                  )}
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <Button type="button" className="w-full" variant={"outline"} onClick={() => router.back()}>
+              <Button
+                type="button"
+                className="w-full"
+                variant={"outline"}
+                onClick={() => router.back()}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting} className="w-full">
