@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/browser";
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
+import { QueryData } from "@supabase/supabase-js";
 
 function getTripCycleForTrip(startDate: Date) {
 	const client = createClient();
@@ -19,8 +20,8 @@ function getTripCycleForTrip(startDate: Date) {
 				trip_feedback_form,
 				guide_post_trip_form
 		`)
-		.lte("starts_at", startDate)
-		.gte("ends_at", startDate)
+		.lte("starts_at", startDate.toISOString())
+		.gte("ends_at", startDate.toISOString())
 		.maybeSingle();
 }
 
@@ -29,3 +30,4 @@ export function useTripCycleByDate(startDate: Date)
 	return useQuery(getTripCycleForTrip(startDate))
 }
 
+export type TripCycle = QueryData<ReturnType<typeof getTripCycleForTrip>>
