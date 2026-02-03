@@ -66,6 +66,11 @@ Trip settings
 		- delete trip (only available if there are no signups)
 
 
+Trip publish logic
+	- the existence of row in published_trips table implies the trip is "Ready". No need for ready_to_publish column
+  - for trip to be visible: must exist in published_trips table, must have visible = true in trips table, must be past the override date or trip cycle date publish date. 
+
+
 Budget formulas: mathjs library
 
 Inputs:
