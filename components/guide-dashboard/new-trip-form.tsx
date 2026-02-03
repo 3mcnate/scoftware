@@ -163,6 +163,7 @@ export default function NewTripForm() {
                         {...field}
                         id="start_date"
                         type="datetime-local"
+                        step="300"
                         aria-invalid={!!error}
                       />
                       <FieldError errors={error ? [error] : undefined} />
@@ -182,6 +183,7 @@ export default function NewTripForm() {
                         {...field}
                         id="end_date"
                         type="datetime-local"
+                        step="300"
                         aria-invalid={!!error}
                       />
                       <FieldError errors={error ? [error] : undefined} />
@@ -239,7 +241,7 @@ export default function NewTripForm() {
             </div>
 
             <Field>
-              <FieldLabel>Guides</FieldLabel>
+              <FieldLabel>Co-Guides</FieldLabel>
               <Controller
                 control={control}
                 name="guides"
@@ -280,18 +282,27 @@ export default function NewTripForm() {
                   ) : isTripCycleLoading ? (
                     <Loader2 className="h-3 w-3 animate-spin inline" />
                   ) : tripCycle ? (
-                    <>
-                      {tripCycle.name}{" "}
-                      <span className="font-normal">
-                        {`(${new Date(tripCycle.starts_at).toLocaleDateString()} - 
-                        ${new Date(tripCycle.ends_at).toLocaleDateString()})`}
-                      </span>
-
-                    </>
+                    tripCycle.name
                   ) : (
                     "Falls outside existing trip cycles"
                   )}
                 </span>
+              </div>
+              <div className="flex justify-end">
+                {!startDate ? (
+                  "-"
+                ) : isTripCycleLoading ? (
+                  <Loader2 className="h-3 w-3 animate-spin inline" />
+                ) : tripCycle ? (
+                  <>
+                    <span className="font-normal">
+                      {`(${new Date(tripCycle.starts_at).toLocaleDateString()} - 
+                        ${new Date(tripCycle.ends_at).toLocaleDateString()})`}
+                    </span>
+                  </>
+                ) : (
+                  "Falls outside existing trip cycles"
+                )}
               </div>
             </div>
 

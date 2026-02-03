@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import type { JSONContent } from "@tiptap/core";
-import { WaiverSignatureForm } from "../../../../../../components/waiver/waiver-signature-form";
+import { WaiverSignatureForm } from "@/components/waiver/waiver-signature-form";
 import { getTripWaiverByTripAndType } from "@/data/server/waivers/get-trip-waiver";
 import { createServerClient } from "@/utils/supabase/server";
 import { generateWaiverHTML } from "@/utils/tiptap";
@@ -101,7 +101,7 @@ export default async function WaiverPage({
   }
 
   // TODO: log waiver view event
-
+	console.log("waiver.content", waiver.content)
   const waiverHtml = generateWaiverHTML(waiver.content as JSONContent);
 
 	const headersList = await headers();

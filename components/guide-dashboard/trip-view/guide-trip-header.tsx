@@ -6,10 +6,16 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Eye, Globe, ArrowLeft } from "lucide-react";
+import { Eye, Globe, ArrowLeft, ScanSearch, FileText } from "lucide-react";
 import { TripTabs } from "@/components/guide-dashboard/trip-view/trip-tabs";
 import { useTrip } from "@/data/client/trips/get-guide-trips";
 import { getAvatarUrl } from "@/data/client/storage/avatars";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function GuideTripHeader() {
   const params = useParams();
@@ -46,23 +52,45 @@ export default function GuideTripHeader() {
                     className="h-8 w-8 border-2 border-background"
                   >
                     <AvatarImage
-                      src={guide.profiles.avatar_path ? getAvatarUrl(guide.profiles.avatar_path) : "/placeholder.svg"}
+                      src={
+                        guide.profiles.avatar_path
+                          ? getAvatarUrl(guide.profiles.avatar_path)
+                          : "/placeholder.svg"
+                      }
                       alt={guide.profiles.first_name}
                     />
                     <AvatarFallback className="text-xs">
-                      {guide.profiles.first_name[0] + guide.profiles.last_name[0]}
+                      {guide.profiles.first_name[0] +
+                        guide.profiles.last_name[0]}
                     </AvatarFallback>
                   </Avatar>
                 ))}
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="bg-transparent">
-                <Eye className="h-4 w-4 mr-2" />
-                Preview
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-transparent"
+                  >
+                    <Eye className="h-4 w-4" />
+                    View
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem>
+                    <ScanSearch /> Preview
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <FileText />
+                    View live page
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button size="sm">
-                <Globe className="h-4 w-4 mr-2" />
+                <Globe className="h-4 w-4" />
                 Publish
               </Button>
             </div>
@@ -71,7 +99,6 @@ export default function GuideTripHeader() {
 
         <TripTabs />
       </div>
-      
     </div>
   );
 }

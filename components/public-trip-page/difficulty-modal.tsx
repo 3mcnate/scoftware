@@ -8,6 +8,15 @@ import {
 } from "@/components/ui/dialog"
 import { Info } from "lucide-react"
 
+function getDifficultyColor(level: number): string {
+  // Gradient from green (level 1) to red (level 10)
+  const ratio = (level - 1) / 9
+  const red = Math.round(34 + ratio * (220 - 34))
+  const green = Math.round(197 - ratio * (197 - 38))
+  const blue = Math.round(94 - ratio * (94 - 38))
+  return `rgb(${red}, ${green}, ${blue})`
+}
+
 export function DifficultyModal() {
   const difficultyLevels = [
     { level: 1, description: "No physical activity." },
@@ -66,7 +75,10 @@ export function DifficultyModal() {
           {difficultyLevels.map((item) => (
             <div key={item.level} className="p-3 rounded-lg bg-muted/50 border">
               <div className="flex items-start gap-3">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                <div 
+                  className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-white"
+                  style={{ backgroundColor: getDifficultyColor(item.level) }}
+                >
                   {item.level}
                 </div>
                 <p className="text-sm leading-relaxed text-foreground">{item.description}</p>
