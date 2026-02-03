@@ -22,6 +22,7 @@ export default defineConfig({
 		"trip_guides",
 		"roles",
 		"waitlist_signups",
+		"trip_signup_settings"
 	],
 	introspect: {
 		casing: "preserve",

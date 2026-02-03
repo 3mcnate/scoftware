@@ -1,4 +1,4 @@
-import { pgTable, pgSchema, uniqueIndex, index, check, uuid, varchar, timestamp, jsonb, boolean, text, smallint, unique, integer, foreignKey, pgPolicy, numeric, primaryKey, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, uuid, timestamp, boolean, pgSchema, uniqueIndex, index, check, varchar, jsonb, text, smallint, unique, integer, pgPolicy, numeric, primaryKey, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const auth = pgSchema("auth");
@@ -24,6 +24,25 @@ export const waitlist_status = pgEnum("waitlist_status", ['waiting', 'notificati
 export const waiver_event = pgEnum("waiver_event", ['user_opened', 'user_signed'])
 
 export const refresh_tokens_id_seqInAuth = auth.sequence("refresh_tokens_id_seq", {  startWith: "1", increment: "1", minValue: "1", maxValue: "9223372036854775807", cache: "1", cycle: false })
+
+export const trip_signup_settings = pgTable("trip_signup_settings", {
+	trip_id: uuid().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	allow_signups: boolean().default(true).notNull(),
+	enable_participant_waitlist: boolean().default(false).notNull(),
+	enable_driver_waitlist: boolean().default(false).notNull(),
+	require_code: boolean().default(false).notNull(),
+	driver_signup_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+	member_signup_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+	nonmember_signup_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+}, (table) => [
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "trip_settings_trip_id_fkey"
+		}).onDelete("cascade"),
+]);
 
 export const usersInAuth = auth.table("users", {
 	instance_id: uuid(),
@@ -138,7 +157,6 @@ export const published_trips = pgTable("published_trips", {
 	description: text().notNull(),
 	what_to_bring: text().array().notNull(),
 	guides: jsonb().notNull(),
-	visible: boolean().default(true).notNull(),
 	picture_path: text().notNull(),
 }, (table) => [
 	foreignKey({
@@ -147,7 +165,6 @@ export const published_trips = pgTable("published_trips", {
 			name: "published_trips_id_fkey"
 		}),
 	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"], using: sql`has_trip_ticket(( SELECT auth.uid() AS uid), id)` }),
-	pgPolicy("Authenticated users can view visible trips", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
 export const tickets = pgTable("tickets", {
@@ -212,7 +229,8 @@ export const waitlist_signups = pgTable("waitlist_signups", {
 			name: "waitlist_signups_user_id_fkey"
 		}),
 	unique("waitlist_signups_user_trip_unique").on(table.user_id, table.trip_id),
-	pgPolicy("Guides can view waitlist signups", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
+	pgPolicy("Allow guides to update waitlist signups", { as: "permissive", for: "update", to: ["authenticated"], using: sql`(is_trip_guide(( SELECT auth.uid() AS uid), trip_id) OR authorize('admin'::user_role))`, withCheck: sql`(is_trip_guide(( SELECT auth.uid() AS uid), trip_id) OR authorize('admin'::user_role))`  }),
+	pgPolicy("Guides can view waitlist signups", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
 export const trip_waivers = pgTable("trip_waivers", {
@@ -321,13 +339,8 @@ export const trips = pgTable("trips", {
 	member_price_override: numeric(),
 	nonmember_price_override: numeric(),
 	driver_price_override: numeric(),
-	allow_signups: boolean().default(true).notNull(),
-	enable_participant_waitlist: boolean().default(false).notNull(),
-	enable_driver_waitlist: boolean().default(false).notNull(),
 	publish_date_override: timestamp({ withTimezone: true, mode: 'string' }),
-	member_ticket_drop_date_override: timestamp({ withTimezone: true, mode: 'string' }),
-	nonmember_ticket_drop_date_override: timestamp({ withTimezone: true, mode: 'string' }),
-	driver_ticket_drop_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+	visible: boolean().default(true).notNull(),
 }, (table) => [
 	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"], using: sql`((is_trip_guide(id, ( SELECT auth.uid() AS uid)) OR authorize('admin'::user_role)) AND (NOT trip_has_tickets(id)))` }),
 	pgPolicy("Allow trip guides, admins to update trips", { as: "permissive", for: "update", to: ["authenticated"] }),
