@@ -9,11 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Eye, Globe, ArrowLeft } from "lucide-react";
 import { TripTabs } from "@/components/guide-dashboard/trip-view/trip-tabs";
 import { useTrip } from "@/data/client/trips/get-guide-trips";
-
-const guides = [
-  { name: "Alex Chen", avatar: "/placeholder.svg?height=32&width=32" },
-  { name: "Maria Santos", avatar: "/placeholder.svg?height=32&width=32" },
-];
+import { getAvatarUrl } from "@/data/client/storage/avatars";
 
 export default function GuideTripHeader() {
   const params = useParams();
@@ -44,20 +40,17 @@ export default function GuideTripHeader() {
             <div className="flex items-center gap-4">
               <h1 className="text-2xl font-semibold">{tripName}</h1>
               <div className="flex -space-x-2">
-                {guides.map((guide, i) => (
+                {trip.trip_guides.map((guide, i) => (
                   <Avatar
                     key={i}
                     className="h-8 w-8 border-2 border-background"
                   >
                     <AvatarImage
-                      src={guide.avatar || "/placeholder.svg"}
-                      alt={guide.name}
+                      src={guide.profiles.avatar_path ? getAvatarUrl(guide.profiles.avatar_path) : "/placeholder.svg"}
+                      alt={guide.profiles.first_name}
                     />
                     <AvatarFallback className="text-xs">
-                      {guide.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                      {guide.profiles.first_name[0] + guide.profiles.last_name[0]}
                     </AvatarFallback>
                   </Avatar>
                 ))}

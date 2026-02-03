@@ -21,6 +21,7 @@ export default defineConfig({
 		"membership_prices",
 		"trip_guides",
 		"roles",
+		"waitlist_signups",
 	],
 	introspect: {
 		casing: "preserve",

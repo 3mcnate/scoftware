@@ -190,6 +190,31 @@ export const tickets = pgTable("tickets", {
 	pgPolicy("Guides, participants can select their own tickets", { as: "permissive", for: "select", to: ["authenticated"], using: sql`((user_id = ( SELECT auth.uid() AS uid)) OR authorize('guide'::user_role))` }),
 ]);
 
+export const waitlist_signups = pgTable("waitlist_signups", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow(),
+	user_id: uuid().notNull(),
+	trip_id: uuid().defaultRandom().notNull(),
+	notification_sent_at: timestamp({ withTimezone: true, mode: 'string' }),
+	spot_expires_at: timestamp({ withTimezone: true, mode: 'string' }),
+	sign_up_success: boolean().default(false).notNull(),
+	ticket_type: participant_type().default('participant').notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "waitlist_signups_trip_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "waitlist_signups_user_id_fkey"
+		}),
+	unique("waitlist_signups_user_trip_unique").on(table.user_id, table.trip_id),
+	pgPolicy("Guides can view waitlist signups", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
+]);
+
 export const trip_waivers = pgTable("trip_waivers", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),

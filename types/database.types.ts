@@ -1002,6 +1002,7 @@ export type Database = {
           notification_sent_at: string | null
           sign_up_success: boolean
           spot_expires_at: string | null
+          ticket_type: Database["public"]["Enums"]["participant_type"]
           trip_id: string
           updated_at: string | null
           user_id: string
@@ -1012,6 +1013,7 @@ export type Database = {
           notification_sent_at?: string | null
           sign_up_success?: boolean
           spot_expires_at?: string | null
+          ticket_type?: Database["public"]["Enums"]["participant_type"]
           trip_id?: string
           updated_at?: string | null
           user_id: string
@@ -1022,6 +1024,7 @@ export type Database = {
           notification_sent_at?: string | null
           sign_up_success?: boolean
           spot_expires_at?: string | null
+          ticket_type?: Database["public"]["Enums"]["participant_type"]
           trip_id?: string
           updated_at?: string | null
           user_id?: string

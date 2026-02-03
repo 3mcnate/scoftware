@@ -13,6 +13,7 @@ const getTripWaitlist = (tripId: string, client: TypedSupabaseClient) => {
       notification_sent_at,
       spot_expires_at,
       user_id,
+			ticket_type,
       user:profiles (
         id,
         first_name,
