@@ -65,3 +65,33 @@ export function formatDateTimeLocal(isoString: string): string {
 	const minutes = String(date.getMinutes()).padStart(2, "0");
 	return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
+
+
+export function formatTimeRemaining(expiresAt: Date): string {
+  const now = new Date();
+  const diffMs = expiresAt.getTime() - now.getTime();
+
+  if (diffMs <= 0) return "expired";
+
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays >= 1) {
+    const remainingHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    if (remainingHours > 0) {
+      return `${diffDays} day${diffDays > 1 ? "s" : ""} and ${remainingHours} hour${remainingHours > 1 ? "s" : ""}`;
+    }
+    return `${diffDays} day${diffDays > 1 ? "s" : ""}`;
+  }
+
+  if (diffHours >= 1) {
+    const remainingMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    if (remainingMinutes > 0) {
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} and ${remainingMinutes} minute${remainingMinutes > 1 ? "s" : ""}`;
+    }
+    return `${diffHours} hour${diffHours > 1 ? "s" : ""}`;
+  }
+
+  return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""}`;
+}

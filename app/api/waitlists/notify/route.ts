@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
 	const { error: emailError } = await resend.emails.send({
 		from: "SC Outfitters [PREVIEW] <noreply@dev.scoutfitters.org>",
 		to: [signupDetails.user.email],
-		subject: `A spot opened up for ${signupDetails.trip.name}!`,
+		subject: `[Time Sensitive] A spot opened up for ${signupDetails.trip.name}!`,
 		react: WaitlistNotificationEmail({
 			firstName: signupDetails.user.first_name,
 			tripName: signupDetails.trip.name,

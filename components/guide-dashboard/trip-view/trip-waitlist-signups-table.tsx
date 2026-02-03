@@ -39,8 +39,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getInitials } from "@/utils/names";
 import { getAvatarUrl } from "@/data/client/storage/avatars";
-import { useTripWaitlist } from "@/data/client/waitlist/get-trip-waitlist";
+import { useTripWaitlist, useUpdateWaitlist } from "@/data/client/waitlist/get-trip-waitlist";
 import { useNotifyWaitlistSignup } from "@/data/client/waitlist/notify-waitlist-signup";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ExpirationOption =
   | "1h"
@@ -152,7 +163,7 @@ function SendSignupLinkDialog({
         onError: (error) => {
           toast.error(error.message);
         },
-      }
+      },
     );
   };
 
@@ -237,16 +248,84 @@ type TripWaitlistSignupsTableProps = {
   tripId: string;
 };
 
+type RevokeSpotDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  waitlistSignupId: string;
+  userName: string;
+  onConfirm: () => void;
+  isPending: boolean;
+};
+
+function RevokeSpotDialog({
+  open,
+  onOpenChange,
+  userName,
+  onConfirm,
+  isPending,
+}: RevokeSpotDialogProps) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Revoke Signup Spot</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to revoke {userName}&apos;s signup spot? They
+            will no longer be able to complete their registration and will be
+            moved back to waiting status.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            disabled={isPending}
+            className="bg-destructive hover:bg-destructive/90"
+          >
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Revoke Spot
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 export const TripWaitlistSignupsTable = ({
   tripId,
 }: TripWaitlistSignupsTableProps) => {
   const { data: waitlist, isLoading: isWaitlistLoading } =
     useTripWaitlist(tripId);
+  const { mutate: updateWaitlist, isPending: isRevoking } = useUpdateWaitlist();
   const [dialogState, setDialogState] = useState<{
     open: boolean;
     waitlistSignupId: string;
     userName: string;
   }>({ open: false, waitlistSignupId: "", userName: "" });
+  const [revokeDialogState, setRevokeDialogState] = useState<{
+    open: boolean;
+    waitlistSignupId: string;
+    userName: string;
+  }>({ open: false, waitlistSignupId: "", userName: "" });
+
+  const handleRevokeSpot = () => {
+    updateWaitlist(
+      {
+        id: revokeDialogState.waitlistSignupId,
+        spot_expires_at: null,
+        notification_sent_at: null,
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Revoked signup spot for ${revokeDialogState.userName}`);
+          setRevokeDialogState({ open: false, waitlistSignupId: "", userName: "" });
+        },
+        onError: (error) => {
+          toast.error(error.message || "Failed to revoke spot");
+        },
+      }
+    );
+  };
 
   if (isWaitlistLoading) {
     return (
@@ -268,9 +347,7 @@ export const TripWaitlistSignupsTable = ({
             <TableRow>
               <TableHead>Position</TableHead>
               <TableHead>Participant</TableHead>
-							<TableHead>Spot type</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Signup Date</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -291,7 +368,8 @@ export const TripWaitlistSignupsTable = ({
                 status = spotExpiresAt > now ? "open" : "expired";
               }
 
-              const userName = `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim();
+              const userName =
+                `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim();
 
               return (
                 <TableRow key={signup.id}>
@@ -299,35 +377,60 @@ export const TripWaitlistSignupsTable = ({
                     <Badge variant="outline">#{index + 1}</Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={
-                            user?.avatar_path
-                              ? getAvatarUrl(user.avatar_path)
-                              : undefined
-                          }
-                          alt={user?.first_name}
-                        />
-                        <AvatarFallback>
-                          {getInitials(user?.first_name, user?.last_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">
-                        {user?.first_name} {user?.last_name}
-                      </span>
-                    </div>
+                    <HoverCard openDelay={10} closeDelay={10} >
+                      <HoverCardTrigger asChild>
+                        <Button
+                          variant={"link"}
+                          className="flex items-center gap-2 text-foreground"
+                        >
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage
+                              src={
+                                user?.avatar_path
+                                  ? getAvatarUrl(user.avatar_path)
+                                  : undefined
+                              }
+                              alt={user?.first_name}
+                            />
+                            <AvatarFallback className="hover:no-underline">
+                              {getInitials(user?.first_name, user?.last_name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium">
+                            {user?.first_name} {user?.last_name}
+                          </span>
+                        </Button>
+                      </HoverCardTrigger>
+                      <HoverCardContent side='top'>
+												<div className="flex items-center gap-2">
+													<Avatar className="h-8 w-8">
+                            <AvatarImage
+                              src={
+                                user?.avatar_path
+                                  ? getAvatarUrl(user.avatar_path)
+                                  : undefined
+                              }
+                              alt={user?.first_name}
+                            />
+                            <AvatarFallback>
+                              {getInitials(user?.first_name, user?.last_name)}
+                            </AvatarFallback>
+                          </Avatar>
+													<span className="font-medium">
+                            {user?.first_name} {user?.last_name}
+                          </span>
+												</div>
+												<div className="text-sm mt-2">
+													{user.email}
+												</div>
+												<div className="text-sm text-muted-foreground">
+													Signed up {format(new Date(signup.created_at), "MMM d, yyyy h:mm a")}
+												</div>
+											</HoverCardContent>
+                    </HoverCard>
                   </TableCell>
-									<TableCell>
-										<Badge variant={'outline'}>
-										{signup.ticket_type}
-										</Badge>
-									</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {user?.email}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {format(new Date(signup.created_at), "MMM d, yyyy h:mm a")}
+                  <TableCell>
+                    <Badge variant={"outline"}>{signup.ticket_type}</Badge>
                   </TableCell>
                   <TableCell>
                     {status === "waiting" && (
@@ -403,7 +506,11 @@ export const TripWaitlistSignupsTable = ({
                             size="sm"
                             className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                             onClick={() =>
-                              toast.info("Cancel spot not implemented")
+                              setRevokeDialogState({
+                                open: true,
+                                waitlistSignupId: signup.id,
+                                userName,
+                              })
                             }
                           >
                             Revoke spot
@@ -431,7 +538,10 @@ export const TripWaitlistSignupsTable = ({
             })}
             {waitlist?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={7}
+                  className="h-24 text-center text-muted-foreground"
+                >
                   No one on the waitlist yet.
                 </TableCell>
               </TableRow>
@@ -442,12 +552,19 @@ export const TripWaitlistSignupsTable = ({
 
       <SendSignupLinkDialog
         open={dialogState.open}
-        onOpenChange={(open) =>
-          setDialogState((prev) => ({ ...prev, open }))
-        }
+        onOpenChange={(open) => setDialogState((prev) => ({ ...prev, open }))}
         waitlistSignupId={dialogState.waitlistSignupId}
         userName={dialogState.userName}
         tripId={tripId}
+      />
+
+      <RevokeSpotDialog
+        open={revokeDialogState.open}
+        onOpenChange={(open) => setRevokeDialogState((prev) => ({ ...prev, open }))}
+        waitlistSignupId={revokeDialogState.waitlistSignupId}
+        userName={revokeDialogState.userName}
+        onConfirm={handleRevokeSpot}
+        isPending={isRevoking}
       />
     </div>
   );

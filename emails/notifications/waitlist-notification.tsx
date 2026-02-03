@@ -1,15 +1,20 @@
+import { formatTimeRemaining } from "@/utils/date-time";
 import {
   Body,
   Button,
   Container,
   Head,
-  Heading,
   Hr,
   Html,
+  Img,
   Preview,
   Section,
   Text,
 } from "@react-email/components";
+
+const BASE_URL = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : "http://localhost:3000";
 
 type WaitlistNotificationEmailProps = {
   firstName: string;
@@ -18,35 +23,6 @@ type WaitlistNotificationEmailProps = {
   expiresAt: Date;
   signupUrl: string;
 };
-
-function formatTimeRemaining(expiresAt: Date): string {
-  const now = new Date();
-  const diffMs = expiresAt.getTime() - now.getTime();
-
-  if (diffMs <= 0) return "expired";
-
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays >= 1) {
-    const remainingHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    if (remainingHours > 0) {
-      return `${diffDays} day${diffDays > 1 ? "s" : ""} and ${remainingHours} hour${remainingHours > 1 ? "s" : ""}`;
-    }
-    return `${diffDays} day${diffDays > 1 ? "s" : ""}`;
-  }
-
-  if (diffHours >= 1) {
-    const remainingMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    if (remainingMinutes > 0) {
-      return `${diffHours} hour${diffHours > 1 ? "s" : ""} and ${remainingMinutes} minute${remainingMinutes > 1 ? "s" : ""}`;
-    }
-    return `${diffHours} hour${diffHours > 1 ? "s" : ""}`;
-  }
-
-  return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""}`;
-}
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
@@ -77,13 +53,21 @@ export function WaitlistNotificationEmail({
       <Preview>A spot opened up for {tripName}!</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={heading}>A Spot Opened Up!</Heading>
+          <Section style={logoContainer}>
+            <Img
+              src={`${BASE_URL}/logo.png`}
+              width="155"
+              height="80"
+              alt="SC Outfitters"
+              style={logo}
+            />
+          </Section>
 
           <Text style={paragraph}>Hi {firstName},</Text>
 
           <Text style={paragraph}>
-            Great news! A <strong>{spotTypeLabel.toLowerCase()} spot</strong> has
-            opened up for <strong>{tripName}</strong>.
+            Great news! A <strong>{spotTypeLabel.toLowerCase()} spot</strong> on the trip{" "}
+						 <strong>{tripName}</strong> just opened up and you&apos;re first on the waitlist.
           </Text>
 
           <Section style={highlightBox}>
@@ -134,13 +118,13 @@ const container = {
   borderRadius: "8px",
 };
 
-const heading = {
-  color: "#1a1a1a",
-  fontSize: "24px",
-  fontWeight: "600" as const,
-  lineHeight: "1.3",
-  margin: "0 0 24px",
+const logoContainer = {
   textAlign: "center" as const,
+  marginBottom: "24px",
+};
+
+const logo = {
+  margin: "0 auto",
 };
 
 const paragraph = {

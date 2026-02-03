@@ -1,6 +1,6 @@
 import { TypedSupabaseClient } from "@/types/typed-supabase-client";
 import { createClient } from "@/utils/supabase/browser";
-import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
+import { useQuery, useUpdateMutation } from "@supabase-cache-helpers/postgrest-react-query";
 
 const getTripWaitlist = (tripId: string, client: TypedSupabaseClient) => {
   return client
@@ -31,3 +31,8 @@ export const useTripWaitlist = (tripId: string) => {
   const client = createClient();
   return useQuery(getTripWaitlist(tripId, client));
 };
+
+export const useUpdateWaitlist = () => {
+	const client = createClient()
+	return useUpdateMutation(client.from('waitlist_signups'), ['id'])
+}

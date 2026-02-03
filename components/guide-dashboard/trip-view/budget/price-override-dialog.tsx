@@ -7,10 +7,7 @@ import { Pencil } from "lucide-react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { z } from "zod/v4";
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
@@ -49,7 +46,7 @@ export function PriceOverrideDialog({
 }) {
   const [open, setOpen] = useState(false);
   const { mutateAsync: updateTrip, isPending } = useUpdateTrip();
-	const { refetch: refetchTrip } = useTrip(tripId);
+  const { refetch: refetchTrip } = useTrip(tripId);
 
   const PriceOverrideSchema = z.object({
     memberEnabled: z.boolean(),
@@ -120,7 +117,7 @@ export function PriceOverrideDialog({
       {
         onSuccess: async () => {
           await refetchTrip();
-					toast.success("Price overrides saved");
+          toast.success("Price overrides saved");
           setOpen(false);
         },
         onError: (err) => {
@@ -190,6 +187,7 @@ export function PriceOverrideDialog({
                     />
                   )}
                 />
+                <p className="text-sm text-muted-foreground">Override</p>
               </div>
             </Field>
 
@@ -230,6 +228,7 @@ export function PriceOverrideDialog({
                     />
                   )}
                 />
+                <p className="text-sm text-muted-foreground">Override</p>
               </div>
             </Field>
 
@@ -271,6 +270,7 @@ export function PriceOverrideDialog({
                       />
                     )}
                   />
+                  <p className="text-sm text-muted-foreground">Override</p>
                 </div>
               </Field>
             )}
