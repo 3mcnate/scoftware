@@ -1,0 +1,1 @@
+select is_trip_visible('af6192f6-2565-49bf-ab29-9d2e97cb9740');

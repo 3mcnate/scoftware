@@ -220,6 +220,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
         total_miles: data.total_miles,
         car_mpgs: data.cars.map((c) => Number(c.mpg)) ?? [],
         other_expenses: data.other_expenses,
+				budget_confirmed: true,
       },
       {
         onSuccess: () => {

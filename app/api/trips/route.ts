@@ -60,7 +60,6 @@ export async function POST(request: Request) {
 			end_date: new Date(end_date).toISOString(),
 			participant_spots,
 			driver_spots,
-			signup_status: "open",
 		})
 		.returning({ id: trips.id });
 
