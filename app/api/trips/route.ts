@@ -22,14 +22,14 @@ export async function POST(request: Request) {
 	const { data: claimsData } = await supabase.auth.getClaims();
 
 	if (!user || !claimsData) {
-		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		return NextResponse.json({ error: "User not found" }, { status: 401 });
 	}
 
 	const { claims } = claimsData;
 	const role: Enums<"user_role"> = claims.app_role;
 
 	if (role === "participant") {
-		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		return NextResponse.json({ error: "Must be a guide" }, { status: 403 });
 	}
 
 	const body = await request.json();

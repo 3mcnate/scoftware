@@ -27,6 +27,28 @@ export default function SettingsPage() {
   return <TripSettingsForm trip={trip} />;
 }
 
+function TripSettingsForm({ trip }: { trip: TripData }) {
+  const auth = useAuth();
+  const userId = auth.status === "authenticated" ? auth.user.id : "";
+  const { data: tripCycle, isLoading: isTripCycleLoading } = useTripCycleByDate(
+    new Date(trip.start_date),
+  );
+	const { data: tickets } = useTripTickets(trip.id);
+
+  return (
+    <div className="space-y-8">
+      <BasicInfoSection trip={trip} />
+      {isTripCycleLoading ? (
+        <TripCycleSkeleton />
+      ) : (
+        <SignupSettingsSection trip={trip} tripCycle={tripCycle ?? null} />
+      )}
+      <GuidesSection trip={trip} currentUserId={userId} />
+      <DestructiveSection trip={trip} currentUserId={userId} allowDeletion={tickets?.length === 0}/>
+    </div>
+  );
+}
+
 function SettingsFormSkeleton() {
   return (
     <div className="space-y-8">
@@ -134,28 +156,6 @@ function SettingsFormSkeleton() {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
-}
-
-function TripSettingsForm({ trip }: { trip: TripData }) {
-  const auth = useAuth();
-  const userId = auth.status === "authenticated" ? auth.user.id : "";
-  const { data: tripCycle, isLoading: isTripCycleLoading } = useTripCycleByDate(
-    new Date(trip.start_date),
-  );
-	const { data: tickets } = useTripTickets(trip.id);
-
-  return (
-    <div className="space-y-8">
-      <BasicInfoSection trip={trip} />
-      {isTripCycleLoading ? (
-        <TripCycleSkeleton />
-      ) : (
-        <SignupSettingsSection trip={trip} tripCycle={tripCycle ?? null} />
-      )}
-      <GuidesSection trip={trip} currentUserId={userId} />
-      <DestructiveSection trip={trip} currentUserId={userId} allowDeletion={tickets?.length === 0}/>
     </div>
   );
 }

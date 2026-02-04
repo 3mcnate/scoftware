@@ -11,7 +11,6 @@ INSERT INTO
 		"end_date",
 		"start_date",
 		"gear_questions",
-		"signup_status",
 		"what_to_bring",
 		"access_code"
 	)
@@ -33,7 +32,6 @@ VALUES
 		'2026-12-07 01:00:00+00',
 		'2026-12-06 17:00:00+00',
 		null,
-		'open',
 		'{"2+ liters of water",
 			"Hat/sunscreen/sunglasses",
 			"Comfortable hiking shoes",
@@ -52,7 +50,6 @@ VALUES
 		'2025-11-24 01:00:00+00',
 		'2025-11-22 17:00:00+00',
 		null,
-		'open',
 		null,
 		null
 	);
@@ -285,7 +282,6 @@ INSERT INTO
 		"trips_published_at",
 		"member_signups_start_at",
 		"nonmember_signups_start_at",
-		"range",
 		"trip_feedback_form",
 		"guide_post_trip_form",
 		"driver_signups_start_at"
@@ -301,7 +297,6 @@ VALUES
 		'2026-02-05 04:00:00+00',
 		'2026-02-04 07:00:00+00',
 		'2026-02-05 17:00:00+00',
-		'["2026-02-01 08:00:00+00","2026-03-01 07:59:00+00")',
 		null,
 		null,
 		'2026-02-04 20:00:00+00'

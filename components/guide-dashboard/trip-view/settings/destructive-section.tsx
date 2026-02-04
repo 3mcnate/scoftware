@@ -23,11 +23,11 @@ import {
 export function DestructiveSection({
   trip,
   currentUserId,
-	allowDeletion,
+  allowDeletion,
 }: {
   trip: TripData;
   currentUserId: string;
-	allowDeletion: boolean
+  allowDeletion: boolean;
 }) {
   const router = useRouter();
   const { mutateAsync: removeGuide, isPending: isLeaving } =
@@ -81,7 +81,9 @@ export function DestructiveSection({
           <div>
             <p className="font-medium">Leave Trip</p>
             <p className="text-sm text-muted-foreground">
-              Remove yourself from this trip
+              {isOnlyGuide
+                ? "You are the only guide on this trip. Add another guide to remove yourself from this trip"
+                : "Remove yourself from this trip"}
             </p>
           </div>
           <AlertDialog>
@@ -116,10 +118,9 @@ export function DestructiveSection({
           <div>
             <p className="font-medium">Delete Trip</p>
             <p className="text-sm text-muted-foreground">
-							{
-								allowDeletion ? "Permanently delete this trip and all associated data" : "This trip can't be deleted because it has signups."
- 							}
-              
+              {allowDeletion
+                ? "Permanently delete this trip and all associated data"
+                : "This trip can't be deleted because it has signups."}
             </p>
           </div>
           <AlertDialog>
@@ -156,13 +157,6 @@ export function DestructiveSection({
             </AlertDialogContent>
           </AlertDialog>
         </div>
-
-        {isOnlyGuide && (
-          <p className="text-sm text-muted-foreground">
-            You are the only guide on this trip. Add another guide before
-            leaving.
-          </p>
-        )}
       </CardContent>
     </Card>
   );

@@ -11,6 +11,8 @@ BEGIN
 	insert into public.trip_signup_settings
 	(trip_id) values (NEW.id);
 
+	return NEW;
+
 end;
 $function$
 ;

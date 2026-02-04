@@ -1,10 +1,19 @@
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { z } from "zod/v4";
 import { toast } from "sonner";
-import { Loader2, ToggleLeft, Calendar, AlertTriangle } from "lucide-react";
+import {
+  Loader2,
+  ToggleLeft,
+  AlertTriangle,
+  ChevronDown,
+} from "lucide-react";
 import { type TripData } from "@/data/client/trips/get-guide-trips";
-import { useUpdateTrip } from "@/data/client/trips/use-update-trip";
+import {
+  useUpdateTrip,
+  useUpdateTripSettings,
+} from "@/data/client/trips/use-update-trip";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +34,11 @@ import {
 import { formatDateTimeLocal } from "@/utils/date-time";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { type TripCycle } from "@/data/client/trip-cycles/get-trip-cycle";
 import { useUnsavedChangesPrompt } from "@/hooks/use-unsaved-changes-prompt";
 
@@ -91,7 +105,15 @@ export function SignupSettingsSection({
   trip: TripData;
   tripCycle: TripCycle | null;
 }) {
-  const { mutateAsync: updateTrip, isPending } = useUpdateTrip();
+  const { mutateAsync: updateTrip, isPending: updateTripPending } =
+    useUpdateTrip();
+  const { mutateAsync: updateSettings, isPending: updateSettingsPending } =
+    useUpdateTripSettings();
+
+  console.log("signup settings", trip.trip_signup_settings);
+
+  const isPending = updateTripPending || updateSettingsPending;
+  const [isTripCycleDatesOpen, setIsTripCycleDatesOpen] = useState(false);
 
   const {
     control,
@@ -103,9 +125,10 @@ export function SignupSettingsSection({
   } = useForm<SignupSettingsFormData>({
     resolver: standardSchemaResolver(SignupSettingsSchema),
     defaultValues: {
-      allow_signups: trip.allow_signups,
-      enable_participant_waitlist: trip.enable_participant_waitlist,
-      enable_driver_waitlist: trip.enable_driver_waitlist,
+      allow_signups: trip.trip_signup_settings?.allow_signups,
+      enable_participant_waitlist:
+        trip.trip_signup_settings?.enable_participant_waitlist,
+      enable_driver_waitlist: trip.trip_signup_settings?.enable_driver_waitlist,
       require_access_code: !!trip.access_code,
       access_code: trip.access_code ?? "",
       override_publish_date: !!trip.publish_date_override,
@@ -114,22 +137,31 @@ export function SignupSettingsSection({
         : tripCycle?.trips_published_at
           ? formatDateTimeLocal(tripCycle.trips_published_at)
           : "",
-      override_member_signup_date: !!trip.member_ticket_drop_date_override,
-      member_signup_date: trip.member_ticket_drop_date_override
-        ? formatDateTimeLocal(trip.member_ticket_drop_date_override)
+      override_member_signup_date:
+        !!trip.trip_signup_settings?.member_signup_date_override,
+      member_signup_date: trip.trip_signup_settings?.member_signup_date_override
+        ? formatDateTimeLocal(
+            trip.trip_signup_settings?.member_signup_date_override,
+          )
         : tripCycle?.member_signups_start_at
           ? formatDateTimeLocal(tripCycle.member_signups_start_at)
           : "",
       override_nonmember_signup_date:
-        !!trip.nonmember_ticket_drop_date_override,
-      nonmember_signup_date: trip.nonmember_ticket_drop_date_override
-        ? formatDateTimeLocal(trip.nonmember_ticket_drop_date_override)
+        !!trip.trip_signup_settings?.nonmember_signup_date_override,
+      nonmember_signup_date: trip.trip_signup_settings
+        ?.nonmember_signup_date_override
+        ? formatDateTimeLocal(
+            trip.trip_signup_settings?.nonmember_signup_date_override,
+          )
         : tripCycle?.nonmember_signups_start_at
           ? formatDateTimeLocal(tripCycle.nonmember_signups_start_at)
           : "",
-      override_driver_signup_date: !!trip.driver_ticket_drop_date_override,
-      driver_signup_date: trip.driver_ticket_drop_date_override
-        ? formatDateTimeLocal(trip.driver_ticket_drop_date_override)
+      override_driver_signup_date:
+        !!trip.trip_signup_settings?.driver_signup_date_override,
+      driver_signup_date: trip.trip_signup_settings?.driver_signup_date_override
+        ? formatDateTimeLocal(
+            trip.trip_signup_settings?.driver_signup_date_override,
+          )
         : tripCycle?.driver_signups_start_at
           ? formatDateTimeLocal(tripCycle.driver_signups_start_at)
           : "",
@@ -157,41 +189,44 @@ export function SignupSettingsSection({
   };
 
   const onSubmit = async (data: SignupSettingsFormData) => {
-    await updateTrip(
-      {
-        id: trip.id,
+    console.log("submitting...", data);
+
+    try {
+      const updateSettingsQuery = updateSettings({
+        trip_id: trip.id,
         allow_signups: data.allow_signups,
         enable_participant_waitlist: data.enable_participant_waitlist,
         enable_driver_waitlist: data.enable_driver_waitlist,
+        member_signup_date_override:
+          data.override_member_signup_date && data.member_signup_date
+            ? new Date(data.member_signup_date).toISOString()
+            : null,
+        nonmember_signup_date_override:
+          data.override_nonmember_signup_date && data.nonmember_signup_date
+            ? new Date(data.nonmember_signup_date).toISOString()
+            : null,
+        driver_signup_date_override:
+          data.override_driver_signup_date && data.driver_signup_date
+            ? new Date(data.driver_signup_date).toISOString()
+            : null,
+      });
+
+      const updateTripQuery = updateTrip({
+        id: trip.id,
         access_code: data.require_access_code ? data.access_code || null : null,
         publish_date_override:
           data.override_publish_date && data.publish_date
             ? new Date(data.publish_date).toISOString()
             : null,
-        member_ticket_drop_date_override:
-          data.override_member_signup_date && data.member_signup_date
-            ? new Date(data.member_signup_date).toISOString()
-            : null,
-        nonmember_ticket_drop_date_override:
-          data.override_nonmember_signup_date && data.nonmember_signup_date
-            ? new Date(data.nonmember_signup_date).toISOString()
-            : null,
-        driver_ticket_drop_date_override:
-          data.override_driver_signup_date && data.driver_signup_date
-            ? new Date(data.driver_signup_date).toISOString()
-            : null,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Signup settings updated");
-          reset(data);
-        },
-        onError: (err) => {
-          toast.error("Failed to update signup settings");
-          console.error(err);
-        },
-      },
-    );
+      });
+
+      await Promise.all([updateSettingsQuery, updateTripQuery]);
+      toast.success("Signup settings updated");
+      reset(data);
+    } catch (err) {
+      toast.error("Failed to update signup settings");
+      console.error(err);
+    }
   };
 
   useUnsavedChangesPrompt(isDirty);
@@ -240,7 +275,7 @@ export function SignupSettingsSection({
                   <p className="text-sm text-muted-foreground">
                     When enabled, participants cannot sign up and may only join
                     the waitlist, even if a spot is available. Participants can
-                    only sign up if you send them a signup link. The waitlist is
+                    only sign up if you send them a signup link. This waitlist is
                     enabled automatically when participant spots fill up.
                   </p>
                 </div>
@@ -262,7 +297,7 @@ export function SignupSettingsSection({
                   <p className="text-sm text-muted-foreground">
                     When enabled, drivers cannot sign up and may only join the
                     waitlist, even if a driver spot is available. Drivers can
-                    only sign up if you send them a signup link. The waitlist is
+                    only sign up if you send them a signup link. This waitlist is
                     enabled automatically when driver spots fill up.
                   </p>
                 </div>
@@ -320,143 +355,156 @@ export function SignupSettingsSection({
 
           <Separator className="my-6" />
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-sm font-medium">Trip Cycle Dates</h3>
-            </div>
+          <Collapsible
+            open={isTripCycleDatesOpen}
+            onOpenChange={setIsTripCycleDatesOpen}
+          >
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 py-2 hover:bg-muted/50 rounded-md px-2 transition-colors">
+              <div className="flex items-center gap-2">
+                <ChevronDown
+                  className={`h-4 w-4 text-muted-foreground transition-transform ${
+                    isTripCycleDatesOpen ? "rotate-180" : ""
+                  }`}
+                />
+                <h3 className="text-sm font-medium">Trip Cycle Information</h3>
+              </div>
+            </CollapsibleTrigger>
 
-            {tripCycle ? (
-              <div className="space-y-4">
-                <div className="rounded-lg bg-muted p-4 text-sm space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Trip Cycle:</span>
-                    <span className="font-medium">{tripCycle.name}</span>
+            <CollapsibleContent className="space-y-4 pt-4">
+              {tripCycle ? (
+                <div className="space-y-4">
+                  <div className="rounded-lg bg-muted p-4 text-sm space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Trip Cycle:</span>
+                      <span className="font-medium">{tripCycle.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Cycle Period:
+                      </span>
+                      <span className="font-medium">
+                        {new Date(tripCycle.starts_at).toLocaleDateString()} -{" "}
+                        {new Date(tripCycle.ends_at).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Cycle Period:</span>
-                    <span className="font-medium">
-                      {new Date(tripCycle.starts_at).toLocaleDateString()} -{" "}
-                      {new Date(tripCycle.ends_at).toLocaleDateString()}
-                    </span>
-                  </div>
+
+                  <DateOverrideField
+                    control={control}
+                    label="Publish Date"
+                    overrideFieldName="override_publish_date"
+                    dateFieldName="publish_date"
+                    isOverridden={overridePublishDate}
+                    defaultValue={tripCycle.trips_published_at}
+                    onOverrideToggle={(checked, defaultVal) =>
+                      handleDateOverrideToggle(
+                        "publish_date",
+                        checked,
+                        defaultVal,
+                      )
+                    }
+                  />
+
+                  <DateOverrideField
+                    control={control}
+                    label="Member Signup Date"
+                    overrideFieldName="override_member_signup_date"
+                    dateFieldName="member_signup_date"
+                    isOverridden={overrideMemberSignupDate}
+                    defaultValue={tripCycle.member_signups_start_at}
+                    onOverrideToggle={(checked, defaultVal) =>
+                      handleDateOverrideToggle(
+                        "member_signup_date",
+                        checked,
+                        defaultVal,
+                      )
+                    }
+                  />
+
+                  <DateOverrideField
+                    control={control}
+                    label="Non-Member Signup Date"
+                    overrideFieldName="override_nonmember_signup_date"
+                    dateFieldName="nonmember_signup_date"
+                    isOverridden={overrideNonmemberSignupDate}
+                    defaultValue={tripCycle.nonmember_signups_start_at}
+                    onOverrideToggle={(checked, defaultVal) =>
+                      handleDateOverrideToggle(
+                        "nonmember_signup_date",
+                        checked,
+                        defaultVal,
+                      )
+                    }
+                  />
+
+                  <DateOverrideField
+                    control={control}
+                    label="Driver Signup Date"
+                    overrideFieldName="override_driver_signup_date"
+                    dateFieldName="driver_signup_date"
+                    isOverridden={overrideDriverSignupDate}
+                    defaultValue={tripCycle.driver_signups_start_at}
+                    onOverrideToggle={(checked, defaultVal) =>
+                      handleDateOverrideToggle(
+                        "driver_signup_date",
+                        checked,
+                        defaultVal,
+                      )
+                    }
+                  />
                 </div>
+              ) : (
+                <div className="space-y-4">
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>No Trip Cycle Found</AlertTitle>
+                    <AlertDescription>
+                      This trip&apos;s start date does not fall within any trip
+                      cycle. Please enter all dates manually below, otherwise
+                      the trip won&apos;t be published and participants
+                      won&apos;t be able to sign up.
+                    </AlertDescription>
+                  </Alert>
 
-                <DateOverrideField
-                  control={control}
-                  label="Publish Date"
-                  overrideFieldName="override_publish_date"
-                  dateFieldName="publish_date"
-                  isOverridden={overridePublishDate}
-                  defaultValue={tripCycle.trips_published_at}
-                  onOverrideToggle={(checked, defaultVal) =>
-                    handleDateOverrideToggle(
-                      "publish_date",
-                      checked,
-                      defaultVal,
-                    )
-                  }
-                />
+                  <DateOverrideField
+                    control={control}
+                    label="Publish Date"
+                    overrideFieldName="override_publish_date"
+                    dateFieldName="publish_date"
+                    isOverridden={true}
+                    forceOverride
+                  />
 
-                <DateOverrideField
-                  control={control}
-                  label="Member Signup Date"
-                  overrideFieldName="override_member_signup_date"
-                  dateFieldName="member_signup_date"
-                  isOverridden={overrideMemberSignupDate}
-                  defaultValue={tripCycle.member_signups_start_at}
-                  onOverrideToggle={(checked, defaultVal) =>
-                    handleDateOverrideToggle(
-                      "member_signup_date",
-                      checked,
-                      defaultVal,
-                    )
-                  }
-                />
+                  <DateOverrideField
+                    control={control}
+                    label="Member Signup Date"
+                    overrideFieldName="override_member_signup_date"
+                    dateFieldName="member_signup_date"
+                    isOverridden={true}
+                    forceOverride
+                  />
 
-                <DateOverrideField
-                  control={control}
-                  label="Non-Member Signup Date"
-                  overrideFieldName="override_nonmember_signup_date"
-                  dateFieldName="nonmember_signup_date"
-                  isOverridden={overrideNonmemberSignupDate}
-                  defaultValue={tripCycle.nonmember_signups_start_at}
-                  onOverrideToggle={(checked, defaultVal) =>
-                    handleDateOverrideToggle(
-                      "nonmember_signup_date",
-                      checked,
-                      defaultVal,
-                    )
-                  }
-                />
+                  <DateOverrideField
+                    control={control}
+                    label="Non-Member Signup Date"
+                    overrideFieldName="override_nonmember_signup_date"
+                    dateFieldName="nonmember_signup_date"
+                    isOverridden={true}
+                    forceOverride
+                  />
 
-                <DateOverrideField
-                  control={control}
-                  label="Driver Signup Date"
-                  overrideFieldName="override_driver_signup_date"
-                  dateFieldName="driver_signup_date"
-                  isOverridden={overrideDriverSignupDate}
-                  defaultValue={tripCycle.driver_signups_start_at}
-                  onOverrideToggle={(checked, defaultVal) =>
-                    handleDateOverrideToggle(
-                      "driver_signup_date",
-                      checked,
-                      defaultVal,
-                    )
-                  }
-                />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>No Trip Cycle Found</AlertTitle>
-                  <AlertDescription>
-                    This trip&apos;s start date does not fall within any trip
-                    cycle. Please enter all dates manually below, otherwise the
-                    trip won&apos;t be published and participants won&apos;t be
-                    able to sign up.
-                  </AlertDescription>
-                </Alert>
-
-                <DateOverrideField
-                  control={control}
-                  label="Publish Date"
-                  overrideFieldName="override_publish_date"
-                  dateFieldName="publish_date"
-                  isOverridden={true}
-                  forceOverride
-                />
-
-                <DateOverrideField
-                  control={control}
-                  label="Member Signup Date"
-                  overrideFieldName="override_member_signup_date"
-                  dateFieldName="member_signup_date"
-                  isOverridden={true}
-                  forceOverride
-                />
-
-                <DateOverrideField
-                  control={control}
-                  label="Non-Member Signup Date"
-                  overrideFieldName="override_nonmember_signup_date"
-                  dateFieldName="nonmember_signup_date"
-                  isOverridden={true}
-                  forceOverride
-                />
-
-                <DateOverrideField
-                  control={control}
-                  label="Driver Signup Date"
-                  overrideFieldName="override_driver_signup_date"
-                  dateFieldName="driver_signup_date"
-                  isOverridden={true}
-                  forceOverride
-                />
-              </div>
-            )}
-          </div>
+                  <DateOverrideField
+                    control={control}
+                    label="Driver Signup Date"
+                    overrideFieldName="override_driver_signup_date"
+                    dateFieldName="driver_signup_date"
+                    isOverridden={true}
+                    forceOverride
+                  />
+                </div>
+              )}
+            </CollapsibleContent>
+          </Collapsible>
 
           <div className="flex justify-end">
             <Button type="submit" disabled={isPending || !isDirty}>
