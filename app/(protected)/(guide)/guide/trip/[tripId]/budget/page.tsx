@@ -110,11 +110,11 @@ function useBudgetTotals(
     } = formValues;
 
     const inputs = {
-      breakfasts,
-      lunches,
-      dinners,
-      snacks,
-      total_miles,
+      breakfasts: Number(breakfasts),
+      lunches: Number(lunches),
+      dinners: Number(dinners),
+      snacks: Number(snacks),
+      total_miles: Number(total_miles),
       num_cars: cars.length,
       average_mpg: getAverageMPGs(cars.map((c) => Number(c.mpg) ?? 0)),
       total_other_expenses: other_expenses.reduce(

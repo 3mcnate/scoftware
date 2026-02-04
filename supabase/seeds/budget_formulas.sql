@@ -1,18 +1,4 @@
-INSERT INTO "public"."budget_formulas" ("formulas", "updated_at") VALUES ('# inputs
-breakfasts = 1
-lunches = 1
-dinners = 1
-snacks = 1
-total_miles = 200
-num_cars = 2
-average_mpg = 24.5
-total_other_expenses = 30
-num_participants = 7
-num_participant_drivers = 1
-num_guides = 2
-num_nights = 1
-
-# constants
+INSERT INTO "public"."budget_formulas" ("formulas", "updated_at") VALUES ('# constants
 price_of_gas = 4.85
 price_of_breakfast = 1.50
 price_of_lunch = 4.20
@@ -35,8 +21,8 @@ total_participants = num_participants + num_participant_drivers
 
 # transportation
 gas_cost = price_of_gas * num_cars * total_miles / average_mpg 
-driver_incentive = num_nights >= 1 ? driver_incentive_overnight : driver_incentive_day_trip
-total_transportation_cost = gas_cost + driver_incentive
+driver_incentive = (num_nights >= 1) ? driver_incentive_overnight : driver_incentive_day_trip
+total_transportation_cost = gas_cost + (num_cars > 0 ? driver_incentive : 0)
 
 # food
 food_cost_per_person = breakfasts * price_of_breakfast + lunches * price_of_lunch + dinners * price_of_dinner + snacks * price_of_snack
@@ -48,9 +34,9 @@ adjusted_trip_price = raw_trip_cost * (1 + profit_margin) * (1 + stripe_percenta
 base_price = adjusted_trip_price / total_participants 
 
 # final prices
-driver_price = (base_price - ((1 / total_participants) * total_transportation_cost)) * additional_driver_discount
-member_price = (adjusted_trip_price - (num_participant_drivers * driver_price)) / num_participants
-nonmember_price = member_price * (1 + nonmember_markup)
+driver_price = ceil((base_price - ((1 / total_participants) * total_transportation_cost)) * additional_driver_discount)
+member_price = ceil((adjusted_trip_price - (num_participant_drivers * driver_price)) / num_participants)
+nonmember_price = ceil(member_price * (1 + nonmember_markup))
 
 # final budget
 gas_budget = gas_cost
