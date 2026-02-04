@@ -16,10 +16,12 @@ const getGuideTrips = (guideId: string, client: TypedSupabaseClient) => {
 				description,
 				driver_spots,
 				participant_spots,
-				allow_signups,
 				start_date,
 				end_date,
 				picture_path,
+				published_trips (
+					id
+				),
 				tickets (
 					id,
 					cancelled,
@@ -60,7 +62,6 @@ export const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
 			participant_spots,
 			gear_questions,
 			what_to_bring,
-			access_code,
 			end_date,
 			picture_path,
 			start_date,
@@ -83,13 +84,9 @@ export const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
 			member_price_override,
 			nonmember_price_override,
 			driver_price_override,
-			allow_signups,
-			enable_participant_waitlist,
-			enable_driver_waitlist,
 			publish_date_override,
-			member_ticket_drop_date_override,
-			nonmember_ticket_drop_date_override,
-			driver_ticket_drop_date_override,
+			access_code,
+			visible,
 			trip_guides (
 				profiles (
 					id,

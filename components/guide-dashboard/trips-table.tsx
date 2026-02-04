@@ -46,16 +46,6 @@ type GuideTripsData = NonNullable<
 >[number];
 type TripData = NonNullable<GuideTripsData["trips"]>;
 
-type Guide = {
-  user_id: string;
-  profiles: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    avatar_path: string | null;
-  } | null;
-};
-
 function getInitials(
   firstName?: string | null,
   lastName?: string | null
@@ -102,7 +92,7 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
   const deleteTrip = useDeleteTrip();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const guides: Guide[] = trip.trip_guides ?? [];
+  const guides = trip.trip_guides ?? [];
   const activeTickets = trip.tickets?.filter((t) => !t.cancelled) ?? [];
   const participantCount = activeTickets.filter(
     (t) => t.type === "member" || t.type === "nonmember"
