@@ -70,6 +70,32 @@ Trip publish logic
 	- the existence of row in published_trips table implies the trip is "Ready". No need for ready_to_publish column
   - for trip to be visible: must exist in published_trips table, must have visible = true in trips table, must be past the override date or trip cycle date publish date. 
 
+Your task is to implement trip publishing from end to end. 
+
+1. Create the backend route, POST /api/trips/publish. It should accept a tripId as JSON in the body. Use Zod for validation.
+
+What needs to happen when you publish a trip:
+	- check that all required fields are filled out
+		- description
+		- what_to_bring
+		- picture_path
+		- activity
+		- difficulty
+		- location
+		- meet
+		- native_land
+		- prior_experience
+		- return
+		- trail
+		- 
+		- budget_confirmed
+		- 
+	- insert row into published_trips table
+	- create stripe products/prices, add to trip_prices table
+		- use budget formulas with input data or the override prices
+
+	- 
+
 
 Budget formulas: mathjs library
 

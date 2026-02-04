@@ -1,8 +1,11 @@
-create or replace function public.is_trip_visible(trip_id uuid)
-returns boolean
-security definer
-set search_path = ''
-as $$
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.is_trip_visible(trip_id uuid)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
 declare
 	override_date timestamptz := null;
 	cycle_date timestamptz := null;
@@ -25,4 +28,7 @@ BEGIN
 	return coalesce(now() >= override_date, now() >= cycle_date, false);
 
 end;
-$$ language plpgsql;
+$function$
+;
+
+

@@ -84,10 +84,8 @@ export const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
 			member_price_override,
 			nonmember_price_override,
 			driver_price_override,
-			publish_date_override,
 			access_code,
-			visible,
-			trip_signup_settings (
+			trip_settings (
 				trip_id,
 				created_at,
 				updated_at,
@@ -95,9 +93,11 @@ export const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
 				enable_participant_waitlist,
 				enable_driver_waitlist,
 				require_code,
+				publish_date_override,
 				driver_signup_date_override,
 				member_signup_date_override,
-				nonmember_signup_date_override
+				nonmember_signup_date_override,
+				hide_trip
 			),
 			trip_guides (
 				profiles (

@@ -8,5 +8,5 @@ export const useUpdateTrip = () => {
 
 export const useUpdateTripSettings = () => {
 	const client = createClient();
-	return useUpdateMutation(client.from('trip_signup_settings'), ["trip_id"], "*")
+	return useUpdateMutation(client.from('trip_settings'), ["trip_id"], "*")
 }

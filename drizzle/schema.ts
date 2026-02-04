@@ -1,4 +1,4 @@
-import { pgTable, foreignKey, uuid, timestamp, boolean, pgSchema, uniqueIndex, index, check, varchar, jsonb, text, smallint, unique, integer, pgPolicy, numeric, primaryKey, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, pgSchema, uniqueIndex, index, check, uuid, varchar, timestamp, jsonb, boolean, text, smallint, unique, integer, foreignKey, pgPolicy, numeric, primaryKey, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const auth = pgSchema("auth");
@@ -24,25 +24,6 @@ export const waitlist_status = pgEnum("waitlist_status", ['waiting', 'notificati
 export const waiver_event = pgEnum("waiver_event", ['user_opened', 'user_signed'])
 
 export const refresh_tokens_id_seqInAuth = auth.sequence("refresh_tokens_id_seq", {  startWith: "1", increment: "1", minValue: "1", maxValue: "9223372036854775807", cache: "1", cycle: false })
-
-export const trip_signup_settings = pgTable("trip_signup_settings", {
-	trip_id: uuid().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	allow_signups: boolean().default(true).notNull(),
-	enable_participant_waitlist: boolean().default(false).notNull(),
-	enable_driver_waitlist: boolean().default(false).notNull(),
-	require_code: boolean().default(false).notNull(),
-	driver_signup_date_override: timestamp({ withTimezone: true, mode: 'string' }),
-	member_signup_date_override: timestamp({ withTimezone: true, mode: 'string' }),
-	nonmember_signup_date_override: timestamp({ withTimezone: true, mode: 'string' }),
-}, (table) => [
-	foreignKey({
-			columns: [table.trip_id],
-			foreignColumns: [trips.id],
-			name: "trip_settings_trip_id_fkey"
-		}).onDelete("cascade"),
-]);
 
 export const usersInAuth = auth.table("users", {
 	instance_id: uuid(),
@@ -207,6 +188,28 @@ export const tickets = pgTable("tickets", {
 	pgPolicy("Guides, participants can select their own tickets", { as: "permissive", for: "select", to: ["authenticated"], using: sql`((user_id = ( SELECT auth.uid() AS uid)) OR authorize('guide'::user_role))` }),
 ]);
 
+export const trip_waivers = pgTable("trip_waivers", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	trip_id: uuid().notNull(),
+	content: jsonb().notNull(),
+	type: participant_type().notNull(),
+	template_id: uuid().notNull(),
+	title: text().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.template_id],
+			foreignColumns: [waiver_templates.id],
+			name: "trip_waivers_template_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "trip_waivers_trip_id_fkey"
+		}),
+]);
+
 export const waitlist_signups = pgTable("waitlist_signups", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -233,26 +236,52 @@ export const waitlist_signups = pgTable("waitlist_signups", {
 	pgPolicy("Guides can view waitlist signups", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
-export const trip_waivers = pgTable("trip_waivers", {
+export const trips = pgTable("trips", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	trip_id: uuid().notNull(),
-	content: jsonb().notNull(),
-	type: participant_type().notNull(),
-	template_id: uuid().notNull(),
-	title: text().notNull(),
+	name: text().notNull(),
+	description: text(),
+	driver_spots: integer().notNull(),
+	participant_spots: integer().notNull(),
+	gear_questions: text().array(),
+	what_to_bring: text().array(),
+	access_code: text(),
+	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	picture_path: text(),
+	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	activity: text(),
+	breakfasts: smallint(),
+	budget_confirmed: boolean().default(false).notNull(),
+	car_mpgs: numeric().array(),
+	difficulty: text(),
+	dinners: smallint(),
+	location: text(),
+	lunches: smallint(),
+	meet: text(),
+	native_land: text(),
+	prior_experience: text(),
+	return: text(),
+	snacks: smallint(),
+	total_miles: integer(),
+	trail: text(),
+	other_expenses: jsonb(),
+	driver_price_override: numeric(),
+	member_price_override: numeric(),
+	nonmember_price_override: numeric(),
 }, (table) => [
-	foreignKey({
-			columns: [table.template_id],
-			foreignColumns: [waiver_templates.id],
-			name: "trip_waivers_template_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.trip_id],
-			foreignColumns: [trips.id],
-			name: "trip_waivers_trip_id_fkey"
-		}),
+	pgPolicy("Allow all guides to update trips", { as: "permissive", for: "update", to: ["authenticated"], using: sql`authorize('guide'::user_role)`, withCheck: sql`authorize('guide'::user_role)`  }),
+	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"] }),
+	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"] }),
+	check("ends_after_start", sql`start_date < end_date`),
+	check("trips_breakfasts_check", sql`breakfasts >= 0`),
+	check("trips_car_mpgs_check", sql`(0)::numeric <= ALL (car_mpgs)`),
+	check("trips_dinners_check", sql`dinners >= 0`),
+	check("trips_driver_spots_check", sql`driver_spots >= 0`),
+	check("trips_lunches_check", sql`lunches >= 0`),
+	check("trips_participant_spots_check", sql`participant_spots >= 0`),
+	check("trips_snacks_check", sql`snacks >= 0`),
+	check("trips_total_miles_check", sql`total_miles >= 0`),
 ]);
 
 export const waiver_events = pgTable("waiver_events", {
@@ -306,56 +335,6 @@ export const roles = pgTable("roles", {
 	pgPolicy("Allow guides to view roles", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
-export const trips = pgTable("trips", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	name: text().notNull(),
-	description: text(),
-	driver_spots: integer().notNull(),
-	participant_spots: integer().notNull(),
-	gear_questions: text().array(),
-	what_to_bring: text().array(),
-	access_code: text(),
-	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	picture_path: text(),
-	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	activity: text(),
-	breakfasts: smallint(),
-	budget_confirmed: boolean().default(false).notNull(),
-	car_mpgs: numeric().array(),
-	difficulty: text(),
-	dinners: smallint(),
-	location: text(),
-	lunches: smallint(),
-	meet: text(),
-	native_land: text(),
-	prior_experience: text(),
-	return: text(),
-	snacks: smallint(),
-	total_miles: integer(),
-	trail: text(),
-	other_expenses: jsonb(),
-	member_price_override: numeric(),
-	nonmember_price_override: numeric(),
-	driver_price_override: numeric(),
-	publish_date_override: timestamp({ withTimezone: true, mode: 'string' }),
-	visible: boolean().default(true).notNull(),
-}, (table) => [
-	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"], using: sql`((is_trip_guide(id, ( SELECT auth.uid() AS uid)) OR authorize('admin'::user_role)) AND (NOT trip_has_tickets(id)))` }),
-	pgPolicy("Allow trip guides, admins to update trips", { as: "permissive", for: "update", to: ["authenticated"] }),
-	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"] }),
-	check("ends_after_start", sql`start_date < end_date`),
-	check("trips_breakfasts_check", sql`breakfasts >= 0`),
-	check("trips_car_mpgs_check", sql`(0)::numeric <= ALL (car_mpgs)`),
-	check("trips_dinners_check", sql`dinners >= 0`),
-	check("trips_driver_spots_check", sql`driver_spots >= 0`),
-	check("trips_lunches_check", sql`lunches >= 0`),
-	check("trips_participant_spots_check", sql`participant_spots >= 0`),
-	check("trips_snacks_check", sql`snacks >= 0`),
-	check("trips_total_miles_check", sql`total_miles >= 0`),
-]);
-
 export const trip_guides = pgTable("trip_guides", {
 	user_id: uuid().defaultRandom().notNull(),
 	trip_id: uuid().defaultRandom().notNull(),
@@ -371,7 +350,7 @@ export const trip_guides = pgTable("trip_guides", {
 			name: "trip_guides_user_id_fkey"
 		}).onUpdate("cascade").onDelete("cascade"),
 	primaryKey({ columns: [table.user_id, table.trip_id], name: "trip_guides_pkey"}),
-	pgPolicy("Allow guides to select trip guides", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
-	pgPolicy("Allow trip guides to remove trip guides", { as: "permissive", for: "delete", to: ["public"] }),
+	pgPolicy("Allow guides to remove trip guides", { as: "permissive", for: "delete", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
+	pgPolicy("Allow guides to select trip guides", { as: "permissive", for: "select", to: ["authenticated"] }),
 	pgPolicy("Guides can add other guides to trip", { as: "permissive", for: "insert", to: ["authenticated"] }),
 ]);

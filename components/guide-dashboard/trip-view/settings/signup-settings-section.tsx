@@ -3,12 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { z } from "zod/v4";
 import { toast } from "sonner";
-import {
-  Loader2,
-  ToggleLeft,
-  AlertTriangle,
-  ChevronDown,
-} from "lucide-react";
+import { Loader2, ToggleLeft, AlertTriangle, ChevronDown } from "lucide-react";
 import { type TripData } from "@/data/client/trips/get-guide-trips";
 import {
   useUpdateTrip,
@@ -110,8 +105,6 @@ export function SignupSettingsSection({
   const { mutateAsync: updateSettings, isPending: updateSettingsPending } =
     useUpdateTripSettings();
 
-  console.log("signup settings", trip.trip_signup_settings);
-
   const isPending = updateTripPending || updateSettingsPending;
   const [isTripCycleDatesOpen, setIsTripCycleDatesOpen] = useState(false);
 
@@ -125,43 +118,38 @@ export function SignupSettingsSection({
   } = useForm<SignupSettingsFormData>({
     resolver: standardSchemaResolver(SignupSettingsSchema),
     defaultValues: {
-      allow_signups: trip.trip_signup_settings?.allow_signups,
+      allow_signups: trip.trip_settings?.allow_signups,
       enable_participant_waitlist:
-        trip.trip_signup_settings?.enable_participant_waitlist,
-      enable_driver_waitlist: trip.trip_signup_settings?.enable_driver_waitlist,
+        trip.trip_settings?.enable_participant_waitlist,
+      enable_driver_waitlist: trip.trip_settings?.enable_driver_waitlist,
       require_access_code: !!trip.access_code,
       access_code: trip.access_code ?? "",
-      override_publish_date: !!trip.publish_date_override,
-      publish_date: trip.publish_date_override
-        ? formatDateTimeLocal(trip.publish_date_override)
+      override_publish_date: !!trip.trip_settings?.publish_date_override,
+      publish_date: trip.trip_settings?.publish_date_override
+        ? formatDateTimeLocal(trip.trip_settings?.publish_date_override)
         : tripCycle?.trips_published_at
           ? formatDateTimeLocal(tripCycle.trips_published_at)
           : "",
       override_member_signup_date:
-        !!trip.trip_signup_settings?.member_signup_date_override,
-      member_signup_date: trip.trip_signup_settings?.member_signup_date_override
-        ? formatDateTimeLocal(
-            trip.trip_signup_settings?.member_signup_date_override,
-          )
+        !!trip.trip_settings?.member_signup_date_override,
+      member_signup_date: trip.trip_settings?.member_signup_date_override
+        ? formatDateTimeLocal(trip.trip_settings?.member_signup_date_override)
         : tripCycle?.member_signups_start_at
           ? formatDateTimeLocal(tripCycle.member_signups_start_at)
           : "",
       override_nonmember_signup_date:
-        !!trip.trip_signup_settings?.nonmember_signup_date_override,
-      nonmember_signup_date: trip.trip_signup_settings
-        ?.nonmember_signup_date_override
+        !!trip.trip_settings?.nonmember_signup_date_override,
+      nonmember_signup_date: trip.trip_settings?.nonmember_signup_date_override
         ? formatDateTimeLocal(
-            trip.trip_signup_settings?.nonmember_signup_date_override,
+            trip.trip_settings?.nonmember_signup_date_override,
           )
         : tripCycle?.nonmember_signups_start_at
           ? formatDateTimeLocal(tripCycle.nonmember_signups_start_at)
           : "",
       override_driver_signup_date:
-        !!trip.trip_signup_settings?.driver_signup_date_override,
-      driver_signup_date: trip.trip_signup_settings?.driver_signup_date_override
-        ? formatDateTimeLocal(
-            trip.trip_signup_settings?.driver_signup_date_override,
-          )
+        !!trip.trip_settings?.driver_signup_date_override,
+      driver_signup_date: trip.trip_settings?.driver_signup_date_override
+        ? formatDateTimeLocal(trip.trip_settings?.driver_signup_date_override)
         : tripCycle?.driver_signups_start_at
           ? formatDateTimeLocal(tripCycle.driver_signups_start_at)
           : "",
@@ -209,15 +197,15 @@ export function SignupSettingsSection({
           data.override_driver_signup_date && data.driver_signup_date
             ? new Date(data.driver_signup_date).toISOString()
             : null,
+        publish_date_override:
+          data.override_publish_date && data.publish_date
+            ? new Date(data.publish_date).toISOString()
+            : null,
       });
 
       const updateTripQuery = updateTrip({
         id: trip.id,
         access_code: data.require_access_code ? data.access_code || null : null,
-        publish_date_override:
-          data.override_publish_date && data.publish_date
-            ? new Date(data.publish_date).toISOString()
-            : null,
       });
 
       await Promise.all([updateSettingsQuery, updateTripQuery]);
@@ -275,8 +263,8 @@ export function SignupSettingsSection({
                   <p className="text-sm text-muted-foreground">
                     When enabled, participants cannot sign up and may only join
                     the waitlist, even if a spot is available. Participants can
-                    only sign up if you send them a signup link. This waitlist is
-                    enabled automatically when participant spots fill up.
+                    only sign up if you send them a signup link. This waitlist
+                    is enabled automatically when participant spots fill up.
                   </p>
                 </div>
                 <Switch
@@ -297,8 +285,8 @@ export function SignupSettingsSection({
                   <p className="text-sm text-muted-foreground">
                     When enabled, drivers cannot sign up and may only join the
                     waitlist, even if a driver spot is available. Drivers can
-                    only sign up if you send them a signup link. This waitlist is
-                    enabled automatically when driver spots fill up.
+                    only sign up if you send them a signup link. This waitlist
+                    is enabled automatically when driver spots fill up.
                   </p>
                 </div>
                 <Switch

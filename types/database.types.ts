@@ -818,15 +818,17 @@ export type Database = {
           },
         ]
       }
-      trip_signup_settings: {
+      trip_settings: {
         Row: {
           allow_signups: boolean
           created_at: string
           driver_signup_date_override: string | null
           enable_driver_waitlist: boolean
           enable_participant_waitlist: boolean
+          hide_trip: boolean
           member_signup_date_override: string | null
           nonmember_signup_date_override: string | null
+          publish_date_override: string | null
           require_code: boolean
           trip_id: string
           updated_at: string
@@ -837,8 +839,10 @@ export type Database = {
           driver_signup_date_override?: string | null
           enable_driver_waitlist?: boolean
           enable_participant_waitlist?: boolean
+          hide_trip?: boolean
           member_signup_date_override?: string | null
           nonmember_signup_date_override?: string | null
+          publish_date_override?: string | null
           require_code?: boolean
           trip_id: string
           updated_at?: string
@@ -849,8 +853,10 @@ export type Database = {
           driver_signup_date_override?: string | null
           enable_driver_waitlist?: boolean
           enable_participant_waitlist?: boolean
+          hide_trip?: boolean
           member_signup_date_override?: string | null
           nonmember_signup_date_override?: string | null
+          publish_date_override?: string | null
           require_code?: boolean
           trip_id?: string
           updated_at?: string
@@ -940,14 +946,12 @@ export type Database = {
           participant_spots: number
           picture_path: string | null
           prior_experience: string | null
-          publish_date_override: string | null
           return: string | null
           snacks: number | null
           start_date: string
           total_miles: number | null
           trail: string | null
           updated_at: string
-          visible: boolean
           what_to_bring: string[] | null
         }
         Insert: {
@@ -976,14 +980,12 @@ export type Database = {
           participant_spots: number
           picture_path?: string | null
           prior_experience?: string | null
-          publish_date_override?: string | null
           return?: string | null
           snacks?: number | null
           start_date: string
           total_miles?: number | null
           trail?: string | null
           updated_at?: string
-          visible?: boolean
           what_to_bring?: string[] | null
         }
         Update: {
@@ -1012,14 +1014,12 @@ export type Database = {
           participant_spots?: number
           picture_path?: string | null
           prior_experience?: string | null
-          publish_date_override?: string | null
           return?: string | null
           snacks?: number | null
           start_date?: string
           total_miles?: number | null
           trail?: string | null
           updated_at?: string
-          visible?: boolean
           what_to_bring?: string[] | null
         }
         Relationships: []
