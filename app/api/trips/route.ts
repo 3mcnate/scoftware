@@ -11,7 +11,7 @@ const CreateTripSchema = z.object({
 	end_date: z.string(),
 	participant_spots: z.coerce.number().min(0),
 	driver_spots: z.coerce.number().min(0),
-	guides: z.array(z.string().uuid()),
+	guides: z.array(z.uuidv4()),
 });
 
 export async function POST(request: Request) {

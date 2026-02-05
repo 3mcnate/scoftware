@@ -1,15 +1,17 @@
 "use client";
 
-import type React from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Eye, Globe, ArrowLeft, ScanSearch, FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Eye, Globe, ArrowLeft, ScanSearch, FileText, CheckCircle2, RefreshCw } from "lucide-react";
 import { TripTabs } from "@/components/guide-dashboard/trip-view/trip-tabs";
 import { useTrip } from "@/data/client/trips/get-guide-trips";
 import { getAvatarUrl } from "@/data/client/storage/avatars";
+import { PublishTripDialog } from "@/components/guide-dashboard/trip-view/publish-trip-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,12 +23,14 @@ export default function GuideTripHeader() {
   const params = useParams();
   const tripId = params.tripId as string;
   const { data: trip, isLoading } = useTrip(tripId);
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
 
   if (isLoading || !trip) {
     return <GuideTripHeaderSkeleton />;
   }
 
   const tripName = trip?.name || "Grand Canyon Expedition";
+  const isPublished = !!trip.published_trips;
 
   return (
     <div className="bg-background">
@@ -45,6 +49,12 @@ export default function GuideTripHeader() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <h1 className="text-2xl font-semibold">{tripName}</h1>
+              {isPublished && (
+                <Badge variant="secondary" className="gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Published
+                </Badge>
+              )}
               <div className="flex -space-x-2">
                 {trip.trip_guides.map((guide, i) => (
                   <Avatar
@@ -89,9 +99,18 @@ export default function GuideTripHeader() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button size="sm">
-                <Globe className="h-4 w-4" />
-                Publish
+              <Button size="sm" onClick={() => setPublishDialogOpen(true)}>
+                {isPublished ? (
+                  <>
+                    <RefreshCw className="h-4 w-4" />
+                    Update
+                  </>
+                ) : (
+                  <>
+                    <Globe className="h-4 w-4" />
+                    Publish
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -99,9 +118,16 @@ export default function GuideTripHeader() {
 
         <TripTabs />
       </div>
+
+      <PublishTripDialog
+        open={publishDialogOpen}
+        onOpenChange={setPublishDialogOpen}
+        trip={trip}
+      />
     </div>
   );
 }
+
 
 function GuideTripHeaderSkeleton() {
   return (

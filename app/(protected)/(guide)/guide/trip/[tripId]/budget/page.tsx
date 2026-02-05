@@ -563,7 +563,7 @@ function BudgetForm({ trip, formulas }: { trip: TripData; formulas: string }) {
         </Card>
 
         {/* Save Button */}
-        <div className="flex justify-end pt-2">
+        <div id="confirm" className="flex justify-end pt-2">
           <Button type="submit" disabled={isSaving}>
             {isSaving ? (
               <>

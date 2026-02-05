@@ -135,10 +135,10 @@ export const published_trips = pgTable("published_trips", {
 	recommended_prior_experience: text().notNull(),
 	location: text().notNull(),
 	native_land: text().notNull(),
-	description: text().notNull(),
 	what_to_bring: text().array().notNull(),
 	guides: jsonb().notNull(),
 	picture_path: text().notNull(),
+	description: text().notNull(),
 }, (table) => [
 	foreignKey({
 			columns: [table.id],
@@ -269,7 +269,7 @@ export const trips = pgTable("trips", {
 	driver_price_override: numeric(),
 	member_price_override: numeric(),
 	nonmember_price_override: numeric(),
-}, (table) => [
+}, () => [
 	pgPolicy("Allow all guides to update trips", { as: "permissive", for: "update", to: ["authenticated"], using: sql`authorize('guide'::user_role)`, withCheck: sql`authorize('guide'::user_role)`  }),
 	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"] }),
 	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"] }),
@@ -353,4 +353,42 @@ export const trip_guides = pgTable("trip_guides", {
 	pgPolicy("Allow guides to remove trip guides", { as: "permissive", for: "delete", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
 	pgPolicy("Allow guides to select trip guides", { as: "permissive", for: "select", to: ["authenticated"] }),
 	pgPolicy("Guides can add other guides to trip", { as: "permissive", for: "insert", to: ["authenticated"] }),
+]);
+
+export const stripe_products = pgTable("stripe_products", {
+	stripe_product_id: text().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow(),
+	name: text().notNull(),
+	trip_id: uuid(),
+	type: participant_type().notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.trip_id],
+		foreignColumns: [trips.id],
+		name: "stripe_products_trip_id_fkey"
+	}),
+]);
+
+export const trip_prices = pgTable("trip_prices", {
+	stripe_price_id: text().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	stripe_product_id: text().notNull(),
+	trip_id: uuid().notNull(),
+	ticket_type: ticket_price_type().notNull(),
+	amount: numeric().notNull(),
+	active: boolean().default(true).notNull(),
+	archived_at: timestamp({ withTimezone: true, mode: 'string' }),
+}, (table) => [
+	foreignKey({
+		columns: [table.trip_id],
+		foreignColumns: [trips.id],
+		name: "stripe_prices_trip_id_fkey"
+	}),
+	foreignKey({
+		columns: [table.stripe_product_id],
+		foreignColumns: [stripe_products.stripe_product_id],
+		name: "trip_prices_stripe_product_id_fkey"
+	}),
 ]);

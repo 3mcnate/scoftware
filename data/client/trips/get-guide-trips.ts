@@ -99,6 +99,9 @@ export const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
 				nonmember_signup_date_override,
 				hide_trip
 			),
+			published_trips (
+				id
+			),
 			trip_guides (
 				profiles (
 					id,

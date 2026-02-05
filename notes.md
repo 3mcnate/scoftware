@@ -72,29 +72,33 @@ Trip publish logic
 
 Your task is to implement trip publishing from end to end. 
 
-1. Create the backend route, POST /api/trips/publish. It should accept a tripId as JSON in the body. Use Zod for validation.
+1. Create the backend route, POST /api/trips/publish. It should accept a tripId as JSON in the body. Use Zod for validation. Check that the following required but possibly null fields are not null:
+	- description
+	- what_to_bring
+	- picture_path
+	- activity
+	- difficulty
+	- location
+	- meet
+	- native_land
+	- prior_experience
+	- return
+	- trail
+	- budget_confirmed
+If any are null, return a 400 response and detail which fields are missing.
+The backend should then copy all the data from the trips table row to insert a new row into the published_trips table. The published_trips.guides column should be a list of guides objects in this format: {"name": "<name>", "email": "<email>", "picture_path": "<picture_path>"}
+In case there are any discrepancies in the schema between the private trips table and public published_trips table, please ask me a question to clarify.
+Next, create the Stripe products and prices for the trip. Create 1 product for Participant tickets and 1 product for Driver ticktes. Participant tickets should have a member and non member price. Only create the Driver product and price if there are more than 0 driver spots on the trip. Use the budget formulas with the mathjs library to calculate this using the exact same methodology as in useBudgetTotals(). If the user has provided member, nonmember, or driver override prices, use those values instead. Add the products to the stripe_products table and the prices to the trip_prices table.
 
-What needs to happen when you publish a trip:
-	- check that all required fields are filled out
-		- description
-		- what_to_bring
-		- picture_path
-		- activity
-		- difficulty
-		- location
-		- meet
-		- native_land
-		- prior_experience
-		- return
-		- trail
-		- 
-		- budget_confirmed
-		- 
+2. Create another backend route, PATCH /api/trips/publish, to edit an existing published trip. If there are differences in the price, archive the old Stripe prices and create new ones, as appropriate. 
+
+3. Create the frontend UI to support publishing trips. When the user clicks "publish" on the guide trip view header, open a dialog that asks them to confirm. The dialog should tell them they are about to publish the trip, and include the trip name, start and end dates, calculated prices (or override prices), and the publish dates (get these from useTripCycleByDate or the overridden trip cycle release dates in the trip_settings table). If the user is missing any of the fields listed above, display a notice with links they can click on to edit the corresponding sections. Finally, create a useMutation hook to manage the request to POST or PATCH the published trip. 
+
+
 	- insert row into published_trips table
 	- create stripe products/prices, add to trip_prices table
-		- use budget formulas with input data or the override prices
+		- use current budget formulas with input data or the override prices
 
-	- 
 
 
 Budget formulas: mathjs library

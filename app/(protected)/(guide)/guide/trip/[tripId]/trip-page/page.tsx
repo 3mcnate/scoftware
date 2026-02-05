@@ -247,7 +247,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Trip Picture */}
-      <Card>
+      <Card id="picture">
         <CardHeader>
           <CardTitle>Trip Picture</CardTitle>
           <CardDescription>
@@ -331,7 +331,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
       </Card>
 
       {/* Trip Details */}
-      <Card>
+      <Card id="trip-details">
         <CardHeader>
           <CardTitle>Trip Details</CardTitle>
         </CardHeader>
@@ -487,7 +487,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
       </Card>
 
       {/* Trip Description */}
-      <div className="space-y-4">
+      <div id="description" className="space-y-4">
         <h3 className="font-semibold">Trip Description</h3>
         <Controller
           control={control}
@@ -507,7 +507,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
       </div>
 
       {/* Packing List */}
-      <Card>
+      <Card id="packing-list">
         <CardHeader>
           <CardTitle>Packing List</CardTitle>
         </CardHeader>

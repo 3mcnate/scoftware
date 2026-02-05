@@ -562,6 +562,41 @@ export type Database = {
           },
         ]
       }
+      stripe_products: {
+        Row: {
+          created_at: string
+          name: string
+          stripe_product_id: string
+          trip_id: string | null
+          type: Database["public"]["Enums"]["participant_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          stripe_product_id: string
+          trip_id?: string | null
+          type: Database["public"]["Enums"]["participant_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          stripe_product_id?: string
+          trip_id?: string | null
+          type?: Database["public"]["Enums"]["participant_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_products_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           amount_paid: number
@@ -815,6 +850,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_prices_stripe_product_id_fkey"
+            columns: ["stripe_product_id"]
+            isOneToOne: false
+            referencedRelation: "stripe_products"
+            referencedColumns: ["stripe_product_id"]
           },
         ]
       }
