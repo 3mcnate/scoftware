@@ -5,7 +5,7 @@ set search_path = ''
 as $$
 BEGIN
 
-	insert into public.trip_signup_settings
+	insert into public.trip_settings
 	(trip_id) values (NEW.id);
 
 	return NEW;
