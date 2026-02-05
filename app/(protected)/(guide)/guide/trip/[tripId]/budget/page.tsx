@@ -140,9 +140,9 @@ function useBudgetTotals(
     return {
       inputs,
       scope,
-      driver_price: Math.ceil(scope.get("driver_price") ?? 0),
-      member_price: Math.ceil(scope.get("member_price") ?? 0),
-      nonmember_price: Math.ceil(scope.get("nonmember_price") ?? 0),
+      driver_price: scope.get("driver_price") ?? 0,
+      member_price: scope.get("member_price") ?? 0,
+      nonmember_price: scope.get("nonmember_price") ?? 0,
       gas_budget,
       food_budget,
       other_budget,

@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { format } from "date-fns";
+import Image from "next/image";
+import { format, isSameDay } from "date-fns";
+import { getTripPictureUrl } from "@/data/client/storage/trip-pictures";
 import {
 	Dialog,
 	DialogContent,
@@ -62,7 +64,7 @@ const FIELD_TO_TAB: Record<string, FieldInfo> = {
 	prior_experience: { field: "prior_experience", label: "Prior Experience", tab: "trip-page#prior_experience" },
 	return: { field: "return", label: "Return Location", tab: "trip-page#return" },
 	trail: { field: "trail", label: "Trail", tab: "trip-page#trail" },
-	budget_confirmed: { field: "budget_confirmed", label: "Budget Confirmation", tab: "budget#confirm" },
+	budget_confirmed: { field: "budget_confirmed", label: "Submit your budget", tab: "budget#confirm" },
 };
 
 type PublishTripDialogProps = {
@@ -138,7 +140,7 @@ export function PublishTripDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
-			<DialogContent className="max-w-lg">
+			<DialogContent className="max-w-lg max-h-[80vh] overflow-scroll">
 				<DialogHeader>
 					<DialogTitle>
 						{isAlreadyPublished ? "Update Published Trip" : "Publish Trip"}
@@ -182,7 +184,7 @@ export function PublishTripDialog({
 						{/* Trip Info */}
 						<div className="rounded-lg border p-4 space-y-3">
 							<div className="flex items-center justify-between">
-								<h4 className="font-medium">{trip.name}</h4>
+								<h4 className="font-semibold">{trip.name}</h4>
 								{isAlreadyPublished && (
 									<Badge variant="secondary" className="gap-1">
 										<CheckCircle2 className="h-3 w-3" />
@@ -190,11 +192,22 @@ export function PublishTripDialog({
 									</Badge>
 								)}
 							</div>
+							{trip.picture_path && (
+								<div className="relative rounded-md overflow-hidden aspect-video w-full">
+									<Image
+										src={getTripPictureUrl(trip.picture_path)}
+										alt={trip.name}
+										fill
+										className="object-cover"
+									/>
+								</div>
+							)}
 							<div className="flex items-center gap-2 text-sm text-muted-foreground">
 								<Calendar className="h-4 w-4" />
 								<span>
-									{format(new Date(trip.start_date), "MMM d")} -{" "}
-									{format(new Date(trip.end_date), "MMM d, yyyy")}
+									{isSameDay(new Date(trip.start_date), new Date(trip.end_date))
+										? `${format(new Date(trip.start_date), "EEEE, MMMM d, yyyy @ h:mm a")} -> ${format(new Date(trip.end_date), "h:mm a")}`
+										: `${format(new Date(trip.start_date), "EEEE, MMMM d, yyyy @ h:mm a")} -> ${format(new Date(trip.end_date), "EEEE, MMMM d, yyyy @ h:mm a")}`}
 								</span>
 							</div>
 						</div>
