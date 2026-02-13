@@ -7,7 +7,6 @@ import { getTripPictureUrl } from "@/data/client/storage/trip-pictures";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -187,11 +186,11 @@ export function PublishTripDialog({
           <DialogTitle>
             {isAlreadyPublished ? "Update Published Trip" : "Publish Trip"}
           </DialogTitle>
-          <DialogDescription>
+          {/* <DialogDescription>
             {isAlreadyPublished
               ? "Update the public trip listing with the latest information."
-              : "If everything looks good, mark this trip as ready to publish."}
-          </DialogDescription>
+              : "If everything looks good, publish this trip to have it released and ready to sign up according to the signup schedule."}
+          </DialogDescription> */}
         </DialogHeader>
         {hasMissingFields ? (
           <Alert variant="default">
@@ -277,7 +276,7 @@ export function PublishTripDialog({
 
             {/* Prices */}
             {prices && (
-              <div className="rounded-lg border p-4 space-y-3">
+              <div className="rounded-lg space-y-3">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                   <h4 className="">Ticket Prices</h4>
@@ -316,7 +315,7 @@ export function PublishTripDialog({
 
             {/* Publish Schedule */}
             {!isTripCycleLoading && (publishDate || memberSignupDate) && (
-              <div className="rounded-lg border p-4 space-y-3">
+              <div className="rounded-lg space-y-3">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <h4 className="">Signup Schedule</h4>
@@ -376,7 +375,7 @@ export function PublishTripDialog({
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="mt-8">
           <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}

@@ -183,31 +183,30 @@ async function createParticipantProductAndPrices(
 		}),
 	]);
 
-	await Promise.all([
-		db.insert(stripe_products).values({
+	await db.insert(stripe_products).values({
+		stripe_product_id: participantProduct.id,
+		name: participantProduct.name,
+		trip_id: tripId,
+		type: "participant",
+	});
+
+	await db.insert(trip_prices).values([
+		{
+			stripe_price_id: memberStripePrice.id,
 			stripe_product_id: participantProduct.id,
-			name: participantProduct.name,
 			trip_id: tripId,
-			type: "participant",
-		}),
-		db.insert(trip_prices).values([
-			{
-				stripe_price_id: memberStripePrice.id,
-				stripe_product_id: participantProduct.id,
-				trip_id: tripId,
-				ticket_type: "member",
-				amount: memberPrice.toString(),
-				active: true,
-			},
-			{
-				stripe_price_id: nonmemberStripePrice.id,
-				stripe_product_id: participantProduct.id,
-				trip_id: tripId,
-				ticket_type: "nonmember",
-				amount: nonmemberPrice.toString(),
-				active: true,
-			},
-		]),
+			ticket_type: "member",
+			amount: memberPrice.toString(),
+			active: true,
+		},
+		{
+			stripe_price_id: nonmemberStripePrice.id,
+			stripe_product_id: participantProduct.id,
+			trip_id: tripId,
+			ticket_type: "nonmember",
+			amount: nonmemberPrice.toString(),
+			active: true,
+		},
 	]);
 }
 
@@ -229,22 +228,21 @@ async function createDriverProductAndPrice(
 		metadata: { trip_id: tripId, ticket_type: "driver" },
 	});
 
-	await Promise.all([
-		db.insert(stripe_products).values({
-			stripe_product_id: driverProduct.id,
-			name: driverProduct.name,
-			trip_id: tripId,
-			type: "driver",
-		}),
-		db.insert(trip_prices).values({
-			stripe_price_id: driverStripePrice.id,
-			stripe_product_id: driverProduct.id,
-			trip_id: tripId,
-			ticket_type: "driver",
-			amount: driverPrice.toString(),
-			active: true,
-		}),
-	]);
+	await db.insert(stripe_products).values({
+		stripe_product_id: driverProduct.id,
+		name: driverProduct.name,
+		trip_id: tripId,
+		type: "driver",
+	});
+	
+	await db.insert(trip_prices).values({
+		stripe_price_id: driverStripePrice.id,
+		stripe_product_id: driverProduct.id,
+		trip_id: tripId,
+		ticket_type: "driver",
+		amount: driverPrice.toString(),
+		active: true,
+	});
 }
 
 async function archiveAndCreateNewPrice(
@@ -411,12 +409,7 @@ async function handlePriceUpdates(
 	await Promise.all(priceUpdatePromises);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Route Handler
-// ─────────────────────────────────────────────────────────────────────────────
-
 export async function POST(request: NextRequest) {
-	// Auth check
 	const supabase = await createServerClient();
 	const { data: claimsData, error: authError } = await supabase.auth
 		.getClaims();
@@ -430,7 +423,6 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json({ error: "Must be a guide" }, { status: 403 });
 	}
 
-	// Validate request body
 	const body = await request.json();
 	const result = PublishTripSchema.safeParse(body);
 

@@ -1,1 +1,1 @@
-select is_trip_visible('af6192f6-2565-49bf-ab29-9d2e97cb9740');
+alter table stripe_products add constraint trip_ticket_type_unique unique (trip_id, "type");
