@@ -3,6 +3,7 @@ import { z } from "zod/v4";
 import { createServerClient } from "@/utils/supabase/server";
 import { db } from "@/utils/drizzle";
 import {
+	budget_formulas,
 	profiles,
 	published_trips,
 	stripe_products,
@@ -10,7 +11,7 @@ import {
 	trip_prices,
 	trips,
 } from "@/drizzle/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { createStripeClient } from "@/utils/stripe";
 import { calculateTripPrices, type TripForPricing } from "@/utils/math";
 import type { Enums } from "@/types/database.types";
@@ -97,11 +98,8 @@ async function fetchTripData(tripId: string): Promise<
 }
 
 async function fetchBudgetFormulas(): Promise<string | null> {
-	const result = await db.execute<{ formulas: string }>(
-		sql`SELECT formulas FROM budget_formulas LIMIT 1`,
-	);
-	const rows = result as unknown as { formulas: string }[];
-	return rows[0]?.formulas ?? null;
+	const result = await db.select().from(budget_formulas).limit(1);
+	return result[0]?.formulas ?? null;
 }
 
 function validateRequiredFields(trip: TripRow): string[] {
@@ -145,13 +143,13 @@ function getFinalPrices(
 ) {
 	return {
 		member: trip.member_price_override !== null
-			? Math.ceil(Number(trip.member_price_override))
+			? Number(trip.member_price_override)
 			: calculatedPrices.member_price,
 		nonmember: trip.nonmember_price_override !== null
-			? Math.ceil(Number(trip.nonmember_price_override))
+			? Number(trip.nonmember_price_override)
 			: calculatedPrices.nonmember_price,
 		driver: trip.driver_price_override !== null
-			? Math.ceil(Number(trip.driver_price_override))
+			? Number(trip.driver_price_override)
 			: calculatedPrices.driver_price,
 	};
 }
@@ -163,23 +161,27 @@ async function createParticipantProductAndPrices(
 	memberPrice: number,
 	nonmemberPrice: number,
 ) {
+	console.log("creating participant product...");
+
 	const participantProduct = await stripe.products.create({
-		name: `${tripName} - Participant Ticket`,
+		name: `${tripName} (Participant)`,
 		metadata: { trip_id: tripId, type: "participant" },
 	});
 
 	const [memberStripePrice, nonmemberStripePrice] = await Promise.all([
 		stripe.prices.create({
 			product: participantProduct.id,
-			unit_amount: memberPrice * 100,
+			unit_amount: Math.trunc(memberPrice * 100),
 			currency: "usd",
 			metadata: { trip_id: tripId, ticket_type: "member" },
+			nickname: "Member Price"
 		}),
 		stripe.prices.create({
 			product: participantProduct.id,
 			unit_amount: nonmemberPrice * 100,
 			currency: "usd",
 			metadata: { trip_id: tripId, ticket_type: "nonmember" },
+			nickname: "Nonmember Price"
 		}),
 	]);
 
@@ -216,28 +218,31 @@ async function createDriverProductAndPrice(
 	tripName: string,
 	driverPrice: number,
 ) {
-	const driverProduct = await stripe.products.create({
-		name: `${tripName} - Driver Ticket`,
-		metadata: { trip_id: tripId, type: "driver" },
-	});
+	console.log("creating driver product...");
+
+	const productName = `${tripName} (Driver)`
 
 	const driverStripePrice = await stripe.prices.create({
-		product: driverProduct.id,
+		product_data: {
+			name: productName,
+			metadata: { trip_id: tripId, type: "driver" },
+		},
 		unit_amount: driverPrice * 100,
 		currency: "usd",
 		metadata: { trip_id: tripId, ticket_type: "driver" },
+		nickname: "Driver Price"
 	});
 
 	await db.insert(stripe_products).values({
-		stripe_product_id: driverProduct.id,
-		name: driverProduct.name,
+		stripe_product_id: driverStripePrice.product as string,
+		name: productName,
 		trip_id: tripId,
 		type: "driver",
 	});
-	
+
 	await db.insert(trip_prices).values({
 		stripe_price_id: driverStripePrice.id,
-		stripe_product_id: driverProduct.id,
+		stripe_product_id: driverStripePrice.product as string,
 		trip_id: tripId,
 		ticket_type: "driver",
 		amount: driverPrice.toString(),
@@ -496,17 +501,16 @@ export async function POST(request: NextRequest) {
 				and(eq(trip_prices.trip_id, tripId), eq(trip_prices.active, true)),
 			);
 
-		await Promise.all([
-			handlePriceUpdates(
-				stripe,
-				tripId,
-				trip.name,
-				trip.driver_spots,
-				finalPrices,
-				existingPrices,
-			),
-			upsertPublishedTrip(tripId, trip, guidesJson),
-		]);
+		await handlePriceUpdates(
+			stripe,
+			tripId,
+			trip.name,
+			trip.driver_spots,
+			finalPrices,
+			existingPrices,
+		);
+
+		await upsertPublishedTrip(tripId, trip, guidesJson);
 	} else {
 		// Create flow: create products, prices, and published trip
 		const stripePromises: Promise<void>[] = [
@@ -530,10 +534,8 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		await Promise.all([
-			...stripePromises,
-			upsertPublishedTrip(tripId, trip, guidesJson),
-		]);
+		await Promise.all(stripePromises);
+		await upsertPublishedTrip(tripId, trip, guidesJson);
 	}
 
 	return NextResponse.json({

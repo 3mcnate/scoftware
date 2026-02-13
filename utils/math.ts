@@ -64,10 +64,6 @@ export function formatCurrency(amount: number): string {
 	});
 }
 
-/**
- * Calculates trip prices using budget formulas.
- * Used by both server-side API routes and client-side hooks.
- */
 export function calculateTripPrices(trip: TripForPricing, formulas: string): TripPrices {
 	const compiledFormulas = compile(formulas);
 

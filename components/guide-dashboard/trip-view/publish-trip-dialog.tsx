@@ -181,7 +181,7 @@ export function PublishTripDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-lg md:min-w-[600px]!">
+      <DialogContent className="max-w-lg md:min-w-[550px]!">
         <DialogHeader>
           <DialogTitle>
             {isAlreadyPublished ? "Update Published Trip" : "Publish Trip"}

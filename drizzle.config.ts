@@ -24,7 +24,14 @@ export default defineConfig({
 		"waitlist_signups",
 		"trip_signup_settings",
 		"stripe_products",
-		"trip_prices"
+		"trip_prices",
+		"budget_formulas",
+		"allowed_trip_participants",
+		"driver_info",
+		"guide_info",
+		"hard_trip_participants",
+		"trip_cycles",
+		"trip_settings",
 	],
 	introspect: {
 		casing: "preserve",

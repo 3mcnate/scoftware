@@ -1,4 +1,4 @@
-import { pgTable, pgSchema, uniqueIndex, index, check, uuid, varchar, timestamp, jsonb, boolean, text, smallint, unique, integer, foreignKey, pgPolicy, numeric, primaryKey, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, text, timestamp, uuid, pgSchema, uniqueIndex, index, check, varchar, jsonb, boolean, smallint, integer, date, unique, pgPolicy, numeric, primaryKey, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const auth = pgSchema("auth");
@@ -24,6 +24,21 @@ export const waitlist_status = pgEnum("waitlist_status", ['waiting', 'notificati
 export const waiver_event = pgEnum("waiver_event", ['user_opened', 'user_signed'])
 
 export const refresh_tokens_id_seqInAuth = auth.sequence("refresh_tokens_id_seq", {  startWith: "1", increment: "1", minValue: "1", maxValue: "9223372036854775807", cache: "1", cycle: false })
+
+export const stripe_products = pgTable("stripe_products", {
+	stripe_product_id: text().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow(),
+	trip_id: uuid(),
+	name: text().notNull(),
+	type: participant_type().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "stripe_products_trip_id_fkey"
+		}).onDelete("set null"),
+]);
 
 export const usersInAuth = auth.table("users", {
 	instance_id: uuid(),
@@ -72,6 +87,99 @@ export const usersInAuth = auth.table("users", {
 	index("users_instance_id_idx").using("btree", table.instance_id.asc().nullsLast().op("uuid_ops")),
 	index("users_is_anonymous_idx").using("btree", table.is_anonymous.asc().nullsLast().op("bool_ops")),
 	check("users_email_change_confirm_status_check", sql`(email_change_confirm_status >= 0) AND (email_change_confirm_status <= 2)`),
+]);
+
+export const allowed_trip_participants = pgTable("allowed_trip_participants", {
+	trip_id: uuid().defaultRandom().primaryKey().notNull(),
+	user_id: uuid().defaultRandom().notNull(),
+	approved_by: uuid().defaultRandom().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.approved_by],
+			foreignColumns: [profiles.id],
+			name: "allowed_trip_participants_approved_by_fkey"
+		}),
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "allowed_trip_participants_trip_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "allowed_trip_participants_user_id_fkey"
+		}),
+]);
+
+export const driver_info = pgTable("driver_info", {
+	user_id: uuid().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	drivers_license_number: text().notNull(),
+	vehicle_make_and_model: text().notNull(),
+	vehicle_year: integer().notNull(),
+	vehicle_owner_name: text().notNull(),
+	vehicle_owner_address: text().notNull(),
+	auto_insurance_company: text().notNull(),
+	auto_insurance_policy_number: text().notNull(),
+	num_seats: integer().notNull(),
+	slack_interested: boolean().notNull(),
+	drivers_license_expiration: date().notNull(),
+	affirm_good_condition: boolean().notNull(),
+	drivers_license_state: text().notNull(),
+	license_plate_number: text().notNull(),
+	is_4wd: boolean().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "driver_info_user_id_fkey"
+		}),
+	check("driver_info_drivers_license_expiration_check", sql`drivers_license_expiration > CURRENT_DATE`),
+]);
+
+export const guide_info = pgTable("guide_info", {
+	user_id: uuid().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	has_car: boolean().notNull(),
+	guide_class: integer().notNull(),
+	active: boolean().default(true).notNull(),
+	position: guide_position().default('new_guide').notNull(),
+	emergency_contact_name: text().notNull(),
+	emergency_contact_phone_number: text().notNull(),
+	emergency_contact_relationship: text().notNull(),
+	medical_history: text(),
+	is_wfr: boolean().default(false).notNull(),
+	wfr_expiration_date: date(),
+}, (table) => [
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "guide_info_user_id_fkey"
+		}),
+	check("guide_info_check", sql`(NOT is_wfr) OR (wfr_expiration_date IS NOT NULL)`),
+]);
+
+export const hard_trip_participants = pgTable("hard_trip_participants", {
+	user_id: uuid().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	approved_by: uuid().notNull(),
+	notes: text(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.approved_by],
+			foreignColumns: [profiles.id],
+			name: "hard_trip_participants_approved_by_fkey"
+		}),
+	foreignKey({
+			columns: [table.user_id],
+			foreignColumns: [profiles.id],
+			name: "hard_trip_participants_user_id_fkey"
+		}),
 ]);
 
 export const membership_prices = pgTable("membership_prices", {
@@ -188,6 +296,29 @@ export const tickets = pgTable("tickets", {
 	pgPolicy("Guides, participants can select their own tickets", { as: "permissive", for: "select", to: ["authenticated"], using: sql`((user_id = ( SELECT auth.uid() AS uid)) OR authorize('guide'::user_role))` }),
 ]);
 
+export const trip_prices = pgTable("trip_prices", {
+	trip_id: uuid().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	active: boolean().default(true).notNull(),
+	amount: numeric().notNull(),
+	archived_at: timestamp({ withTimezone: true, mode: 'string' }),
+	stripe_price_id: text().primaryKey().notNull(),
+	stripe_product_id: text().notNull(),
+	ticket_type: ticket_price_type().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "stripe_prices_trip_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.stripe_product_id],
+			foreignColumns: [stripe_products.stripe_product_id],
+			name: "trip_prices_stripe_product_id_fkey"
+		}),
+]);
+
 export const trip_waivers = pgTable("trip_waivers", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -208,6 +339,26 @@ export const trip_waivers = pgTable("trip_waivers", {
 			foreignColumns: [trips.id],
 			name: "trip_waivers_trip_id_fkey"
 		}),
+]);
+
+export const trip_cycles = pgTable("trip_cycles", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	name: text().notNull(),
+	starts_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	ends_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	trips_published_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	member_signups_start_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	nonmember_signups_start_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	// TODO: failed to parse database type 'tstzrange'
+	range: timestamp({ withTimezone: true, mode: 'string' }).array().notNull(),
+	trip_feedback_form: text(),
+	guide_post_trip_form: text(),
+	driver_signups_start_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+}, (table) => [
+	pgPolicy("Guides can view trip cycles", { as: "permissive", for: "select", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
+	check("end_after_start", sql`starts_at < ends_at`),
 ]);
 
 export const waitlist_signups = pgTable("waitlist_signups", {
@@ -269,7 +420,7 @@ export const trips = pgTable("trips", {
 	driver_price_override: numeric(),
 	member_price_override: numeric(),
 	nonmember_price_override: numeric(),
-}, () => [
+}, (table) => [
 	pgPolicy("Allow all guides to update trips", { as: "permissive", for: "update", to: ["authenticated"], using: sql`authorize('guide'::user_role)`, withCheck: sql`authorize('guide'::user_role)`  }),
 	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"] }),
 	pgPolicy("Guides can select trips", { as: "permissive", for: "select", to: ["authenticated"] }),
@@ -335,6 +486,37 @@ export const roles = pgTable("roles", {
 	pgPolicy("Allow guides to view roles", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
+export const budget_formulas = pgTable("budget_formulas", {
+	formulas: text().primaryKey().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	pgPolicy("Admins can update", { as: "permissive", for: "update", to: ["authenticated"], using: sql`authorize('admin'::user_role)`, withCheck: sql`authorize('admin'::user_role)`  }),
+	pgPolicy("Guides can select", { as: "permissive", for: "select", to: ["authenticated"] }),
+]);
+
+export const trip_settings = pgTable("trip_settings", {
+	trip_id: uuid().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	allow_signups: boolean().default(true).notNull(),
+	enable_participant_waitlist: boolean().default(false).notNull(),
+	enable_driver_waitlist: boolean().default(false).notNull(),
+	require_code: boolean().default(false).notNull(),
+	driver_signup_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+	member_signup_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+	nonmember_signup_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+	publish_date_override: timestamp({ withTimezone: true, mode: 'string' }),
+	hide_trip: boolean().default(false).notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.trip_id],
+			foreignColumns: [trips.id],
+			name: "trip_settings_trip_id_fkey"
+		}).onDelete("cascade"),
+	pgPolicy("Allow guides to update trip settings", { as: "permissive", for: "update", to: ["authenticated"], using: sql`authorize('guide'::user_role)`, withCheck: sql`authorize('guide'::user_role)`  }),
+	pgPolicy("Allow guides to view trip settings", { as: "permissive", for: "select", to: ["authenticated"] }),
+]);
+
 export const trip_guides = pgTable("trip_guides", {
 	user_id: uuid().defaultRandom().notNull(),
 	trip_id: uuid().defaultRandom().notNull(),
@@ -353,42 +535,4 @@ export const trip_guides = pgTable("trip_guides", {
 	pgPolicy("Allow guides to remove trip guides", { as: "permissive", for: "delete", to: ["authenticated"], using: sql`authorize('guide'::user_role)` }),
 	pgPolicy("Allow guides to select trip guides", { as: "permissive", for: "select", to: ["authenticated"] }),
 	pgPolicy("Guides can add other guides to trip", { as: "permissive", for: "insert", to: ["authenticated"] }),
-]);
-
-export const stripe_products = pgTable("stripe_products", {
-	stripe_product_id: text().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow(),
-	name: text().notNull(),
-	trip_id: uuid(),
-	type: participant_type().notNull(),
-}, (table) => [
-	foreignKey({
-		columns: [table.trip_id],
-		foreignColumns: [trips.id],
-		name: "stripe_products_trip_id_fkey"
-	}),
-]);
-
-export const trip_prices = pgTable("trip_prices", {
-	stripe_price_id: text().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	stripe_product_id: text().notNull(),
-	trip_id: uuid().notNull(),
-	ticket_type: ticket_price_type().notNull(),
-	amount: numeric().notNull(),
-	active: boolean().default(true).notNull(),
-	archived_at: timestamp({ withTimezone: true, mode: 'string' }),
-}, (table) => [
-	foreignKey({
-		columns: [table.trip_id],
-		foreignColumns: [trips.id],
-		name: "stripe_prices_trip_id_fkey"
-	}),
-	foreignKey({
-		columns: [table.stripe_product_id],
-		foreignColumns: [stripe_products.stripe_product_id],
-		name: "trip_prices_stripe_product_id_fkey"
-	}),
 ]);
