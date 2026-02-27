@@ -7,6 +7,7 @@ import { getTripPictureUrl } from "@/data/client/storage/trip-pictures";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -179,12 +180,10 @@ export function PublishTripDialog({ open, onOpenChange, trip }: PublishTripDialo
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg md:min-w-[550px]!">
         <DialogHeader>
-          <DialogTitle>{isAlreadyPublished ? "Update Published Trip" : "Publish Trip"}</DialogTitle>
-          {/* <DialogDescription>
-            {isAlreadyPublished
-              ? "Update the public trip listing with the latest information."
-              : "If everything looks good, publish this trip to have it released and ready to sign up according to the signup schedule."}
-          </DialogDescription> */}
+          <DialogTitle>{isAlreadyPublished ? "Update trip" : "Mark trip as ready to publish"}</DialogTitle>
+          <DialogDescription>
+            Your trip won&apos;t be visible to participants until the publish date below. 
+          </DialogDescription>
         </DialogHeader>
         {hasMissingFields ? (
           <Alert variant="default">
@@ -328,7 +327,7 @@ export function PublishTripDialog({ open, onOpenChange, trip }: PublishTripDialo
                 <div className="space-y-2 text-sm">
                   {publishDate && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Trip Published:</span>
+                      <span className="text-muted-foreground">Trip will be visible at:</span>
                       <span
                         className={trip.trip_settings?.publish_date_override ? "text-blue-500" : ""}
                       >

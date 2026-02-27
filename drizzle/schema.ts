@@ -400,8 +400,7 @@ export const trip_cycles = pgTable("trip_cycles", {
 	trips_published_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	member_signups_start_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	nonmember_signups_start_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	// TODO: failed to parse database type 'tstzrange'
-	range: unknown("range").generatedAlwaysAs(sql`tstzrange(starts_at, ends_at, '[)'::text)`),
+	range: timestamp({ withTimezone: true, mode: 'string' }).notNull().array(),
 	trip_feedback_form: text(),
 	guide_post_trip_form: text(),
 	driver_signups_start_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),

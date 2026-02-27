@@ -124,7 +124,7 @@ export default function GuideTripHeader() {
               </DropdownMenu>
               <Button size="sm" onClick={() => setPublishDialogOpen(true)}>
                 <Globe className="h-4 w-4" />
-								{isPublished ? "Publish" : "Publish"}
+								{isPublished ? "Publish Updates" : "Ready to Publish"}
               </Button>
             </div>
           </div>

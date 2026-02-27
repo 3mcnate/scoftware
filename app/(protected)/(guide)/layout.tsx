@@ -13,7 +13,7 @@ export default function GuideLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <main className="flex flex-1 flex-col gap-4 p-12">{children}</main>
+        <main className="flex flex-1 flex-col gap-4 p-12 min-w-0">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
