@@ -79,7 +79,9 @@ Here are the available states:
 7. completed (gray) - trip end date has passed. 
 
 
-
+The public trip page and trips list needs to be fixed. 
+1. Fix the visibility logic. Here is the descending order of logical priority: hide a trip if trip_settings.hide_trip is true, show a trip if now() >= publish_date_override, show a trip if now() is greater than its trip cycle's trip_published_at date, if none of the above are true, hide the trip. 
+2. The Overview is not displaying correctly on the trip page. Raw html tags are showing as text rather than applying formatting. to solve this, the rich text from the overview tiptap input should be saved as JSON and then rendered on demand. This will probably require changing the guide trip page input form. 
 
 The plan:
 12/26	 guide/admin layout, start on guide trips page

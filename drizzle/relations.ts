@@ -12,8 +12,8 @@ export const stripe_productsRelations = relations(stripe_products, ({one, many})
 export const tripsRelations = relations(trips, ({many}) => ({
 	stripe_products: many(stripe_products),
 	allowed_trip_participants: many(allowed_trip_participants),
-	published_trips: many(published_trips),
 	tickets: many(tickets),
+	published_trips: many(published_trips),
 	trip_prices: many(trip_prices),
 	trip_waivers: many(trip_waivers),
 	waitlist_signups: many(waitlist_signups),
@@ -104,14 +104,6 @@ export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	profiles: many(profiles),
 }));
 
-export const published_tripsRelations = relations(published_trips, ({one, many}) => ({
-	trip: one(trips, {
-		fields: [published_trips.id],
-		references: [trips.id]
-	}),
-	tickets: many(tickets),
-}));
-
 export const ticketsRelations = relations(tickets, ({one}) => ({
 	published_trip: one(published_trips, {
 		fields: [tickets.trip_id],
@@ -124,6 +116,14 @@ export const ticketsRelations = relations(tickets, ({one}) => ({
 	profile: one(profiles, {
 		fields: [tickets.user_id],
 		references: [profiles.id]
+	}),
+}));
+
+export const published_tripsRelations = relations(published_trips, ({one, many}) => ({
+	tickets: many(tickets),
+	trip: one(trips, {
+		fields: [published_trips.id],
+		references: [trips.id]
 	}),
 }));
 

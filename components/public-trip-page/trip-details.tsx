@@ -21,6 +21,9 @@ import { published_trips } from "@/drizzle/schema";
 import { getInitialsFullname } from "@/utils/names";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { getTripPictureUrl } from "@/utils/storage";
+import { generateTripDescriptionHTML } from "@/utils/tiptap";
+import { RichTextContent } from "@/components/tiptap";
+import type { JSONContent } from "@tiptap/core";
 
 type PublishedTrip = InferSelectModel<typeof published_trips>;
 
@@ -172,11 +175,9 @@ export function TripDetails({ trip }: TripDetailsProps) {
       <Item variant="outline" className="p-6 md:p-8">
         <ItemContent>
           <h2 className="text-2xl font-bold mb-4 text-foreground">Overview</h2>
-          <div className="space-y-4">
-            <p className="text-base leading-relaxed text-foreground">
-              {trip.description}
-            </p>
-          </div>
+          <RichTextContent
+            content={generateTripDescriptionHTML(trip.description as JSONContent)}
+          />
         </ItemContent>
       </Item>
 
@@ -307,7 +308,7 @@ export function TripDetails({ trip }: TripDetailsProps) {
                 operates all of its programs and activities consistent with the
                 University&apos;s Notice of Non-Discrimination. Eligibility is
                 not determined based on race, sex, ethnicity, sexual
-                orientation, or any other prohibited factor.
+                orientation, disability, or any other prohibited factor.
               </p>
             </div>
 

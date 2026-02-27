@@ -8,18 +8,30 @@ import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import { Color } from "@tiptap/extension-color";
 import TextStyle from "@tiptap/extension-text-style";
+import Typography from "@tiptap/extension-typography";
 import { JSONContent } from "@tiptap/core";
+
+const sharedExtensions = [
+	StarterKit,
+	Underline,
+	Link,
+	TextAlign.configure({ types: ["heading", "paragraph"] }),
+	Highlight.configure({ multicolor: true }),
+	Color,
+	TextStyle,
+];
 
 export function generateWaiverHTML(content: JSONContent) {
 	return generateHTML(content, [
-		StarterKit,
-		Underline,
-		Link,
-		TextAlign.configure({ types: ["heading", "paragraph"] }),
-		Highlight.configure({ multicolor: true }),
+		...sharedExtensions,
 		Subscript,
 		Superscript,
-		Color,
-		TextStyle,
+	]);
+}
+
+export function generateTripDescriptionHTML(content: JSONContent) {
+	return generateHTML(content, [
+		...sharedExtensions,
+		Typography,
 	]);
 }

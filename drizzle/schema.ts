@@ -228,40 +228,11 @@ export const profiles = pgTable("profiles", {
 	pgPolicy("Allow users to update own profile", { as: "permissive", for: "update", to: ["authenticated"] }),
 ]);
 
-export const published_trips = pgTable("published_trips", {
-	id: uuid().primaryKey().notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	name: text().notNull(),
-	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
-	meet: text().notNull(),
-	return: text().notNull(),
-	activity: text().notNull(),
-	difficulty: text().notNull(),
-	trail: text().notNull(),
-	recommended_prior_experience: text().notNull(),
-	location: text().notNull(),
-	native_land: text().notNull(),
-	what_to_bring: text().array().notNull(),
-	guides: jsonb().notNull(),
-	picture_path: text().notNull(),
-	description: text().notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.id],
-			foreignColumns: [trips.id],
-			name: "published_trips_id_fkey"
-		}),
-	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(has_trip_ticket(( SELECT auth.uid() AS uid), id) OR authorize('guide'::user_role))` }),
-]);
-
 export const trips = pgTable("trips", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	name: text().notNull(),
-	description: text(),
 	driver_spots: integer().notNull(),
 	participant_spots: integer().notNull(),
 	gear_questions: text().array(),
@@ -290,6 +261,7 @@ export const trips = pgTable("trips", {
 	member_price_override: numeric(),
 	nonmember_price_override: numeric(),
 	cancelled: boolean().default(false).notNull(),
+	description: jsonb(),
 }, (table) => [
 	pgPolicy("Allow all guides to update trips", { as: "permissive", for: "update", to: ["authenticated"], using: sql`authorize('guide'::user_role)`, withCheck: sql`authorize('guide'::user_role)`  }),
 	pgPolicy("Allow trip deletion", { as: "permissive", for: "delete", to: ["authenticated"] }),
@@ -343,6 +315,34 @@ export const tickets = pgTable("tickets", {
 	unique("tickets_stripe_checkout_session_id_key").on(table.stripe_payment_id),
 	unique("tickets_stripe_refund_id_key").on(table.stripe_refund_id),
 	pgPolicy("Guides, participants can select their own tickets", { as: "permissive", for: "select", to: ["authenticated"], using: sql`((user_id = ( SELECT auth.uid() AS uid)) OR authorize('guide'::user_role))` }),
+]);
+
+export const published_trips = pgTable("published_trips", {
+	id: uuid().primaryKey().notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	name: text().notNull(),
+	start_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	end_date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	meet: text().notNull(),
+	return: text().notNull(),
+	activity: text().notNull(),
+	difficulty: text().notNull(),
+	trail: text().notNull(),
+	recommended_prior_experience: text().notNull(),
+	location: text().notNull(),
+	native_land: text().notNull(),
+	what_to_bring: text().array().notNull(),
+	guides: jsonb().notNull(),
+	picture_path: text().notNull(),
+	description: jsonb().default("").notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.id],
+			foreignColumns: [trips.id],
+			name: "published_trips_id_fkey"
+		}),
+	pgPolicy("Allow participants who have a ticket to view the trip, even if ", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(has_trip_ticket(( SELECT auth.uid() AS uid), id) OR authorize('guide'::user_role))` }),
 ]);
 
 export const trip_prices = pgTable("trip_prices", {
@@ -400,6 +400,7 @@ export const trip_cycles = pgTable("trip_cycles", {
 	trips_published_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	member_signups_start_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
 	nonmember_signups_start_at: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+	// TODO: failed to parse database type 'tstzrange'
 	range: timestamp({ withTimezone: true, mode: 'string' }).notNull().array(),
 	trip_feedback_form: text(),
 	guide_post_trip_form: text(),

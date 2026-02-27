@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { z } from "zod/v4";
+import type { JSONContent } from "@tiptap/core";
 import { toast } from "sonner";
 import {
   ImagePlus,
@@ -54,7 +55,12 @@ const TripPageSchema = z.object({
   prior_experience: z.string().min(1, "Prior experience level is required"),
   location: z.string().min(1, "Trip location is required"),
   native_land: z.string().min(1, "Native land information is required"),
-  description: z.string().min(1, "Trip description is required"),
+  description: z.record(z.string(), z.any()).refine((val) => {
+    const doc = val as JSONContent;
+    return doc.content?.some((node) =>
+      node.content?.some((child) => child.text?.trim())
+    ) ?? false;
+  }, "Trip description is required"),
   what_to_bring: z.array(z.string()).min(1, "Packing list is required"),
 });
 
@@ -115,7 +121,7 @@ function TripPageContent({ trip }: { trip: TripData }) {
       prior_experience: trip.prior_experience ?? "",
       location: trip.location ?? "",
       native_land: trip.native_land ?? "",
-      description: trip.description ?? "",
+      description: (trip.description as JSONContent) ?? { type: "doc", content: [] },
       what_to_bring: trip.what_to_bring ?? [],
     },
   });
@@ -494,16 +500,19 @@ function TripPageContent({ trip }: { trip: TripData }) {
           name="description"
           render={({ field }) => (
             <FormRichTextEditor
-              value={field.value ?? ""}
+              value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
               placeholder=""
               minHeight="250px"
               tripId={trip.id}
+              outputFormat="json"
             />
           )}
         />
-        <FieldError>{errors.description?.message}</FieldError>
+        <FieldError>
+          {(errors.description?.root?.message ?? errors.description?.message) as string | undefined}
+        </FieldError>
       </div>
 
       {/* Packing List */}

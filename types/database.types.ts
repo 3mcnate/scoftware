@@ -469,7 +469,7 @@ export type Database = {
         Row: {
           activity: string
           created_at: string
-          description: string
+          description: Json
           difficulty: string
           end_date: string
           guides: Json
@@ -489,7 +489,7 @@ export type Database = {
         Insert: {
           activity: string
           created_at?: string
-          description: string
+          description?: Json
           difficulty: string
           end_date: string
           guides: Json
@@ -509,7 +509,7 @@ export type Database = {
         Update: {
           activity?: string
           created_at?: string
-          description?: string
+          description?: Json
           difficulty?: string
           end_date?: string
           guides?: Json
@@ -970,7 +970,7 @@ export type Database = {
           cancelled: boolean
           car_mpgs: number[] | null
           created_at: string
-          description: string | null
+          description: Json | null
           difficulty: string | null
           dinners: number | null
           driver_price_override: number | null
@@ -1005,7 +1005,7 @@ export type Database = {
           cancelled?: boolean
           car_mpgs?: number[] | null
           created_at?: string
-          description?: string | null
+          description?: Json | null
           difficulty?: string | null
           dinners?: number | null
           driver_price_override?: number | null
@@ -1040,7 +1040,7 @@ export type Database = {
           cancelled?: boolean
           car_mpgs?: number[] | null
           created_at?: string
-          description?: string | null
+          description?: Json | null
           difficulty?: string | null
           dinners?: number | null
           driver_price_override?: number | null

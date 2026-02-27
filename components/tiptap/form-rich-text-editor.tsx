@@ -13,6 +13,7 @@ import Typography from "@tiptap/extension-typography";
 import Underline from "@tiptap/extension-underline";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { EditorContent, type Extension, useEditor } from "@tiptap/react";
+import type { JSONContent } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { FormEditorToolbar } from "@/components/tiptap/toolbars/form-editor-toolbar";
@@ -79,10 +80,10 @@ const createExtensions = ({ placeholder, uploadFn }: CreateExtensionsOptions) =>
 ];
 
 export interface FormRichTextEditorProps {
-  /** Current HTML content value */
-  value?: string;
-  /** Called when content changes with HTML string */
-  onChange?: (html: string) => void;
+  /** Current content value (HTML string or TipTap JSON) */
+  value?: string | JSONContent;
+  /** Called when content changes — returns HTML string or JSON depending on outputFormat */
+  onChange?: (content: string | JSONContent) => void;
   /** Called when editor loses focus */
   onBlur?: () => void;
   /** Placeholder text when editor is empty */
@@ -99,6 +100,8 @@ export interface FormRichTextEditorProps {
   showFloatingToolbar?: boolean;
   /** Trip ID for uploading images to the trip_pictures storage bucket */
   tripId?: string;
+  /** Output format: 'html' returns HTML string, 'json' returns TipTap JSONContent */
+  outputFormat?: "html" | "json";
 }
 
 /**
@@ -132,6 +135,7 @@ export function FormRichTextEditor({
   disabled = false,
   showFloatingToolbar = true,
   tripId,
+  outputFormat = "html",
 }: FormRichTextEditorProps) {
   // Create upload function if tripId is provided
   const uploadFn: ImageUploadFn | undefined = tripId
@@ -155,8 +159,11 @@ export function FormRichTextEditor({
       },
     },
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onChange?.(html);
+      if (outputFormat === "json") {
+        onChange?.(editor.getJSON());
+      } else {
+        onChange?.(editor.getHTML());
+      }
     },
     onBlur: () => {
       onBlur?.();
@@ -165,10 +172,21 @@ export function FormRichTextEditor({
 
   // Sync external value changes
   useEffect(() => {
-    if (editor && value !== editor.getHTML() && !editor.isFocused) {
-      editor.commands.setContent(value, false);
+    if (!editor || editor.isFocused) return;
+
+    if (outputFormat === "json") {
+      // For JSON, compare serialized content
+      const currentJson = JSON.stringify(editor.getJSON());
+      const newJson = typeof value === "string" ? value : JSON.stringify(value);
+      if (currentJson !== newJson) {
+        editor.commands.setContent(value, false);
+      }
+    } else {
+      if (value !== editor.getHTML()) {
+        editor.commands.setContent(value, false);
+      }
     }
-  }, [editor, value]);
+  }, [editor, value, outputFormat]);
 
   if (!editor) return null;
 
