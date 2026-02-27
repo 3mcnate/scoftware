@@ -78,7 +78,7 @@ export default function MyTripsPage() {
       {pastTrips.length > 0 && (
         <div className="space-y-6">
           <h2 className="text-lg font-semibold">Past Trips</h2>
-          <TripsTable trips={pastTrips} isPast />
+          <TripsTable trips={pastTrips} />
         </div>
       )}
 

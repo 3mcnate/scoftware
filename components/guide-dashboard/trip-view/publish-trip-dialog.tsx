@@ -29,7 +29,7 @@ import { usePublishTrip } from "@/data/client/trips/publish-trip";
 import { useTripPrices } from "@/hooks/use-trip-prices";
 import { useTripCycleByDate } from "@/data/client/trip-cycles/get-trip-cycle";
 import { formatCurrency } from "@/utils/math";
-import type { TripData } from "@/data/client/trips/get-guide-trips";
+import { useTrip, type TripData } from "@/data/client/trips/get-guide-trips";
 
 const REQUIRED_FIELDS = [
   "description",
@@ -105,17 +105,14 @@ type PublishTripDialogProps = {
   trip: TripData;
 };
 
-export function PublishTripDialog({
-  open,
-  onOpenChange,
-  trip,
-}: PublishTripDialogProps) {
+export function PublishTripDialog({ open, onOpenChange, trip }: PublishTripDialogProps) {
   const isAlreadyPublished = !!trip.published_trips;
   const prices = useTripPrices(trip);
   const { data: tripCycle, isLoading: isTripCycleLoading } = useTripCycleByDate(
     new Date(trip.start_date),
   );
   const { mutateAsync: publishTrip, isPending } = usePublishTrip();
+  const { refetch } = useTrip(trip.id);
 
   // Check for missing fields
   const missingFields = REQUIRED_FIELDS.filter((field) => {
@@ -162,10 +159,9 @@ export function PublishTripDialog({
     try {
       await publishTrip({ tripId: trip.id });
       toast.success(
-        isAlreadyPublished
-          ? "Trip updated successfully"
-          : "Trip published successfully",
+        isAlreadyPublished ? "Trip updated successfully" : "Trip published successfully",
       );
+			refetch();
       onOpenChange(false);
     } catch (error) {
       const err = error as { error?: string; missingFields?: string[] };
@@ -183,9 +179,7 @@ export function PublishTripDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg md:min-w-[550px]!">
         <DialogHeader>
-          <DialogTitle>
-            {isAlreadyPublished ? "Update Published Trip" : "Publish Trip"}
-          </DialogTitle>
+          <DialogTitle>{isAlreadyPublished ? "Update Published Trip" : "Publish Trip"}</DialogTitle>
           {/* <DialogDescription>
             {isAlreadyPublished
               ? "Update the public trip listing with the latest information."
@@ -197,9 +191,7 @@ export function PublishTripDialog({
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Missing Required Information</AlertTitle>
             <AlertDescription className="mt-2">
-              <p className="mb-2">
-                Please complete the following fields before publishing:
-              </p>
+              <p className="mb-2">Please complete the following fields before publishing:</p>
               <ul className="space-y-1">
                 {missingFields.map((field) => {
                   const info = FIELD_TO_TAB[field];
@@ -247,10 +239,7 @@ export function PublishTripDialog({
                 <div className="flex items-center gap-1 text-sm">
                   <Calendar className="size-3" />
                   <span>
-                    {isSameDay(
-                      new Date(trip.start_date),
-                      new Date(trip.end_date),
-                    )
+                    {isSameDay(new Date(trip.start_date), new Date(trip.end_date))
                       ? `${format(new Date(trip.start_date), "EEEE, MMMM d")} → ${format(new Date(trip.end_date), "h:mm a")}`
                       : `${format(new Date(trip.start_date), "EEEE, MMMM d")} → ${format(new Date(trip.end_date), "EEEE, MMMM d")}`}
                   </span>
@@ -284,20 +273,38 @@ export function PublishTripDialog({
                 <div className="text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Member:</span>
-                    <span className={trip.member_price_override !== null ? "font-medium text-blue-500" : "font-medium"}>
+                    <span
+                      className={
+                        trip.member_price_override !== null
+                          ? "font-medium text-blue-500"
+                          : "font-medium"
+                      }
+                    >
                       {formatCurrency(prices.member_price)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Non-member:</span>
-                    <span className={trip.nonmember_price_override !== null ? "font-medium text-blue-500" : "font-medium"}>
+                    <span
+                      className={
+                        trip.nonmember_price_override !== null
+                          ? "font-medium text-blue-500"
+                          : "font-medium"
+                      }
+                    >
                       {formatCurrency(prices.nonmember_price)}
                     </span>
                   </div>
                   {trip.driver_spots > 0 && (
                     <div className="flex justify-between col-span-2">
                       <span className="text-muted-foreground">Driver:</span>
-                      <span className={trip.driver_price_override !== null ? "font-medium text-blue-500" : "font-medium"}>
+                      <span
+                        className={
+                          trip.driver_price_override !== null
+                            ? "font-medium text-blue-500"
+                            : "font-medium"
+                        }
+                      >
                         {formatCurrency(prices.driver_price)}
                       </span>
                     </div>
@@ -306,9 +313,7 @@ export function PublishTripDialog({
                 {(trip.member_price_override !== null ||
                   trip.nonmember_price_override !== null ||
                   trip.driver_price_override !== null) && (
-                  <p className="text-xs text-muted-foreground">
-                    * Using override prices
-                  </p>
+                  <p className="text-xs text-muted-foreground">* Using override prices</p>
                 )}
               </div>
             )}
@@ -323,40 +328,46 @@ export function PublishTripDialog({
                 <div className="space-y-2 text-sm">
                   {publishDate && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Trip Published:
-                      </span>
-                      <span className={trip.trip_settings?.publish_date_override ? "text-blue-500" : ""}>
+                      <span className="text-muted-foreground">Trip Published:</span>
+                      <span
+                        className={trip.trip_settings?.publish_date_override ? "text-blue-500" : ""}
+                      >
                         {format(publishDate, "MMM d, yyyy 'at' h:mm a")}
                       </span>
                     </div>
                   )}
                   {memberSignupDate && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Member Signups:
-                      </span>
-                      <span className={trip.trip_settings?.member_signup_date_override ? "text-blue-500" : ""}>
+                      <span className="text-muted-foreground">Member Signups:</span>
+                      <span
+                        className={
+                          trip.trip_settings?.member_signup_date_override ? "text-blue-500" : ""
+                        }
+                      >
                         {format(memberSignupDate, "MMM d, yyyy 'at' h:mm a")}
                       </span>
                     </div>
                   )}
                   {nonmemberSignupDate && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Non-member Signups:
-                      </span>
-                      <span className={trip.trip_settings?.nonmember_signup_date_override ? "text-blue-500" : ""}>
+                      <span className="text-muted-foreground">Non-member Signups:</span>
+                      <span
+                        className={
+                          trip.trip_settings?.nonmember_signup_date_override ? "text-blue-500" : ""
+                        }
+                      >
                         {format(nonmemberSignupDate, "MMM d, yyyy 'at' h:mm a")}
                       </span>
                     </div>
                   )}
                   {trip.driver_spots > 0 && driverSignupDate && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Driver Signups:
-                      </span>
-                      <span className={trip.trip_settings?.driver_signup_date_override ? "text-blue-500" : ""}>
+                      <span className="text-muted-foreground">Driver Signups:</span>
+                      <span
+                        className={
+                          trip.trip_settings?.driver_signup_date_override ? "text-blue-500" : ""
+                        }
+                      >
                         {format(driverSignupDate, "MMM d, yyyy 'at' h:mm a")}
                       </span>
                     </div>
@@ -366,9 +377,7 @@ export function PublishTripDialog({
                   trip.trip_settings?.member_signup_date_override ||
                   trip.trip_settings?.nonmember_signup_date_override ||
                   trip.trip_settings?.driver_signup_date_override) && (
-                  <p className="text-xs text-muted-foreground">
-                    * Using custom schedule overrides
-                  </p>
+                  <p className="text-xs text-muted-foreground">* Using custom schedule overrides</p>
                 )}
               </div>
             )}
@@ -376,17 +385,10 @@ export function PublishTripDialog({
         )}
 
         <DialogFooter className="mt-8">
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={isPending}
-          >
+          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isPending}>
             Cancel
           </Button>
-          <Button
-            onClick={handlePublish}
-            disabled={isPending || hasMissingFields}
-          >
+          <Button onClick={handlePublish} disabled={isPending || hasMissingFields}>
             {isPending && <Spinner />}
             {isAlreadyPublished ? "Update Trip" : "Publish Trip"}
           </Button>

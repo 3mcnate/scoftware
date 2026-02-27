@@ -10,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,6 +39,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { useDeleteTrip } from "@/data/client/trips/use-delete-trip";
 import { useState } from "react";
 import { toast } from "sonner";
+import { TripStatusBadge } from "@/components/guide-dashboard/trip-status-badge";
+import { computeTripStatus } from "@/lib/trip-status";
+import {
+  useTripCycles,
+  findCycleForDate,
+  type TripCycleRow,
+} from "@/data/client/trip-cycles/get-trip-cycles";
 
 type GuideTripsData = NonNullable<
   ReturnType<typeof useGuideTrips>["data"]
@@ -55,38 +61,7 @@ function getInitials(
   return first + last || "?";
 }
 
-export function getStatusBadge(signupStatus: string | null, isPast: boolean) {
-  if (isPast) {
-    return <Badge variant="secondary">Completed</Badge>;
-  }
-
-  switch (signupStatus) {
-    case "open":
-      return <Badge className="bg-green-500/20 text-green-700">Open</Badge>;
-    case "closed":
-      return <Badge variant="secondary">Closed</Badge>;
-    case "full":
-      return <Badge variant="destructive">Full</Badge>;
-    case "waitlist":
-      return (
-        <Badge className="bg-yellow-500/20 text-yellow-700">Waitlist</Badge>
-      );
-    case "access_code":
-      return (
-        <Badge className="bg-blue-500/20 text-blue-700">Access Code</Badge>
-      );
-    case "select_participants":
-      return (
-        <Badge className="bg-purple-500/20 text-purple-700">
-          Select Participants
-        </Badge>
-      );
-    default:
-      return <Badge variant="outline">{signupStatus}</Badge>;
-  }
-}
-
-function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
+function TripRow({ trip, tripCycles }: { trip: TripData; tripCycles: TripCycleRow[] | undefined }) {
   const router = useRouter();
   const auth = useAuth();
   const deleteTrip = useDeleteTrip();
@@ -98,6 +73,28 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
     (t) => t.type === "member" || t.type === "nonmember"
   ).length;
   const driverCount = activeTickets.filter((t) => t.type === "driver").length;
+
+  // Resolve trip cycle and compute status
+  const cycle = findCycleForDate(tripCycles, trip.start_date);
+  const settings = trip.trip_settings;
+
+  const tripStatus = computeTripStatus({
+    cancelled: trip.cancelled,
+    startDate: trip.start_date,
+    endDate: trip.end_date,
+    isPublished: !!trip.published_trips,
+    allowSignups: settings?.allow_signups ?? true,
+    enableParticipantWaitlist: settings?.enable_participant_waitlist ?? false,
+    enableDriverWaitlist: settings?.enable_driver_waitlist ?? false,
+    participantCount,
+    participantSpots: trip.participant_spots,
+    driverCount,
+    driverSpots: trip.driver_spots,
+    publishDate: settings?.publish_date_override ?? cycle?.trips_published_at ?? null,
+    memberSignupDate: settings?.member_signup_date_override ?? cycle?.member_signups_start_at ?? null,
+    nonmemberSignupDate: settings?.nonmember_signup_date_override ?? cycle?.nonmember_signups_start_at ?? null,
+    driverSignupDate: settings?.driver_signup_date_override ?? cycle?.driver_signups_start_at ?? null,
+  });
 
   const participantSpots = trip.participant_spots;
   const driverSpots = trip.driver_spots;
@@ -217,7 +214,7 @@ function TripRow({ trip, isPast }: { trip: TripData; isPast?: boolean }) {
         </div>
       </TableCell>
       <TableCell>
-        {getStatusBadge(trip.signup_status ?? null, !!isPast)}
+        <TripStatusBadge status={tripStatus} />
       </TableCell>
       <TableCell onClick={(e) => e.stopPropagation()}>
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -317,13 +314,9 @@ export function TripsTableSkeleton() {
   );
 }
 
-export function TripsTable({
-  trips,
-  isPast,
-}: {
-  trips: TripData[];
-  isPast?: boolean;
-}) {
+export function TripsTable({ trips }: { trips: TripData[] }) {
+  const { data: tripCycles } = useTripCycles();
+
   return (
     <div className="border rounded-lg">
       <Table>
@@ -340,7 +333,7 @@ export function TripsTable({
         </TableHeader>
         <TableBody>
           {trips.map((trip) => (
-            <TripRow key={trip.id} trip={trip} isPast={isPast} />
+            <TripRow key={trip.id} trip={trip} tripCycles={tripCycles ?? undefined} />
           ))}
         </TableBody>
       </Table>

@@ -6,12 +6,14 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Eye, Globe, ArrowLeft, ScanSearch, FileText, CheckCircle2, RefreshCw } from "lucide-react";
+import { Eye, Globe, ArrowLeft, ScanSearch, FileText } from "lucide-react";
 import { TripTabs } from "@/components/guide-dashboard/trip-view/trip-tabs";
 import { useTrip } from "@/data/client/trips/get-guide-trips";
 import { getAvatarUrl } from "@/data/client/storage/avatars";
 import { PublishTripDialog } from "@/components/guide-dashboard/trip-view/publish-trip-dialog";
+import { TripStatusBadge } from "@/components/guide-dashboard/trip-status-badge";
+import { computeTripStatus } from "@/lib/trip-status";
+import { useTripCycleByDate } from "@/data/client/trip-cycles/get-trip-cycle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +25,7 @@ export default function GuideTripHeader() {
   const params = useParams();
   const tripId = params.tripId as string;
   const { data: trip, isLoading } = useTrip(tripId);
+  const { data: cycle } = useTripCycleByDate(trip ? new Date(trip.start_date) : new Date());
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
 
   if (isLoading || !trip) {
@@ -31,6 +34,31 @@ export default function GuideTripHeader() {
 
   const tripName = trip?.name || "Grand Canyon Expedition";
   const isPublished = !!trip.published_trips;
+
+  const activeTickets = trip.tickets?.filter((t) => !t.cancelled) ?? [];
+  const participantCount = activeTickets.filter(
+    (t) => t.type === "member" || t.type === "nonmember"
+  ).length;
+  const driverCount = activeTickets.filter((t) => t.type === "driver").length;
+
+  const settings = trip.trip_settings;
+  const tripStatus = computeTripStatus({
+    cancelled: trip.cancelled,
+    startDate: trip.start_date,
+    endDate: trip.end_date,
+    isPublished,
+    allowSignups: settings?.allow_signups ?? true,
+    enableParticipantWaitlist: settings?.enable_participant_waitlist ?? false,
+    enableDriverWaitlist: settings?.enable_driver_waitlist ?? false,
+    participantCount,
+    participantSpots: trip.participant_spots,
+    driverCount,
+    driverSpots: trip.driver_spots,
+    publishDate: settings?.publish_date_override ?? cycle?.trips_published_at ?? null,
+    memberSignupDate: settings?.member_signup_date_override ?? cycle?.member_signups_start_at ?? null,
+    nonmemberSignupDate: settings?.nonmember_signup_date_override ?? cycle?.nonmember_signups_start_at ?? null,
+    driverSignupDate: settings?.driver_signup_date_override ?? cycle?.driver_signups_start_at ?? null,
+  });
 
   return (
     <div className="bg-background">
@@ -49,12 +77,7 @@ export default function GuideTripHeader() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <h1 className="text-2xl font-semibold">{tripName}</h1>
-              {isPublished && (
-                <Badge variant="secondary" className="gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Published
-                </Badge>
-              )}
+              <TripStatusBadge status={tripStatus} />
               <div className="flex -space-x-2">
                 {trip.trip_guides.map((guide, i) => (
                   <Avatar
@@ -100,17 +123,8 @@ export default function GuideTripHeader() {
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button size="sm" onClick={() => setPublishDialogOpen(true)}>
-                {isPublished ? (
-                  <>
-                    <RefreshCw className="h-4 w-4" />
-                    Update
-                  </>
-                ) : (
-                  <>
-                    <Globe className="h-4 w-4" />
-                    Publish
-                  </>
-                )}
+                <Globe className="h-4 w-4" />
+								{isPublished ? "Publish" : "Publish"}
               </Button>
             </div>
           </div>

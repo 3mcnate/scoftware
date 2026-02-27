@@ -68,6 +68,18 @@ trip statuses:
 - completed - moves to past trips table
 
 
+Make a component for the trip status badge. 
+Here are the available states:
+1. draft (gray) - user has not yet published the trip.
+2. ready to drop (green) - user has successfully published the trip, but its trip cycle publish date has not happened yet (or publish override date, if it exists)
+3. open  (green) - trip is available for signup. One of the trip cycle sign up dates or signup override dates has passed.
+4. waitlist (blue) - participant and driver spots are full, participant and driver waitlist is enabled
+5. closed (light red) - trip start date has passed or allow_signups is false
+6. cancelled (gray) - trip.cancelled is true
+7. completed (gray) - trip end date has passed. 
+
+
+
 
 The plan:
 12/26	 guide/admin layout, start on guide trips page
@@ -98,6 +110,7 @@ Next Up
 - waitlists
 - add "you must sign in or create an account to sign up for a trip alert"
 - allergy select component
+- limited use ticket codes
 
 small things
 - fix truncation for trip details

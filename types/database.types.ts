@@ -967,6 +967,7 @@ export type Database = {
           activity: string | null
           breakfasts: number | null
           budget_confirmed: boolean
+          cancelled: boolean
           car_mpgs: number[] | null
           created_at: string
           description: string | null
@@ -1001,6 +1002,7 @@ export type Database = {
           activity?: string | null
           breakfasts?: number | null
           budget_confirmed?: boolean
+          cancelled?: boolean
           car_mpgs?: number[] | null
           created_at?: string
           description?: string | null
@@ -1035,6 +1037,7 @@ export type Database = {
           activity?: string | null
           breakfasts?: number | null
           budget_confirmed?: boolean
+          cancelled?: boolean
           car_mpgs?: number[] | null
           created_at?: string
           description?: string | null

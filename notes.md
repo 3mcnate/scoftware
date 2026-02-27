@@ -180,3 +180,5 @@ nonmember_price = member_price * (1 + nonmember_markup)
 gas_budget = gas_cost
 food_budget = food_cost
 other_budget = total_other_expenses
+
+

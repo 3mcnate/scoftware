@@ -19,8 +19,18 @@ const getGuideTrips = (guideId: string, client: TypedSupabaseClient) => {
 				start_date,
 				end_date,
 				picture_path,
+				cancelled,
 				published_trips (
 					id
+				),
+				trip_settings (
+					allow_signups,
+					enable_participant_waitlist,
+					enable_driver_waitlist,
+					publish_date_override,
+					member_signup_date_override,
+					nonmember_signup_date_override,
+					driver_signup_date_override
 				),
 				tickets (
 					id,
@@ -85,6 +95,12 @@ export const getAllTripInfo = (tripId: string, client: TypedSupabaseClient) => {
 			nonmember_price_override,
 			driver_price_override,
 			access_code,
+			cancelled,
+			tickets (
+				id,
+				cancelled,
+				type
+			),
 			trip_settings (
 				trip_id,
 				created_at,
