@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { createServerClient } from "@/utils/supabase/server";
 import { db } from "@/utils/drizzle";
+import { revalidateTripCache } from "@/data/server/trips/revalidate-trip-cache";
 import {
 	budget_formulas,
 	profiles,
@@ -511,6 +512,7 @@ export async function POST(request: NextRequest) {
 		);
 
 		await upsertPublishedTrip(tripId, trip, guidesJson);
+		revalidateTripCache(tripId);
 	} else {
 		// Create flow: create products, prices, and published trip
 		const stripePromises: Promise<void>[] = [
@@ -536,6 +538,7 @@ export async function POST(request: NextRequest) {
 
 		await Promise.all(stripePromises);
 		await upsertPublishedTrip(tripId, trip, guidesJson);
+		revalidateTripCache(tripId);
 	}
 
 	return NextResponse.json({

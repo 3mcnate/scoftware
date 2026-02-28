@@ -6,12 +6,10 @@ import Link from "next/link";
 import { History, Undo2 } from "lucide-react";
 import { unstable_cache } from "next/cache";
 
-export const dynamic = 'force-dynamic'
-
 const getUpcomingTrips = unstable_cache(
 	getUpcomingPublishedTrips,
 	['upcoming-trips'],
-	{ revalidate: 60 }
+	{ revalidate: 60, tags: ['upcoming-trips'] }
 )
 
 export default async function TripsPage() {
